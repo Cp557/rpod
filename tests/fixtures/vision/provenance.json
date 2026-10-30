@@ -1,0 +1,183 @@
+{
+  "source": "M3 Blender perception dataset, datasets/m3",
+  "purpose": "Two actual pixel observations for a fast onboard-boundary regression; no target truth is consumed by the test",
+  "camera": {
+    "width": 1024,
+    "height": 1024,
+    "hfov_deg": 35.0,
+    "mount_position_body_m": [
+      0.2,
+      0.55,
+      0.2
+    ],
+    "rotation_bc": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    ],
+    "camera_id": "chaser",
+    "K": [
+      [
+        1623.8565388099648,
+        0.0,
+        511.5
+      ],
+      [
+        0.0,
+        1623.8565388099648,
+        511.5
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coefficients": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "axes": "+X right, +Y down, +Z forward",
+    "pixel_convention": "top-left pixel center (0, 0)"
+  },
+  "opencv": "4.14.0",
+  "rendering": {
+    "blender_version": "5.2.3 LTS",
+    "engine": "CYCLES",
+    "samples": 16,
+    "threads": 6,
+    "seed": 0,
+    "view_transform": "Standard",
+    "look": "None",
+    "exposure": 0.0,
+    "surface_epsilon_m": 1e-05,
+    "dictionary": "DICT_4X4_50",
+    "worker_sha256": "66e5e47a690c6857de2b650783e261194e52d6648cabb8051eb33515d37f3ef6"
+  },
+  "implementation_sha256": {
+    "camera.py": "b55b9407b148b0c63dfc5b4c3a3d35a69527fbb1bd0118dc61c3bf67949f9ca4",
+    "perception.py": "9491669c2584448582df01163bb730198cf1d02e5e42227d09189ce25024e18e",
+    "blender_worker.py": "66e5e47a690c6857de2b650783e261194e52d6648cabb8051eb33515d37f3ef6"
+  },
+  "estimator": {
+    "dictionary": "DICT_4X4_50",
+    "corner_refinement": "CORNER_REFINE_APRILTAG",
+    "detector_upscale": 2,
+    "resize_interpolation": "INTER_CUBIC",
+    "inverse_resize_coordinates": "(pixel + 0.5) / scale - 0.5",
+    "minimum_marker_edge_px": 20.0,
+    "ransac_method": "SOLVEPNP_EPNP",
+    "ransac_iterations": 200,
+    "ransac_reprojection_error_px": 2.0,
+    "ransac_confidence": 0.999,
+    "ransac_seed": 0,
+    "refinement": "solvePnPRefineLM on RANSAC inliers",
+    "minimum_inliers": 8,
+    "minimum_inliers_per_depth_group": 4,
+    "maximum_reprojection_rms_px": 1.0
+  },
+  "source_report_sha256": "2870d264a866266395dfcc619436c82f495765f4e1f18484314fbb873be9988e",
+  "fixtures": [
+    {
+      "file": "center.png",
+      "capture_id": 54,
+      "source_image": "images/0054.png",
+      "sha256": "e7af841733a1c8e94013f9e8b9591b42fc52a064fd5160e8a542f6fd24ea531c"
+    },
+    {
+      "file": "yaw.png",
+      "capture_id": 57,
+      "source_image": "images/0057.png",
+      "sha256": "3ecc55589b0dc0dda06c35eefd0f86233d6e0d5a87d91fa37cdfa6169c2c86c8"
+    }
+  ],
+  "navigation_calibration": {
+    "range_bins": [
+      5.7,
+      8.45,
+      15.95,
+      25.95,
+      31.95,
+      1000000000.0
+    ],
+    "translation_variance": [
+      [
+        4e-06,
+        4e-06,
+        0.0001
+      ],
+      [
+        4e-06,
+        4e-06,
+        0.0001
+      ],
+      [
+        4e-06,
+        1.926108838797635e-05,
+        0.00016967581531287333
+      ],
+      [
+        1.0821641520205629e-05,
+        1.1443800225619606e-05,
+        0.0026782302445003746
+      ],
+      [
+        2.5916170352653584e-05,
+        2.733662425915717e-05,
+        0.008588547711354517
+      ],
+      [
+        4.0741947561039165e-06,
+        7.374176024393352e-05,
+        0.014640144859095738
+      ]
+    ],
+    "rotation_variance": [
+      [
+        1.9038588736669286e-05,
+        1.9038588736669286e-05,
+        1.9038588736669286e-05
+      ],
+      [
+        1.9038588736669286e-05,
+        1.9038588736669286e-05,
+        1.9038588736669286e-05
+      ],
+      [
+        1.9038588736669286e-05,
+        1.9038588736669286e-05,
+        1.9038588736669286e-05
+      ],
+      [
+        1.9038588736669286e-05,
+        1.9038588736669286e-05,
+        1.9038588736669286e-05
+      ],
+      [
+        1.9038588736669286e-05,
+        1.9038588736669286e-05,
+        1.9038588736669286e-05
+      ],
+      [
+        1.9038588736669286e-05,
+        1.9038588736669286e-05,
+        1.9038588736669286e-05
+      ]
+    ]
+  }
+}

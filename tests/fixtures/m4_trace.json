@@ -1,0 +1,141 @@
+{
+  "outcome": "navigation_lost",
+  "trajectory": {
+    "angular_velocities_body_radps": [
+      "float64",
+      [
+        142,
+        2,
+        3
+      ],
+      "15b9d0a7e8209322dfa00f1597f9f124f12b7921a36a129bb11be0c1a6f0cd02"
+    ],
+    "applied_forces_body_n": [
+      "float64",
+      [
+        141,
+        2,
+        3
+      ],
+      "0639bfd66d305bf3d48cd2856a22875690fb2f8d5d4245db37812b891d948840"
+    ],
+    "applied_torques_body_nm": [
+      "float64",
+      [
+        141,
+        2,
+        3
+      ],
+      "fb195c8373035d436362cfbbb50c42e5ed2b71877bc8a0baf8c7d0cc1cc5c0eb"
+    ],
+    "control_update": [
+      "bool",
+      [
+        141
+      ],
+      "e0694cae2a0a253c68844b1fc98017c018f9d980595356132914d6734210b5d1"
+    ],
+    "desired_gap_m": [
+      "float64",
+      [
+        142
+      ],
+      "6fe768a2d6924fa87c88bcd2a0639ee981edc479f7b02ab04fe4ca818bb25156"
+    ],
+    "own_angular_velocity_body_radps": [
+      "float64",
+      [
+        142,
+        3
+      ],
+      "1ac100c6c076088a01904e40c2b2a96d09617b1a6d04dbcb187409251b5b4d49"
+    ],
+    "own_position_m": [
+      "float64",
+      [
+        142,
+        3
+      ],
+      "e487694623250bd3bd601c191364faac92731bf7289b393a4b7e6dafbd7f17e5"
+    ],
+    "own_quaternion_xyzw": [
+      "float64",
+      [
+        142,
+        4
+      ],
+      "cac92049878e0b0d6002e9d2c721f54c6fa0f1a93d2644e91de488036f40cc9e"
+    ],
+    "own_velocity_mps": [
+      "float64",
+      [
+        142,
+        3
+      ],
+      "204b8131116e7f7ae6e1f3dadc6d6268ef760f98dc7d2975656c395467f1515b"
+    ],
+    "phase": [
+      "uint8",
+      [
+        142
+      ],
+      "fc53a82c893d78f50b61d034ced241aa0abfd4285df537f81b477f1c75cf48ea"
+    ],
+    "positions_m": [
+      "float64",
+      [
+        142,
+        2,
+        3
+      ],
+      "4c3f3eb10342f461eacc236109ad320eb46831e9b08ba389ff2b3ec769f73858"
+    ],
+    "quaternions_xyzw": [
+      "float64",
+      [
+        142,
+        2,
+        4
+      ],
+      "b9a6bacce185e1abbfbec855ea6e11be77670df8fcbba412bfaafd61b52ba65e"
+    ],
+    "requested_forces_body_n": [
+      "float64",
+      [
+        141,
+        2,
+        3
+      ],
+      "0639bfd66d305bf3d48cd2856a22875690fb2f8d5d4245db37812b891d948840"
+    ],
+    "requested_torques_body_nm": [
+      "float64",
+      [
+        141,
+        2,
+        3
+      ],
+      "fb195c8373035d436362cfbbb50c42e5ed2b71877bc8a0baf8c7d0cc1cc5c0eb"
+    ],
+    "tick": [
+      "uint64",
+      [
+        142
+      ],
+      "47831534e8998b718b6a57df499f1c0e4b368d5cc1b2226f05cacb3152786e74"
+    ],
+    "velocities_mps": [
+      "float64",
+      [
+        142,
+        2,
+        3
+      ],
+      "3b4fac2f622e38bbc6e07848afc7e308805650c26c101a14dec8f68220267ddc"
+    ]
+  },
+  "events": "2d29c96c7b7aabce29afa1ac785ce68ae2bc033885e43dd3f1740c548db775f8",
+  "observations": "665af0834891f15ce6901460ffdca28db0d77ab50a95cdff8664584fc8fbcf09",
+  "estimates": "bcd16ae24caa0730a48b12070f351b1df5142b7c3739a1308e8af670441690bf",
+  "summary": "50e3777247597e4c2f3ec601b6df2f7d0fede3fe3ff16f55bf00ac470a1384e4"
+}

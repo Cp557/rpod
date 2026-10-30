@@ -1,0 +1,14 @@
+[package]
+name = "rpod-python"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "_core"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.30.1"
+rpod-core = { path = "../rpod-core" }

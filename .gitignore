@@ -1,0 +1,11 @@
+/.venv/
+/.uv-cache/
+/.tools/
+/datasets/
+/target/
+__pycache__/
+*.py[cod]
+*.pyd
+*.pdb
+/runs/
+/benchmarks/

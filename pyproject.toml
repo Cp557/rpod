@@ -1,0 +1,26 @@
+[build-system]
+requires = ["maturin>=1.15,<2"]
+build-backend = "maturin"
+
+[project]
+name = "rpod"
+version = "0.1.0"
+description = "Simulation environments for autonomous spacecraft RPOD"
+requires-python = ">=3.15,<3.16"
+dependencies = [
+    "matplotlib>=3.11.2,<4",
+    "numpy>=2.5.4,<3",
+    "opencv-python-headless==4.14.0.94",
+    "rerun-sdk>=0.40.0,<0.41",
+]
+
+[dependency-groups]
+dev = ["maturin>=1.15,<2", "psutil>=7.2.2,<8"]
+
+[project.scripts]
+rpod = "rpod.cli:main"
+
+[tool.maturin]
+manifest-path = "crates/rpod-python/Cargo.toml"
+python-source = "src"
+module-name = "rpod._core"
