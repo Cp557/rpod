@@ -4,7 +4,7 @@ This document records implemented behavior. [OVERVIEW.md](OVERVIEW.md) describes
 
 ## Current implementation
 
-RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (detailed satellite, space lighting, procedural Earth, GPU rendering). The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5 and M6 lidar suite gates pass. The M7 realistic suite passes its operational and integrity gates but fails the fault gate: one abort episode lost navigation when the target entered Earth's shadow. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. Individual thrusters, fuel/mass depletion, environmental disturbances, natural-feature perception, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
+RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. Individual thrusters, fuel/mass depletion, environmental disturbances, natural-feature perception, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
 
 The Rust `rpod-core` crate owns state and time. `rpod-python` exposes it through PyO3. Python defines scenarios, collects snapshots, derives relative state and diagnostics, and exports recordings. Physics has no renderer dependency.
 
@@ -73,7 +73,7 @@ restored = engine.reset()
 | Duration | 600 physics ticks, 600 seconds |
 | Samples | 601, including tick zero |
 
-The inertial frame `N` has Earth at its origin, target initially on +X, and initial target velocity along +Y. Axes remain fixed; no epoch, Earth rotation, or named astronomical frame is implied.
+The inertial frame `N` has Earth at its origin, target initially on +X, and initial target velocity along +Y. Axes remain fixed; no epoch or named astronomical frame is implied. Earth turns only in rendering (`earth_rotation_ne`); the physics has no Earth rotation.
 
 The target starts at `[a, 0, 0]` with velocity `[0, sqrt(mu/a), 0]`. The chaser starts at phase `-100/a` radians on the same circle, with correspondingly rotated tangential velocity. The 100 m separation is an arc length, so the initial local radial offset is approximately -0.000738 m rather than exactly zero. `drift` adds `[0, 0.05, 0.02] m/s` to the chaser in the initial target-local basis. There are no stochastic effects in M1.
 
@@ -286,7 +286,7 @@ The three uninterrupted approaches finish within 1.005× their paired oracle tim
 
 The official nominal feedback run took 362.2 wall-clock seconds for 208.4 simulated seconds, excluding its separately timed paired oracle. Its sampled Blender peak RSS was 266.2 MiB. Qualification cases ran in pairs on the same desktop, so these wall times describe that workload rather than an isolated renderer or real-time guarantee. Each run's summary preserves startup, per-render/request timing, sampled RSS, and total feedback-loop wall time.
 
-The current fast suite passes 47 Python tests and 13 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
+The current fast suite passes 49 Python tests and 13 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
 
 ### Schema 3 visual records
 
@@ -464,28 +464,48 @@ Runtime, on an unisolated desktop:
 - **Per image:** render median 1.06 s, perception 0.38 s.
 - **Per scan:** lidar pose estimation 8.8 ms median. The scan ray-cast is not timed separately.
 
-## Realistic scene (M7)
+## Realistic scene (M7, upgraded in M8)
 
 ```powershell
-.\.venv\Scripts\rpod.exe perception-eval --suite m3 --scene realistic --earth vbar --output datasets/m7-vbar
-.\.venv\Scripts\rpod.exe perception-eval --suite m3 --scene realistic --earth rbar --output datasets/m7-rbar
-.\.venv\Scripts\rpod.exe m5-suite --scene realistic --output runs/m7-realistic --calibration datasets/m7-vbar/calibration.json
+.\.venv\Scripts\rpod.exe perception-eval --suite m3 --scene realistic --earth vbar --output datasets/m8-vbar
+.\.venv\Scripts\rpod.exe perception-eval --suite m3 --scene realistic --earth rbar --output datasets/m8-rbar
+.\.venv\Scripts\rpod.exe m5-suite --scene realistic --output runs/m8-realistic --calibration datasets/m8-vbar/calibration.json
 ```
 
+M8 replaced the M7 realistic scene in place, raised its Sun, and reran the suite. The M7 code is preserved in git commit `a03d4f0`. `runs/m7-realistic`, `datasets/m7-*` and `benchmarks/m7-realistic-evaluation.json` were produced by that commit; the current code cannot resume them, because the frozen hashes differ.
+
 **Scene** (`realistic_scene()` in `rendering.py`, built by `blender_worker.py`). The simple scene is unchanged: re-rendered M3 fixtures are pixel-identical to `datasets/m3`. The realistic scene keeps the calibrated camera, the 2 m target body and the four marker pads, and adds:
-- **Target detail:**
-  - crinkled gold multilayer-insulation foil (metallic, bump-mapped) on the bus, with a white painted −Y docking face;
+- **Docking face (as in M7):**
+  - a white painted −Y face;
   - a 0.17 m aluminum docking ring with a dark hatch;
   - standoff posts under the two floating pads;
-  - gold handrails beside the face, and a mast and dish on +Z;
-  - two 4 × 1.8 m solar-array wings (glass-covered cells on a metallic grid) on booms along ±X.
+  - gold handrails beside the face.
 
-  The four lidar retroreflectors appear as glossy dark discs at their lidar positions. Physics and the lidar still model only the 2 m body, pads and reflectors.
+  The four lidar retroreflectors appear as glossy dark discs at their lidar positions.
+
+  In M8 the 2 m body is drawn only as a 5 cm docking plate, from y = −1 to −0.95.
+- **Bus and wings (M8):** NASA 3D Resources' QuikSCAT model (glTF), mounted behind the plate:
+  - scaled 1.1× so its 1.8 m bus spans the 2 m body, and moved (0, 0.08, −0.05) m;
+  - its scatterometer dish below, and its two three-panel solar wings, about 8 m tip to tip;
+  - wings on a drive about body X through the model's hinge axis (model z = 0.7 m), turned each render so the cell side faces the Sun.
+
+  The bus is about 2.5 m tall and the dish hangs about 2.3 m below. Physics and the lidar still model only the 2 m body, pads and reflectors.
 - **Lighting:**
   - Space is black, with no ambient term.
   - The Sun has strength 3, so a white diffuse face lit head-on reads 0.95, and a 0.53° disc.
-  - Earth is a 6,378,137 m sphere placed each frame from the camera's inertial pose (`earth_pose`: Earth-centered inertial axes, no Earth rotation). It can shadow the Sun.
-  - Light reflected from Earth onto the spacecraft (earthshine) uses a uniform 0.3 albedo. Camera rays see a procedural surface: dark-blue ocean with sun glint, land, and cloud fields with structure down to about 1 km. There is no atmosphere or limb glow.
+  - Earth is a 6,378,137 m sphere placed each frame from the camera's inertial pose. It can shadow the Sun.
+- **Earth (M8):** `earth_pose` turns Earth about inertial +Z at the sidereal rate (`earth_rotation_ne`). The simulation has no epoch, so the angle is chosen: −37.8° at t = 0, which puts the approaches over southern India.
+  - **Surface:** NASA imagery looked up in the shader by equirectangular coordinates, lighting both camera rays and earthshine:
+    - Blue Marble Next Generation (July 2004, topography and bathymetry, 21600×10800), with water darkened through a blue-minus-red mask;
+    - Blue Marble clouds (8192×4096).
+  - **Atmosphere:** a transparent 60 km shell seen only by camera rays. Its glow follows each ray's path length through the air and the Sun's elevation at the path's midpoint. The full model is under Showcase movie.
+  - **Emitters:** Earth and air are not sampled as lights.
+  - **No per-render material edits:** the Earth and air shaders read the Sun from `sun_frame`, an Earth-centred empty whose +Z each render turns toward the Sun; the shell is parented to it. A first M8 attempt instead edited shader node values every render. In 5 of 38 episodes, the four white marker pads then intermittently rendered pure black mid-run, and navigation was lost. A fresh renderer drew the same frames correctly, and the fault could not be reproduced on demand. That attempt was discarded.
+  - **Not in the camera scene:** city lights and stars. A camera exposed for the sunlit target would not record them; only the showcase adds them.
+- **Assets** (`scene_assets()` in `rendering.py`):
+  - four NASA images and two NASA 3D Resources models (QuikSCAT for the target, IBEX for the showcase chaser), about 205 MB, downloaded to `.tools/showcase-assets/` on first use;
+  - each checked against its SHA-256 once per process when a realistic renderer starts;
+  - recorded as `scene_assets_sha256` in the render metadata.
 - **Rendering:**
   - Cycles on CUDA (GTX 1060 6 GB), 16 samples, two bounces (one diffuse, one glossy), indirect clamp 10, no denoising. OptiX fails to compile its kernel on this GPU and driver.
   - Repeated CUDA renders differ by at most 1 DN in fewer than ten pixels per frame (CPU + CUDA hybrid rendering differed by up to 14 DN). Realistic re-runs are therefore not bitwise repeatable, but records keep the actual images and replay is exact.
@@ -493,7 +513,9 @@ Runtime, on an unisolated desktop:
 
 **Geometry consequences:**
 - **Earth out of view:** on the along-track (V-bar) approach, Earth's center lies about 90° from the optical axis and its disk never enters the image; a test checks that no border ray meets it. Earth's only effect there is reflected light.
-- **Sun convention:** M5's Sun angle turns the Sun within the orbit plane. With Earth present, angles below −19.8° (the horizon dip at 400 km) would put 8 of the 40 suite episodes in Earth's shadow. The realistic scene therefore applies the same angle about chaser body X, the handoff's local vertical, so the Sun starts level with the approach axis (`sunlight_direction`). Episode specs are otherwise identical. The Sun lies behind the chaser, against the direction of orbital motion, so it sets at up to the orbital rate (0.065°/s). It starts 17.5–22.5° above Earth's limb, so in these episodes its disc would reach the limb after 287–528 s (median 318 s). Episodes that run longer enter Earth's shadow and the target goes black.
+- **Sun convention:** M5's Sun angle turns the Sun within the orbit plane. With Earth present, angles below −19.8° (the horizon dip at 400 km) would put 8 of the 40 suite episodes in Earth's shadow. The realistic scene therefore applies the same angle about chaser body X, the handoff's local vertical (`sunlight_direction`). Episode specs are otherwise identical.
+  - **M7:** the Sun started level with the approach axis. It lies behind the chaser, against the direction of orbital motion, so it sets at up to the orbital rate (0.065°/s). It started 17.5–22.5° above Earth's limb and would reach the limb after 287–528 s. Episode `29` ran past its sunset.
+  - **M8:** the Sun is first raised `REALISTIC_SUN_ELEVATION_DEG` = 30° above the approach axis toward the local vertical, then turned. It then stays above the limb for at least the 600 s step limit. A test checks every episode: the start elevation, minus the orbital rate times 600 s, must stay above the limb plus the Sun's radius. Earth below the spacecraft is now in daylight.
 - **Fixture Earth placement:**
   - `--earth vbar` places Earth 6,778 km below the image (fixture −Z), where M3's ±30° fixture Sun stays on the horizon.
   - `--earth rbar` places Earth beyond the target along the line of sight, as when approaching from above. The Sun is overhead, so the camera sees lit Earth and its sun glint directly behind the target.
@@ -504,19 +526,19 @@ Runtime, on an unisolated desktop:
 - no gross errors;
 - the camera geometry check reproduces 0.00015 px projection and 0.0625 px raster error on CUDA.
 
-Clean P95 translation / rotation errors match the simple scene within a few percent:
+Clean P95 translation / rotation errors (M8, `datasets/m8-*`) match the simple scene within a few percent:
 
 | Axial gap | M3 simple | Realistic V-bar | Realistic R-bar |
 | --- | --- | --- | --- |
 | 5 m | 3.4 mm / 0.044° | 3.3 mm / 0.044° | 3.3 mm / 0.044° |
-| 10 m | 14.8 mm / 0.093° | 14.8 mm / 0.090° | 14.8 mm / 0.087° |
-| 20 m | 54.5 mm / 0.188° | 54.8 mm / 0.201° | 54.6 mm / 0.200° |
-| 30 m | 124 mm / 0.438° | 122 mm / 0.452° | 122 mm / 0.443° |
-| 32 m | 195 mm / 0.578° | 194 mm / 0.546° | 194 mm / 0.551° |
+| 10 m | 14.8 mm / 0.093° | 14.8 mm / 0.089° | 14.8 mm / 0.087° |
+| 20 m | 54.5 mm / 0.188° | 54.4 mm / 0.193° | 54.6 mm / 0.200° |
+| 30 m | 124 mm / 0.438° | 124 mm / 0.446° | 122 mm / 0.443° |
+| 32 m | 195 mm / 0.578° | 194 mm / 0.545° | 194 mm / 0.556° |
 
-This realism does not break the marker pipeline. The matte, high-contrast markers on a sunlit white face dominate detection, and the clutter (foil, arrays, clouds, glint) never decodes as a valid marker. Median render times were 1.59 s per fixture for V-bar and 4.77 s for R-bar, where Earth fills the frame. Median estimation times were 0.13 s and 0.45 s.
+This realism does not break the marker pipeline. The matte, high-contrast markers on a sunlit white face dominate detection, and the clutter (the QuikSCAT bus and wings, clouds, glint) never decodes as a valid marker. M8 median render times were 0.71 s per fixture for V-bar and 1.58 s for R-bar, where Earth fills the frame. Median estimation times were 0.13 s and 0.43 s.
 
-`calibration.json` records `scene` and `earth_geometry`, and `m5-suite --scene realistic` refuses a calibration qualified on another scene. The realistic suite puts `scene: realistic` in every episode spec and in `suite.json`, adds `scene` to the report, and copies the report to `benchmarks/m7-realistic-evaluation.json`.
+`calibration.json` records `scene` and `earth_geometry`, and `m5-suite --scene realistic` refuses a calibration qualified on another scene. The realistic suite puts `scene: realistic` in every episode spec and in `suite.json`, adds `scene` to the report, and copies the report to `benchmarks/m8-realistic-evaluation.json` (`m7-realistic-evaluation.json` at commit `a03d4f0`).
 
 ### M7 results
 
@@ -560,63 +582,91 @@ Runtime, on an unisolated desktop, with the suite paused while another heavy wor
 - **Per image:** GPU render median 0.37 s (P95 0.73 s), perception 0.095 s. Renderer startup median is 1.5 s.
 - **Memory:** sampled Blender RSS is about 516 MiB, against 266 MiB for the simple scene.
 
+### M8 results
+
+`runs/m8-realistic` passes all three gates. Its report is copied to `benchmarks/m8-realistic-evaluation.json`.
+- **Records:** all 40 are valid with uniform hashes. Recomputing the report from the saved records reproduces it exactly.
+- **Replays:** `00-operational-approach` and `29-fault-abort` export and pass `rrd verify`.
+- **Acceptance:** the camera accepted 8,420 of 8,432 delivered images (M7: 8,287 of 8,297).
+- **No black pads:** apart from the injected black frames of `33`, every image processed during an episode produced a valid pose estimate, so the black-pad fault of the first M8 attempt did not recur.
+
+Outcomes, against M7 on the same episodes:
+
+| Category | M7 | M8 |
+| --- | --- | --- |
+| Operational | 28/28 success at 205–224 s; completion 1.004× the paired oracle (median; max 1.061×); final port speed ≤ 0.0026 m/s; minimum port gap 4.96 m | 28/28 success at 205–234 s; completion 1.004× (median; max 1.107×); final port speed ≤ 0.0028 m/s; minimum port gap 4.95 m |
+| Fault: abort | 1/2: `28` retreated at 309 s; `29` ended `navigation_lost` at 335 s | 2/2 retreated, at 243 and 280 s |
+| Fault: dropped frame | success at 271 and 265 s; minimum port gap 4.46 and 4.57 m | the same |
+| Fault: extended loss | `navigation_lost` at 55.1 and 42.1 s | the same |
+| Stress | 5/6 success; heavy degradation ended `navigation_lost` at 21.1 s | 6/6 success; heavy degradation braked three times and docked at 237 s |
+
+No episode had a false completion, boundary violation or actuator-bound breach. The two slowest operational episodes braked after rejected estimates and reacquired: `12` at 14 and 34 s (docked at 234 s) and `24` at 24 s (227 s). Episode `29` now retreats at 280 s, as in M5, with the Sun well above the limb. `35` remains marginal: the same stress case survived in M5, failed in M7 and survives in M8.
+
+Filtered target error over operational episodes:
+
+| Error | M7 median / P95 / max | M8 median / P95 / max |
+| --- | --- | --- |
+| Position | 3.6 / 12.0 / 18.9 cm | 3.5 / 11.8 / 18.6 cm |
+| Attitude | 0.068 / 0.42 / 1.93° | 0.065 / 0.33 / 1.98° |
+
+Accepted image-pose translation error medians are 3.7, 15, 49 and 104 mm in the four range bins (M7: 3.8, 15, 51, 105). Rotation-error P95 is back near M5: 0.11°, 0.27°, 0.42° and 0.72° (M7: 0.16°, 0.34°, 0.48°, 0.72°). Chaser actuator maxima match M7.
+
+Runtime, on an unisolated desktop:
+- **Total:** episode wall times sum to 9,240 s (2.6 h), against 5,826 s for M7.
+- **Per episode:** median 218 s, maximum 410 s.
+- **Per image:** GPU render median 0.67 s (P95 1.39 s), perception 0.15 s. Renderer startup median is 2.3 s.
+- **Memory:** sampled Blender RSS is about 1.8 GiB, mostly the 21600×10800 Earth image and the QuikSCAT model.
+
 ## Showcase movie
 
-`rpod showcase RUN_DIR --output OUT_DIR` renders a saved schema-3 visual run as a realistic outside-view movie. It is presentation-only. It reads the validated record (`load_visual_run`), never constructs an engine or autonomy, and is not part of any suite or its frozen hashes. `blender_worker.py` and `rendering.py` are reused unchanged.
+`rpod showcase RUN_DIR --output OUT_DIR` renders a saved schema-3 visual run as a realistic outside-view movie. It is presentation-only. It reads the validated record (`load_visual_run`), never constructs an engine or autonomy, and is not part of any suite or its frozen hashes.
 
-**Renderer.** `showcase_worker.py` runs inside Blender and `showcase.py` drives it through a `BlenderRenderer` subclass that launches that worker. The worker subclasses the realistic `SceneRenderer` and keeps its protocol, its Sun, and the target's marked docking face: markers, standoffs, docking ring, reflectors and handrails. It removes the rest of the M7 target and builds the following. All of it is visual only.
-- **Target (2 m bus):**
-  - crumpled gold Kapton blankets on five faces: displaced geometry plus crease shading, with taped edges and tack points;
-  - a white radiator and aluminum edge rails;
-  - eight thruster pods, two star trackers, patch antennas and sun sensors;
-  - a gimballed paraboloid dish with feed struts;
-  - two-panel wings on V yokes.
-- **Chaser (1 m):**
-  - silver blankets and an optical-solar-reflector radiator;
-  - thruster quads at the corners;
-  - a +Y docking ring with guide petals, and camera and lidar heads at their mounts;
-  - a star tracker and one-panel wings.
-- **Wings track the Sun** about body X each frame. The docking-camera inset still shows the M7 target with fixed wings.
-- **Earth:** NASA imagery looked up by equirectangular coordinates in the shader:
-  - **Daytime surface:** Blue Marble Next Generation, July 2004, with topography and bathymetry, 21600×10800. Water is darkened using a blue-minus-red mask.
-  - **Clouds:** Blue Marble clouds, 8192×4096.
-  - **City lights:** Black Marble 2016, 13500×6750, on the night side only. They are dimmed to 0.05 and dimmed further under clouds.
-  - **Rotation:** Earth turns about inertial +Z at 7.292e-5 rad/s. The simulation has no epoch, so the angle at t = 0 is chosen as −37.8°. That makes the runs pass over southern India and the Bay of Bengal.
-- **Atmosphere:** a transparent shell 60 km above the surface, seen only by camera rays.
+**Renderer.** `showcase_worker.py` runs inside Blender and `showcase.py` drives it through a `BlenderRenderer` subclass that launches that worker. The worker subclasses the realistic `SceneRenderer`, so the target, Earth, atmosphere and Sun are exactly the docking camera's (see Realistic scene). It adds the following. All of it is visual only.
+- **Chaser (1 m):** NASA 3D Resources' IBEX model (glTF), scaled 0.72× to about 1.1 m across.
+  - It is turned so its solar deck faces aft (−Y) and its base sits at y = 0.45 m.
+  - On the base are a docking ring on an adapter, with guide petals, and the camera and lidar heads at their mounts.
+- **Thruster plumes:** four corner pods on the hull, each with nozzles along both ±Y directions and its two outward lateral axes. For each body axis, the recorded `applied_forces_body_n` of the chaser, divided by its 2 N force limit, sets the throttle of the nozzles whose exhaust opposes that force (`plume_throttles`).
+  - Each fired nozzle shows a faint transparent 0.5 m cone. It glows 0.6 × throttle, brightest at the nozzle.
+  - Torques do not fire plumes.
+- **Presentation extras**, passed as scene options that the docking camera leaves off:
+  - **City lights:** Black Marble 2016 (13500×6750) on the night side, at strength 0.05, dimmed under clouds.
+  - **Stars:** NASA SVS Deep Star Maps 2020 (8K EXR, celestial coordinates), shown at strength 0.15 on a 5×10⁷ m sphere around the camera. Only camera rays see it. Each render turns the sphere to inertial axes.
+- **Atmosphere model**, shared with the docking camera: a transparent shell 60 km above the surface, seen only by camera rays.
   - Each front face emits the light scattered along its ray's path L through the shell.
   - **Strength:** `0.6 × (L / L_max)²`, so the horizon is brightest and the view straight down stays clear.
   - **Colour:** follows the Sun's elevation at the path midpoint. It is blue by day, orange to red through twilight, and black at night.
-- **Stars:** NASA SVS Deep Star Maps 2020 (8K EXR, celestial coordinates) as the world background. Only camera rays see them, at strength 0.15, and the world is not sampled as a light.
 - **Image settings:**
-  - AgX view with the Medium High Contrast look, exposure +0.5;
+  - AgX view with the Medium High Contrast look, exposure +0.5, and Sun strength 4;
   - 16 samples with adaptive sampling (threshold 0.02), then CPU OpenImageDenoise at fast quality and prefilter;
   - up to 6 bounces: 2 diffuse and 3 glossy.
-  - The Earth and atmosphere materials are not sampled as lights. Emissive Earth triangles would otherwise each count as a light.
-- **Every run uses this scene,** including simple-scene runs.
+- **Every run uses this scene,** including simple-scene runs. A run from before M8 is filmed under its own recorded Sun, but its docking-camera inset shows the older images.
 
-**Assets.** `showcase_assets()` downloads the four NASA files, about 200 MB, to `.tools/showcase-assets/` on first use. It checks each file against a pinned SHA-256. `showcase.json` records the URLs, hashes and credits.
+`showcase.json` records the asset URLs, hashes and credits.
 
-**Camera rule** (`chase_camera`):
-- **Aim:** the midpoint of the two centers of mass.
-- **Direction from that midpoint**, in target LVLH: `normalize(0.25, −0.2, ±0.95)` (radial, along-track, normal). That is slightly above and behind the chaser, looking across the approach.
-- **Normal sign:** follows the toward-Sun normal component, so the camera sees the lit sides. In every M7 episode the Sun is on the −along-track side.
-- **Distance:** `max(1.5 × separation, 12 m)`.
-- **Up:** LVLH +radial.
-- **Lens and resolution:** 50° horizontal field of view at 1280×720.
+**Camera rules.** Both shots use LVLH +radial as up and a 50° horizontal field of view at 1920×1080. Both take their normal side from the Sun: the sign of the toward-Sun normal component, so the camera sees the lit sides. In every suite episode the Sun is on the −along-track side.
+- **Wide shot** (`chase_camera`):
+  - **Aim:** the midpoint of the two centers of mass.
+  - **Direction from that midpoint**, in target LVLH: `normalize(0.25, −0.2, ±0.95)` (radial, along-track, normal). That is slightly above and behind the chaser, looking across the approach.
+  - **Distance:** `max(1.5 × separation, 12 m)`.
+- **Close shot** (`close_camera`):
+  - **When:** the port gap falls below 11.5 m, until it rises above 12.5 m.
+  - **Position:** over the chaser's shoulder, at LVLH `(1.2, −5.0, ±2.4)` m from its center of mass.
+  - **Aim:** the target's docking port.
 
-Each frame places the target, chaser and Earth from recorded truth, with the Sun along `sunlight_direction_inertial`. A fast test checks three things:
-- both centers of mass project inside the image with a 10% margin, at 30 m and 6.5 m separation;
-- the camera is on the sunlit normal side, for both signs of the Sun's normal component;
-- Earth's center is below the image.
+Each frame places the target, chaser and Earth from recorded truth, with the Sun along `sunlight_direction_inertial`. Fast tests check:
+- the wide shot keeps both centers of mass inside the image with a 10% margin, at 30 m and 6.5 m separation;
+- the wide shot is on the sunlit normal side for both signs of the Sun's normal component, and Earth's center is below the image;
+- the close shot centres the port with the chaser in front of the camera;
+- plumes fire against the applied force.
 
 **Rendering:**
 - Every third tick is rendered, so each frame covers 0.3 s of simulated time. Rendering uses CUDA.
-- Measured on run 00: 694 frames at a median of 4.56 s each, 53 min wall time, for a 23.1 s video.
 - The video is 30 fps (9× real time) MPEG-4 Part 2 (`mp4v`). This OpenCV build cannot open an H.264 encoder.
+- At 1080p, M8 run `00` (694 frames) took a median 3.2 s per frame, 39 min in all.
 
-**Overlay** (drawn by OpenCV on each clean render):
-- **Bloom:** a soft glow on highlights: threshold 190, σ 6 px, gain 0.8.
-- **Inset:** the run's most recent docking-camera image captured at or before that tick, or a "no image" box for a missing capture. It sits at the bottom centre, clear of both spacecraft.
+**Overlay** (drawn by OpenCV on each clean render; sizes scale with the image height from a 720-line base):
+- **Bloom:** a soft glow on highlights: threshold 190, σ 9 px, gain 0.8.
+- **Inset:** the run's most recent docking-camera image captured at or before that tick, or a "no image" box for a missing capture. It is 405 px wide, at the bottom centre in the wide shot and the bottom right in the close shot, clear of the spacecraft.
 - **Labels:** run name, elapsed time, port gap and supervisor phase.
 
 **Outputs:**
@@ -626,9 +676,8 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 - The marker assets.
 
 **Limitations:**
-- In the realistic suite the Sun sits near the local horizon behind the chaser. Most of the Earth in view is therefore on the night side: dark, with faint city lights and a twilight glow along the sunward horizon. Run 29 ends in Earth's shadow, so its last frames are black.
-- City lights and stars are brighter than a camera exposed for the sunlit spacecraft would record.
-- The atmosphere uses single scattering in a uniform 60 km shell. There is no airglow, cloud shadow or thruster plume.
+- City lights, stars and plumes are brighter than a camera exposed for the sunlit spacecraft would record. Real cold-gas and monopropellant plumes are nearly invisible.
+- The atmosphere uses single scattering in a uniform 60 km shell. There is no airglow or cloud shadow.
 
 ## Source layout and generated output
 
@@ -637,4 +686,4 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 - `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`).
 - `tests`: Python integration and contract checks; `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
 
-`.gitignore` excludes the environment, workspace-local uv cache, target directory, compiled extensions, Python caches, portable tools, and generated `runs/`, `datasets/`, and `benchmarks/` outputs. Blender is installed locally for M3/M4 and remains separate from the physics runtime. Contact engines and learning frameworks are not installed.
+Frozen-file hashes are taken over raw bytes, so `.gitattributes` checks text out with LF, except `blender_worker.py`. That file is stored byte-exact with CRLF line endings, as the M8 suite hashed it. `.gitignore` excludes the environment, workspace-local uv cache, target directory, compiled extensions, Python caches, portable tools, and generated `runs/`, `datasets/`, and `benchmarks/` outputs. Blender is installed locally for M3/M4 and remains separate from the physics runtime. Contact engines and learning frameworks are not installed.

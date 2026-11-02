@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 from rpod.approach import make_approach_scenario
-from rpod.camera import (CameraModel, MARKER_CENTERS, camera_pose, earth_pose,
+from rpod.camera import (CameraModel, MARKER_CENTERS, camera_pose, earth_pose, earth_rotation_ne,
                          marker_corners, project_points, relative_target_pose)
 from rpod.observations import ImageObservation, OwnNavigation
 from rpod.perception import estimate_pose
@@ -62,7 +62,7 @@ class CameraGeometry(unittest.TestCase):
                             np.asarray(scenario["initial_quaternions_xyzw"][1]), np.zeros(3))
         rotation_ce, center_c = earth_pose(own, camera)
         position_nc, rotation_nc = camera_pose(own, camera)
-        np.testing.assert_allclose(rotation_ce, rotation_nc.T)
+        np.testing.assert_allclose(rotation_ce, rotation_nc.T @ earth_rotation_ne(0.0))
         np.testing.assert_allclose(rotation_nc @ center_c + position_nc, 0, atol=1e-6)
         # Earth's center is outside the image and no ray through the image border meets its
         # disk, so the convex disk misses the whole image.

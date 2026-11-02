@@ -18,6 +18,8 @@ MARKER_CENTERS = {
     2: (-0.55, -1.3, -0.55),
     3: (0.55, -1.0, -0.55),
 }
+EARTH_ROTATION_DEG = -37.8
+EARTH_RATE_RADPS = 7.2921159e-5
 
 
 @dataclass(frozen=True)
@@ -103,13 +105,24 @@ def relative_target_pose(
     return rotation_nc.T @ rotation_nt, rotation_nc.T @ (position_nt - position_nc)
 
 
-def earth_pose(own: OwnNavigation, camera: CameraModel | None = None) -> tuple[np.ndarray, np.ndarray]:
-    """Rendering truth: inertial-to-camera rotation and Earth's center in camera axes.
+def earth_rotation_ne(time_s: float) -> np.ndarray:
+    """Earth-body-to-inertial rotation: a turn about inertial +Z at Earth's sidereal rate.
 
-    The inertial frame is Earth-centered; Earth's own rotation is not modeled.
+    The simulation has no epoch, so the angle at t = 0 is chosen: the M2 handoff's longitude
+    then lies over 70 deg E, and the approaches pass over southern India.
+    """
+    angle = np.radians(EARTH_ROTATION_DEG) + EARTH_RATE_RADPS * time_s
+    cosine, sine = np.cos(angle), np.sin(angle)
+    return np.array([[cosine, -sine, 0.0], [sine, cosine, 0.0], [0.0, 0.0, 1.0]])
+
+
+def earth_pose(own: OwnNavigation, camera: CameraModel | None = None) -> tuple[np.ndarray, np.ndarray]:
+    """Rendering truth: Earth-body-to-camera rotation and Earth's center in camera axes.
+
+    The inertial frame is Earth-centered; Earth turns in it at the capture time.
     """
     position_nc, rotation_nc = camera_pose(own, camera)
-    return rotation_nc.T, rotation_nc.T @ -position_nc
+    return rotation_nc.T @ earth_rotation_ne(own.time_ns / 1e9), rotation_nc.T @ -position_nc
 
 
 def project_points(

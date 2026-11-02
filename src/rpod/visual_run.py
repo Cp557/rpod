@@ -27,6 +27,9 @@ from .visual_env import VisualEnv, _hard_guard, _physical_valid, _target_torque
 VISUAL_CASES = ("nominal", "disturbed", "hidden", "abort", "short-loss", "long-loss")
 AUTONOMY_FILES = ("visual_control.py", "navigation.py", "visual_agent.py",
                   "visual_env.py", "visual_run.py", "lidar.py")
+# The realistic Sun starts this far above the approach axis; it sets at up to the orbital
+# rate (0.065 deg/s), and Earth's limb lies 19.8 deg below level at 400 km.
+REALISTIC_SUN_ELEVATION_DEG = 30.0
 M4_CONDITIONS = {
     "nominal": {}, "hidden": {}, "abort": {},
     "disturbed": {"chaser_disturbance": {
@@ -423,12 +426,17 @@ def sunlight_direction(initial):
     """Inertial Sun incident-ray direction: the M4 lit face turned by `sun_angle_deg`.
 
     The turn is about chaser body Z, within the orbit plane. The realistic scene's Earth
-    can eclipse a Sun below the horizon, so there the turn is about body X, the handoff's
-    local vertical, and the Sun stays level with the approach axis.
+    can eclipse the Sun, so there the Sun is first raised REALISTIC_SUN_ELEVATION_DEG above
+    the approach axis toward body X, the handoff's local vertical, then turned about body X.
+    It then stays clear of Earth's limb for the longest episode.
     """
+    light_body = np.array([0.0, 1.0, 0.0])
+    if initial.get("scene") == "realistic":
+        elevation = np.deg2rad(REALISTIC_SUN_ELEVATION_DEG)
+        light_body = np.array([-np.sin(elevation), np.cos(elevation), 0.0])
     half = np.deg2rad(initial["sun_angle_deg"]) / 2
     axis = [1, 0, 0] if initial.get("scene") == "realistic" else [0, 0, 1]
-    light_body = quaternion_matrices([*np.multiply(axis, np.sin(half)), np.cos(half)]) @ [0, 1, 0]
+    light_body = quaternion_matrices([*np.multiply(axis, np.sin(half)), np.cos(half)]) @ light_body
     return quaternion_matrices(initial["initial_quaternions_xyzw"][1]) @ light_body
 
 

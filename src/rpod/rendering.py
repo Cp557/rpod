@@ -1,6 +1,7 @@
 """Persistent Blender subprocess adapter; rendering never owns simulation time."""
 
 from collections import deque
+from functools import cache
 import hashlib
 import json
 from pathlib import Path
@@ -10,6 +11,8 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.parse
+import urllib.request
 
 import numpy as np
 
@@ -19,15 +22,68 @@ from .lidar import REFLECTOR_RADIUS_M, REFLECTOR_STANDOFF_M, REFLECTORS_BODY_M
 from .scenarios import EARTH_RADIUS_M
 
 
-def realistic_scene(device="CUDA", samples=16):
-    """Space lighting, a detailed satellite around the marked face, and a procedural Earth.
+ASSET_DIR = Path(__file__).resolve().parents[2] / ".tools/showcase-assets"
+EARTH_OBSERVATORY = "https://eoimages.gsfc.nasa.gov/images/imagerecords"
+NASA_3D = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models"
+# Pinned NASA assets: the camera scene uses day, clouds and the target model; the showcase
+# adds night, stars and the chaser model.
+ASSETS = {
+    "target_model": (f"{NASA_3D}/Quick%20Scatterometer%20%28QuikSCAT%29/"
+                     "Quick%20Scatterometer%20%28QuikSCAT%29.glb",
+                     "329e0214c4330cfc8366fc1c84cd1f2b3d8321a0a3c0ff90534e2845c1eaf554"),
+    "chaser_model": (f"{NASA_3D}/Interstellar%20Boundary%20Explorer%20%28IBEX%29/"
+                     "Interstellar%20Boundary%20Explorer%20%28IBEX%29.glb",
+                     "6ce15c60467673f599c7085ed5152a07d0335628109741848ce64835e3786406"),
+    "day": (f"{EARTH_OBSERVATORY}/73000/73751/world.topo.bathy.200407.3x21600x10800.jpg",
+            "d225f1f35a6448a4d1d8f6de6e48f3433e470085b70a35800e64f384f269a7b0"),
+    "clouds": (f"{EARTH_OBSERVATORY}/57000/57747/cloud_combined_8192.tif",
+               "d137775d8966ab8d443fd5126dc6e7ad72072bc1ed50555c5818d221735daf0f"),
+    "night": (f"{EARTH_OBSERVATORY}/144000/144898/BlackMarble_2016_3km.jpg",
+              "230aac448ae68c358be433dd518888cccb3a85ccf66f7b44326441c324ad6725"),
+    "stars": ("https://svs.gsfc.nasa.gov/vis/a000000/a004800/a004851/starmap_2020_8k.exr",
+              "dc6c4f413e85707a29a25a9451148154554ecca2c996f84fa8f47b65ef9ff7c4"),
+}
+ASSET_CREDITS = ("Earth: NASA Earth Observatory (Blue Marble Next Generation, Blue Marble "
+                 "clouds, Black Marble 2016). Stars: NASA/Goddard Space Flight Center Scientific "
+                 "Visualization Studio, Deep Star Maps 2020; Gaia DR2: ESA/Gaia/DPAC. "
+                 "Spacecraft: NASA 3D Resources (QuikSCAT, IBEX).")
 
-    The lidar reflectors are drawn in the camera image too. Earth is placed per render.
+
+def _asset_path(url):
+    return ASSET_DIR / urllib.parse.unquote(url.rsplit("/", 1)[1])
+
+
+@cache
+def scene_assets():
+    """SHA-256 of each pinned NASA image, downloading any that are missing; checked once."""
+    digests = {}
+    for name, (url, digest) in ASSETS.items():
+        path = _asset_path(url)
+        if not path.is_file():
+            ASSET_DIR.mkdir(parents=True, exist_ok=True)
+            partial = path.with_suffix(".part")
+            with urllib.request.urlopen(url, timeout=60) as response, partial.open("wb") as file:
+                shutil.copyfileobj(response, file)
+            partial.replace(path)
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual != digest:
+            raise ValueError(f"scene asset does not match its pinned sha256: {path}")
+        digests[name] = actual
+    return digests
+
+
+def realistic_scene(device="CUDA", samples=16):
+    """Space lighting, a detailed satellite around the marked face, and NASA-textured Earth
+    with an atmosphere.
+
+    The lidar reflectors are drawn in the camera image too. Earth is placed per render. The
+    image paths are checked against their pinned hashes when a renderer starts.
     """
     return {"name": "realistic", "device": device, "samples": samples,
             "earth_radius_m": EARTH_RADIUS_M, "reflectors_body_m": REFLECTORS_BODY_M.tolist(),
             "reflector_radius_m": REFLECTOR_RADIUS_M,
-            "reflector_standoff_m": REFLECTOR_STANDOFF_M}
+            "reflector_standoff_m": REFLECTOR_STANDOFF_M,
+            "assets": {name: str(_asset_path(url)) for name, (url, _) in ASSETS.items()}}
 
 
 class BlenderRenderer:
@@ -134,6 +190,7 @@ class BlenderRenderer:
         if not self.blender_path.is_file():
             raise FileNotFoundError(f"Blender executable not found: {self.blender_path}")
         markers = self._assets()
+        images = scene_assets() if self.scene and "assets" in self.scene else None
         started = time.perf_counter()
         self._process = subprocess.Popen(
             [str(self.blender_path), "--background", "--factory-startup", "--disable-autoexec", "--python", str(self._worker)],
@@ -165,6 +222,7 @@ class BlenderRenderer:
                 **settings, "camera": self.camera.to_dict(),
                 "dictionary": MARKER_DICTIONARY, "markers": markers,
                 "worker_sha256": hashlib.sha256(self._worker.read_bytes()).hexdigest(),
+                **({"scene_assets_sha256": images} if images else {}),
             })
         except BaseException:
             self.close(graceful=False)

@@ -7,7 +7,7 @@ import numpy as np
 from rpod.approach import make_approach_scenario
 from rpod.camera import project_points
 from rpod.frames import relative_state
-from rpod.showcase import VIEW, chase_camera
+from rpod.showcase import VIEW, chase_camera, close_camera, plume_throttles
 
 
 class ChaseCameraFraming(unittest.TestCase):
@@ -31,6 +31,25 @@ class ChaseCameraFraming(unittest.TestCase):
                 self.assertTrue(np.all(pixels < [VIEW.width, VIEW.height] - margin), pixels)
                 earth_c = rotation_nc.T @ -position
                 self.assertGreater(earth_c[1], 0)
+
+    def test_close_shot_looks_past_the_chaser_at_the_target_port(self):
+        scenario = make_approach_scenario("approach")
+        target = np.asarray(scenario["initial_positions_m"][0])
+        basis = relative_state(np.asarray(scenario["initial_positions_m"]),
+                               np.asarray(scenario["initial_velocities_mps"]))[2]
+        port = target - basis[:, 1]
+        chaser = port - 6.0 * basis[:, 1] - 0.5 * basis[:, 1]
+        position, rotation_nc = close_camera(chaser, port, basis, basis @ [0, 0.97, 0.25])
+        np.testing.assert_allclose(rotation_nc.T @ rotation_nc, np.eye(3), atol=1e-12)
+        points_c = (np.stack((port, chaser)) - position) @ rotation_nc
+        self.assertTrue(np.all(points_c[:, 2] > 0))
+        pixel = project_points(points_c[:1], np.eye(3), np.zeros(3), VIEW)[0]
+        np.testing.assert_allclose(pixel, [(VIEW.width - 1) / 2, (VIEW.height - 1) / 2], atol=1)
+
+    def test_plumes_fire_against_the_applied_force(self):
+        throttles = plume_throttles([1.0, -2.0, 0.0], 2.0)
+        # +x force: exhaust along -x; -y force: exhaust along +y, saturated.
+        self.assertEqual(throttles, [0.0, 0.5, 1.0, 0.0, 0.0, 0.0])
 
 
 if __name__ == "__main__":

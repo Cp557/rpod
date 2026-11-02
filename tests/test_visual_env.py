@@ -284,7 +284,7 @@ class M5Suite(unittest.TestCase):
                 lidar["expected_outcome"] = camera["expected_outcome"]
             self.assertEqual(lidar, camera)
 
-    def test_realistic_suite_changes_only_the_scene_and_keeps_the_sun_above_the_horizon(self):
+    def test_realistic_suite_changes_only_the_scene_and_keeps_the_sun_up_for_every_episode(self):
         for simple, realistic in zip(suite_specs(), suite_specs(scene="realistic")):
             self.assertEqual(realistic.pop("scene"), "realistic")
             self.assertEqual(realistic, simple)
@@ -292,11 +292,14 @@ class M5Suite(unittest.TestCase):
             for spec in suite_specs(scene="realistic"):
                 initial = m5_suite.episode_initial_state(spec)
                 chaser = np.asarray(initial["initial_positions_m"][1])
-                up = chaser / np.linalg.norm(chaser)
-                # The Sun is opposite the incident ray; Earth's disk starts this far below level.
-                elevation = np.degrees(np.arcsin(-sunlight_direction(initial) @ up))
-                dip = np.degrees(np.arccos(initial["earth_radius_m"] / np.linalg.norm(chaser)))
-                self.assertGreater(elevation, -dip, spec["id"])
+                radius = np.linalg.norm(chaser)
+                # The Sun is opposite the incident ray. Its elevation falls at most at the
+                # orbital rate; its whole disc must stay above Earth's limb until the step limit.
+                elevation = np.degrees(np.arcsin(-sunlight_direction(initial) @ chaser / radius))
+                dip = np.degrees(np.arccos(initial["earth_radius_m"] / radius))
+                duration_s = initial["max_steps"] * initial["dt_ns"] / 1e9
+                setting = np.degrees(np.sqrt(initial["mu_m3_s2"] / radius**3)) * duration_s
+                self.assertGreater(elevation - setting, -dip + 0.265, spec["id"])
 
     def test_resume_refuses_a_changed_suite(self):
         with tempfile.TemporaryDirectory() as temporary:

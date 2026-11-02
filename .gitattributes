@@ -1,2 +1,4 @@
 # Keep LF on checkout: frozen-suite hashes are taken over source bytes.
 * text=auto eol=lf
+# Byte-exact: the M8 suite hashed this file with CRLF line endings.
+src/rpod/blender_worker.py -text

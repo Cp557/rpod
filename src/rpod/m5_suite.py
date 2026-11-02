@@ -434,8 +434,8 @@ def suite_report(directory) -> dict:
         "implementation_sha256": suite["implementation_sha256"],
         "report_implementation_sha256": sha256_file(Path(__file__)),
         "scope": ("Fixed 40-episode suite with cooperative markers, "
-                  + ("realistic Blender imagery (detailed satellite, space lighting, procedural "
-                     "Earth)" if realistic else "simple Blender imagery")
+                  + ("realistic Blender imagery (detailed satellite, space lighting, NASA-imaged "
+                     "Earth and atmosphere)" if realistic else "simple Blender imagery")
                   + ", and a 30 m M2 handoff; not a population reliability estimate, "
                   "natural-feature perception, or contact validation"),
         "passed": all(gates.values()), "gates": gates,

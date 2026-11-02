@@ -111,7 +111,7 @@ def main(argv=None) -> int:
 
             report = run_suite(args.output, args.calibration, args.lidar, args.scene)
             if args.scene == "realistic":
-                milestone, name = "M7", "m7-realistic" + ("-lidar" if args.lidar else "")
+                milestone, name = "M8", "m8-realistic" + ("-lidar" if args.lidar else "")
             else:
                 milestone, name = ("M6", "m6-lidar") if args.lidar else ("M5", "m5")
             evidence = Path("benchmarks") / f"{name}-evaluation.json"

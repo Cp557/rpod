@@ -22,6 +22,19 @@ CALIBRATION_COLORS = (
     (1, 0, 0), (0, 1, 0), (0, 0, 1), (0, 1, 1),
     (1, 0, 1), (1, 1, 0), (1, 0.4, 0), (0.4, 0, 1),
 )
+ATMOSPHERE_M = 60_000.0
+AIR_GLOW = 0.6
+STAR_SPHERE_M = 5e7  # beyond Earth's far side, inside the camera's 1e8 m clip
+# The target's 2 m body is drawn as a docking plate from y = -1 to PLATE_BACK_Y, in front of
+# NASA's QuikSCAT model: its 1.8 m bus scaled to 2 m and moved just behind the plate, with
+# its wing hinge axis (model z = 0.7 m) on the drive.
+PLATE_BACK_Y = -0.95
+TARGET_MODEL_SCALE = 1.1
+TARGET_MODEL_OFFSET = (0.0, 0.08, -0.05)
+TARGET_WING_AXIS_Z = 0.7
+cylinder, box, cone = (bpy.ops.mesh.primitive_cylinder_add, bpy.ops.mesh.primitive_cube_add,
+                       bpy.ops.mesh.primitive_cone_add)
+ALONG_Y = (math.pi / 2, 0, 0)
 
 
 def _material(name, color=None, image_path=None, emission=False):
@@ -99,62 +112,88 @@ def _mix(tree, kind, factor, a, b):
     return _socket(mix.outputs, "Result", kind)
 
 
-def _foil(name, color):
-    """Crinkled metallic multilayer-insulation blanket."""
-    material, tree, shader = _principled(name, color, metallic=1, roughness=0.3)
-    bump = tree.nodes.new("ShaderNodeBump")
-    bump.inputs["Strength"].default_value = 0.35
-    coordinates = tree.nodes.new("ShaderNodeTexCoord").outputs["Object"]
-    tree.links.new(_noise(tree, coordinates, 7, 6), bump.inputs["Height"])
-    tree.links.new(bump.outputs["Normal"], shader.inputs["Normal"])
+def _math(tree, operation, *values):
+    """Scalar math on sockets or constants."""
+    node = tree.nodes.new("ShaderNodeMath")
+    node.operation = operation
+    for socket, value in zip(node.inputs, values):
+        if isinstance(value, bpy.types.NodeSocket):
+            tree.links.new(value, socket)
+        else:
+            socket.default_value = value
+    return node.outputs[0]
+
+
+def _xyz(tree, vector):
+    node = tree.nodes.new("ShaderNodeSeparateXYZ")
+    tree.links.new(vector, node.inputs[0])
+    return node.outputs
+
+
+def _unit(tree, vector):
+    node = tree.nodes.new("ShaderNodeVectorMath")
+    node.operation = "NORMALIZE"
+    tree.links.new(vector, node.inputs[0])
+    return node.outputs["Vector"]
+
+
+def _dot(tree, a, b):
+    node = tree.nodes.new("ShaderNodeVectorMath")
+    node.operation = "DOT_PRODUCT"
+    tree.links.new(a, node.inputs[0])
+    tree.links.new(b, node.inputs[1])
+    return node.outputs["Value"]
+
+
+def _object_coordinates(tree):
+    return tree.nodes.new("ShaderNodeTexCoord").outputs["Object"]
+
+
+def _bump(tree, height, strength, distance=1.0):
+    node = tree.nodes.new("ShaderNodeBump")
+    node.inputs["Strength"].default_value = strength
+    node.inputs["Distance"].default_value = distance
+    tree.links.new(height, node.inputs["Height"])
+    return node.outputs["Normal"]
+
+
+def _image(tree, path, vector, colorspace="sRGB"):
+    node = tree.nodes.new("ShaderNodeTexImage")
+    node.image = bpy.data.images.load(str(path), check_existing=True)
+    node.image.colorspace_settings.name = colorspace
+    node.interpolation = "Linear"
+    node.extension = "REPEAT"
+    tree.links.new(vector, node.inputs["Vector"])
+    return node.outputs
+
+
+def _equirectangular(tree, direction, east_sign):
+    """Plate-carree UV of a direction: longitude atan2(y, x) on u, latitude on v."""
+    x, y, z = _xyz(tree, _unit(tree, direction))
+    u = _math(tree, "ADD", _math(tree, "MULTIPLY", _math(tree, "ARCTAN2", y, x),
+                                 east_sign / (2 * math.pi)), 0.5)
+    v = _math(tree, "ADD", _math(tree, "MULTIPLY", _math(tree, "ARCSINE", z), 1 / math.pi), 0.5)
+    uv = tree.nodes.new("ShaderNodeCombineXYZ")
+    tree.links.new(u, uv.inputs[0])
+    tree.links.new(v, uv.inputs[1])
+    return uv.outputs[0]
+
+
+def _metal(name, color, roughness):
+    material, tree, shader = _principled(name, color, metallic=1, roughness=roughness)
+    tree.links.new(_bump(tree, _noise(tree, _object_coordinates(tree), 300, 2), 0.04, 0.001),
+                   shader.inputs["Normal"])
     return material
 
 
-def _solar_cells():
-    """Glass-covered dark cells on a metallic grid, in the panel's body x-z plane."""
-    material, tree, shader = _principled("solar_cells", (0.01, 0.015, 0.05),
-                                         roughness=0.12, specular=0.6)
-    mapping = tree.nodes.new("ShaderNodeMapping")
-    mapping.inputs["Rotation"].default_value = (math.pi / 2, 0, 0)
-    tree.links.new(tree.nodes.new("ShaderNodeTexCoord").outputs["Object"], mapping.inputs["Vector"])
-    brick = tree.nodes.new("ShaderNodeTexBrick")
-    brick.offset = 0
-    for name, value in (("Color1", (0.01, 0.015, 0.05, 1)), ("Color2", (0.012, 0.02, 0.06, 1)),
-                        ("Mortar", (0.6, 0.6, 0.6, 1)), ("Scale", 1.0),
-                        ("Mortar Size", 0.012), ("Brick Width", 0.4), ("Row Height", 0.2)):
-        brick.inputs[name].default_value = value
-    tree.links.new(mapping.outputs["Vector"], brick.inputs["Vector"])
-    tree.links.new(brick.outputs["Color"], shader.inputs["Base Color"])
-    tree.links.new(brick.outputs["Fac"], shader.inputs["Metallic"])
-    return material
-
-
-def _earth_surface():
-    """Procedural oceans, land, and clouds evaluated on the unit normal.
-
-    Only camera rays see the textured surface; light reflected onto the spacecraft uses a
-    uniform 0.3 albedo, which Cycles evaluates without the texture nodes.
-    """
-    material, tree, shader = _principled("earth_surface", (0, 0, 0))
-    normalize = tree.nodes.new("ShaderNodeVectorMath")
-    normalize.operation = "NORMALIZE"
-    tree.links.new(tree.nodes.new("ShaderNodeTexCoord").outputs["Object"], normalize.inputs[0])
-    direction = normalize.outputs["Vector"]
-    land = _ramp(tree, _noise(tree, direction, 1.6, 6), 0.5, 0.56)
-    cloud = _ramp(tree, _noise(tree, direction, 60, 8), 0.5, 0.62)
-    ground = _mix(tree, "RGBA", land, (0.006, 0.02, 0.05), (0.09, 0.08, 0.045))
-    tree.links.new(_mix(tree, "RGBA", cloud, ground, (0.75, 0.75, 0.75)), shader.inputs["Base Color"])
-    rough = _mix(tree, "VALUE", land, 0.12, 0.95)
-    tree.links.new(_mix(tree, "VALUE", cloud, rough, 1.0), shader.inputs["Roughness"])
-    albedo = tree.nodes.new("ShaderNodeBsdfDiffuse")
-    albedo.inputs["Color"].default_value = (0.3, 0.3, 0.3, 1)
-    choose = tree.nodes.new("ShaderNodeMixShader")
-    tree.links.new(tree.nodes.new("ShaderNodeLightPath").outputs["Is Camera Ray"], choose.inputs[0])
-    tree.links.new(albedo.outputs[0], choose.inputs[1])
-    tree.links.new(shader.outputs[0], choose.inputs[2])
-    output = next(node for node in tree.nodes if node.type == "OUTPUT_MATERIAL")
-    tree.links.new(choose.outputs[0], output.inputs["Surface"])
-    return material
+def _hardware_materials():
+    """Materials shared by both spacecraft models."""
+    return {
+        "aluminum": _metal("bare_aluminum", (0.88, 0.88, 0.9), 0.3),
+        "dark": _principled("black_anodize", (0.02, 0.02, 0.022), roughness=0.45)[0],
+        "nozzle": _metal("nozzle_niobium", (0.35, 0.33, 0.32), 0.45),
+        "glass": _principled("lens_glass", (0.01, 0.01, 0.015), roughness=0.02, specular=1)[0],
+    }
 
 
 def _sphere(name, radius, segments, rings):
@@ -190,6 +229,207 @@ def _part(add, material, parent, apply_scale=False, **placement):
     if apply_scale:
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     obj.parent = parent
+    obj.data.materials.append(material)
+    return obj
+
+
+def _aim(direction, track):
+    """Rotation turning local `track` ('Z' or '-Z') onto `direction`."""
+    direction = Vector(direction).normalized()
+    return direction.to_track_quat(track, "Y" if abs(direction.y) < 0.9 else "X")
+
+
+def _import_model(path, parent, scale, rotation, location):
+    """Import a glTF model under an empty placed in `parent`'s body axes.
+
+    Returns the imported meshes and the empty.
+    """
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=str(path))
+    imported = [obj for obj in bpy.data.objects if obj not in before]
+    holder = bpy.data.objects.new(f"model_{Path(path).stem}", None)
+    bpy.context.scene.collection.objects.link(holder)
+    holder.parent = parent
+    holder.scale = (scale, scale, scale)
+    holder.rotation_euler = rotation
+    holder.location = location
+    for obj in imported:
+        if obj.parent is None:
+            obj.parent = holder
+    return [obj for obj in imported if obj.type == "MESH"], holder
+
+
+def _faces(obj, materials, choose):
+    """Assign `materials` to `obj` by face normal with `choose(normal) -> index`."""
+    obj.data.materials.clear()
+    for material in materials:
+        obj.data.materials.append(material)
+    for polygon in obj.data.polygons:
+        polygon.material_index = choose(polygon.normal)
+    return obj
+
+
+def _strut(material, parent, start, end, radius):
+    """A cylinder between two body points."""
+    start, end = Vector(start), Vector(end)
+    axis = end - start
+    obj = _part(cylinder, material, parent, vertices=12, radius=radius, depth=axis.length,
+                location=(start + end) / 2)
+    obj.rotation_mode = "QUATERNION"
+    obj.rotation_quaternion = _aim(axis, "Z")
+    return obj
+
+
+def _thruster(materials, parent, location, direction, size=1.0):
+    """A small bell nozzle pointing along `direction` from a valve block."""
+    nozzle, valve = materials
+    direction = Vector(direction).normalized()
+    turn = _aim(direction, "-Z")
+    block = _part(box, valve, parent, apply_scale=True, size=1, location=location,
+                  scale=(0.05 * size, 0.05 * size, 0.04 * size))
+    bell = _part(cone, nozzle, parent, vertices=24, radius1=0.028 * size, radius2=0.01 * size,
+                 depth=0.06 * size, end_fill_type="NOTHING",
+                 location=Vector(location) + direction * 0.045 * size)
+    for obj in (block, bell):
+        obj.rotation_mode = "QUATERNION"
+        obj.rotation_quaternion = turn
+    return [block, bell]
+
+
+def _wing_drive(parent):
+    """An empty at the body origin; wings parented to it turn about body X with it."""
+    obj = bpy.data.objects.new("wing_drive", None)
+    bpy.context.scene.collection.objects.link(obj)
+    obj.parent = parent
+    return obj
+
+
+def _track_sun(drive, rotation_cb, toward_sun_c):
+    """Turn the wings about body X so the cell (-Y) side faces the Sun."""
+    sun = rotation_cb.transposed() @ toward_sun_c
+    drive.rotation_euler = (math.atan2(-sun.z, -sun.y), 0, 0)
+
+
+def _earth_surface(assets, city_lights, sun_frame):
+    """NASA Blue Marble surface with water darkened, clouds, and optional city lights on the
+    night side, judged in `sun_frame`, an Earth-centred frame whose +Z points at the Sun."""
+    material, tree, shader = _principled("earth_nasa", (0, 0, 0))
+    uv = _equirectangular(tree, _object_coordinates(tree), 1.0)
+    day = _image(tree, assets["day"], uv)["Color"]
+    cloud = _image(tree, assets["clouds"], uv, "Non-Color")["Color"]
+    rgb = tree.nodes.new("ShaderNodeSeparateColor")
+    tree.links.new(day, rgb.inputs[0])
+    water = _ramp(tree, _math(tree, "SUBTRACT", rgb.outputs[2], rgb.outputs[0]), 0.03, 0.12)
+    ocean = _mix(tree, "RGBA", _ramp(tree, rgb.outputs[2], 0.1, 0.6),
+                 (0.004, 0.012, 0.035), (0.01, 0.03, 0.07))
+    cover = _ramp(tree, cloud, 0.15, 0.85)
+    tree.links.new(_mix(tree, "RGBA", cover, _mix(tree, "RGBA", water, day, ocean),
+                        (0.85, 0.86, 0.88)), shader.inputs["Base Color"])
+    tree.links.new(_mix(tree, "VALUE", cover, _mix(tree, "VALUE", water, 0.85, 0.22), 0.9),
+                   shader.inputs["Roughness"])
+    if city_lights:
+        night = _image(tree, assets["night"], uv)["Color"]
+        sun_space = tree.nodes.new("ShaderNodeTexCoord")
+        sun_space.object = sun_frame
+        dark = _ramp(tree, _xyz(tree, _unit(tree, sun_space.outputs["Object"]))[2], 0.05, -0.12)
+        lights = _math(tree, "MULTIPLY", dark, _math(tree, "SUBTRACT", 1.0,
+                                                     _math(tree, "MULTIPLY", cover, 0.85)))
+        tree.links.new(night, shader.inputs["Emission Color"])
+        tree.links.new(_math(tree, "MULTIPLY", lights, city_lights),
+                       shader.inputs["Emission Strength"])
+    return material
+
+
+def _air(radius):
+    """Transparent shell whose front face emits the single-scattered skylight of its ray.
+
+    In Earth radii, a ray entering at P along d crosses the air for
+    L = s_out - s_in if it reaches the ground, else 2 s_out, where s_out and s_in are the
+    half-chords of the shell and Earth at the ray's closest approach b. Glow grows as
+    (L / L_max)^2, so the horizon is brightest and the view straight down stays clear. The
+    colour follows the Sun's elevation at the path midpoint: blue by day, red at twilight.
+    The shell's object frame is Earth-centred with +Z toward the Sun.
+    """
+    air = bpy.data.materials.new("atmosphere_glow")
+    air.use_nodes = True
+    tree = air.node_tree
+    tree.nodes.clear()
+    top = (1 + ATMOSPHERE_M / radius) ** 2
+
+    def vector(operation, a, scale):
+        node = tree.nodes.new("ShaderNodeVectorMath")
+        node.operation = operation
+        tree.links.new(a, node.inputs[0])
+        node.inputs["Scale"].default_value = scale
+        return node.outputs["Vector"]
+
+    def root(value):
+        return _math(tree, "SQRT", _math(tree, "MAXIMUM", value, 0.0))
+
+    geometry = tree.nodes.new("ShaderNodeNewGeometry")
+    point = vector("SCALE", _object_coordinates(tree), 1 / radius)
+    incoming = tree.nodes.new("ShaderNodeVectorTransform")
+    incoming.vector_type, incoming.convert_from, incoming.convert_to = "VECTOR", "WORLD", "OBJECT"
+    tree.links.new(geometry.outputs["Incoming"], incoming.inputs["Vector"])
+    ray = _unit(tree, vector("SCALE", incoming.outputs["Vector"], -1.0))
+    along = _dot(tree, point, ray)
+    closest = _math(tree, "SUBTRACT", _dot(tree, point, point), _math(tree, "MULTIPLY", along, along))
+    shell = root(_math(tree, "SUBTRACT", top, closest))
+    ground = root(_math(tree, "SUBTRACT", 1.0, closest))
+    hits = _math(tree, "LESS_THAN", closest, 1.0)
+    length = _math(tree, "SUBTRACT", _math(tree, "MULTIPLY", shell, 2.0), _math(
+        tree, "MULTIPLY", hits, _math(tree, "ADD", shell, ground)))
+    middle = tree.nodes.new("ShaderNodeVectorMath")
+    middle.operation = "MULTIPLY_ADD"
+    tree.links.new(ray, middle.inputs[0])
+    half = tree.nodes.new("ShaderNodeCombineXYZ")
+    for axis in range(3):
+        tree.links.new(_math(tree, "MULTIPLY", length, 0.5), half.inputs[axis])
+    tree.links.new(half.outputs[0], middle.inputs[1])
+    tree.links.new(point, middle.inputs[2])
+    light = _xyz(tree, _unit(tree, middle.outputs["Vector"]))[2]
+    sky = tree.nodes.new("ShaderNodeValToRGB")
+    ramp = sky.color_ramp
+    ramp.elements[0].position, ramp.elements[0].color = 0.42, (0, 0, 0, 1)
+    ramp.elements[1].position, ramp.elements[1].color = 0.56, (0.3, 0.55, 1.0, 1)
+    for position, color in ((0.46, (0.4, 0.06, 0.01, 1)), (0.49, (1.0, 0.42, 0.1, 1)),
+                            (0.515, (0.75, 0.7, 0.75, 1))):
+        ramp.elements.new(position).color = color
+    tree.links.new(_math(tree, "MULTIPLY_ADD", light, 0.5, 0.5), sky.inputs["Fac"])
+    fraction = _math(tree, "DIVIDE", length, 2 * math.sqrt(top - 1))
+    front = _math(tree, "SUBTRACT", 1.0, geometry.outputs["Backfacing"])
+    glow = tree.nodes.new("ShaderNodeEmission")
+    tree.links.new(sky.outputs["Color"], glow.inputs["Color"])
+    tree.links.new(_math(tree, "MULTIPLY", _math(tree, "MULTIPLY", _math(
+        tree, "MULTIPLY", fraction, fraction), front), AIR_GLOW), glow.inputs["Strength"])
+    add = tree.nodes.new("ShaderNodeAddShader")
+    tree.links.new(tree.nodes.new("ShaderNodeBsdfTransparent").outputs[0], add.inputs[0])
+    tree.links.new(glow.outputs[0], add.inputs[1])
+    tree.links.new(add.outputs[0], tree.nodes.new("ShaderNodeOutputMaterial").inputs["Surface"])
+    return air
+
+
+def _camera_only(obj):
+    for key in ("visible_diffuse", "visible_glossy", "visible_transmission",
+                "visible_volume_scatter", "visible_shadow"):
+        setattr(obj, key, False)
+
+
+def _star_sphere(path, strength):
+    """Deep Star Maps 2020 on a sphere around the camera, seen only by camera rays. Each
+    render sets its axes to inertial, so its object coordinates are celestial directions."""
+    obj = _sphere("stars", STAR_SPHERE_M, 64, 32)
+    _camera_only(obj)
+    material = bpy.data.materials.new("star_map")
+    material.use_nodes = True
+    tree = material.node_tree
+    tree.nodes.clear()
+    glow = tree.nodes.new("ShaderNodeEmission")
+    glow.inputs["Strength"].default_value = strength
+    tree.links.new(_image(tree, path, _equirectangular(tree, _object_coordinates(tree), -1.0),
+                          "Linear Rec.709")["Color"], glow.inputs["Color"])
+    tree.links.new(glow.outputs[0], tree.nodes.new("ShaderNodeOutputMaterial").inputs["Surface"])
+    material.cycles.emission_sampling = "NONE"
     obj.data.materials.append(material)
     return obj
 
@@ -349,7 +589,7 @@ class SceneRenderer:
             self._build_realistic(request["scene"], cube)
 
     def _build_realistic(self, spec, cube):
-        """Space lighting, a detailed satellite around the marked face, and Earth."""
+        """Space lighting, a detailed satellite around the marked face, NASA Earth and air."""
         if spec.get("name") != "realistic":
             raise ValueError(f"unknown render scene: {spec.get('name')}")
         scene, target = self.scene, self.target
@@ -368,24 +608,20 @@ class SceneRenderer:
                           "max_bounces": scene.cycles.max_bounces,
                           "sun_angular_diameter_deg": 0.53}
 
-        # The 2 m bus: foil blankets, with white paint on the -Y docking face.
-        cube.data.materials.clear()
-        cube.data.materials.append(_foil("gold_foil", (1.0, 0.72, 0.3)))
-        cube.data.materials.append(_principled("docking_face", (0.75, 0.75, 0.72), roughness=0.6)[0])
-        for polygon in cube.data.polygons:
-            polygon.material_index = int(polygon.normal.y < -0.9)
-        aluminum = _principled("aluminum", (0.9, 0.9, 0.92), metallic=1, roughness=0.35)[0]
+        # The 2 m body becomes a 5 cm docking plate, white on -Y, mounted on a NASA model bus.
+        hardware = _hardware_materials()
+        aluminum, dark = hardware["aluminum"], hardware["dark"]
+        for vertex in cube.data.vertices:
+            vertex.co.y = min(vertex.co.y, PLATE_BACK_Y)
+        _faces(cube, (_principled("docking_face", (0.75, 0.75, 0.72), roughness=0.6)[0], aluminum),
+               lambda normal: int(normal.y > -0.9))
         handrail = _principled("handrail", (0.9, 0.65, 0.25), metallic=1, roughness=0.35)[0]
-        dark = _principled("hatch", (0.04, 0.04, 0.045), roughness=0.5)[0]
         glass = _principled("reflector_glass", (0.02, 0.02, 0.025), roughness=0.04, specular=1)[0]
-        white = _principled("white_paint", (0.8, 0.8, 0.78), roughness=0.5)[0]
-        cylinder, box = bpy.ops.mesh.primitive_cylinder_add, bpy.ops.mesh.primitive_cube_add
-        along_y = (math.pi / 2, 0, 0)
         parts = [
             _part(cylinder, aluminum, target, vertices=64, radius=0.17, depth=0.06,
-                  location=(0, -1.03, 0), rotation=along_y),
+                  location=(0, -1.03, 0), rotation=ALONG_Y),
             _part(cylinder, dark, target, vertices=64, radius=0.12, depth=0.004,
-                  location=(0, -1.061, 0), rotation=along_y),
+                  location=(0, -1.061, 0), rotation=ALONG_Y),
         ]
         for marker in self.marker_objects:
             pad_y = sum(vertex.co.y for vertex in marker.data.vertices) / 4
@@ -396,34 +632,68 @@ class SceneRenderer:
                 for dx in (-0.3, 0.3):
                     for dz in (-0.3, 0.3):
                         parts.append(_part(cylinder, aluminum, target, vertices=12, radius=0.012,
-                                           depth=depth, rotation=along_y, location=(
+                                           depth=depth, rotation=ALONG_Y, location=(
                                                center[0] + dx, -1 - depth / 2, center[1] + dz)))
         standoff, radius = spec["reflector_standoff_m"], spec["reflector_radius_m"]
         for x, y, z in spec["reflectors_body_m"]:
             parts.append(_part(cylinder, glass, target, vertices=32, radius=radius,
                                depth=2 * standoff, location=(x, y - standoff, z),
-                               rotation=along_y))
+                               rotation=ALONG_Y))
         for x in (-0.95, 0.95):
             parts.append(_part(cylinder, handrail, target, vertices=12, radius=0.017, depth=1.6,
                                location=(x, -1.07, 0)))
             for z in (-0.75, 0.75):
                 parts.append(_part(cylinder, handrail, target, vertices=12, radius=0.012,
-                                   depth=0.07, location=(x, -1.035, z), rotation=along_y))
-        cells = _solar_cells()
-        for side in (-1, 1):
-            parts.append(_part(cylinder, aluminum, target, vertices=16, radius=0.04, depth=0.5,
-                               location=(side * 1.25, 0, 0), rotation=(0, math.pi / 2, 0)))
-            parts.append(_part(box, cells, target, apply_scale=True, size=1,
-                               location=(side * 3.5, 0, 0), scale=(4.0, 0.03, 1.8)))
-        parts.append(_part(cylinder, aluminum, target, vertices=16, radius=0.03, depth=0.5,
-                           location=(0.4, 0.4, 1.25)))
-        dish = _part(bpy.ops.mesh.primitive_uv_sphere_add, white, target, segments=48,
-                     ring_count=24, radius=0.4, location=(0.4, 0.4, 1.55), scale=(1, 1, 0.2))
-        self.target_objects.extend((*parts, dish))
+                                   depth=0.07, location=(x, -1.035, z), rotation=ALONG_Y))
+        assets = {key: Path(value) for key, value in spec["assets"].items()}
+        self.target_objects.extend((*parts, *self._build_bus(assets["target_model"])))
 
-        self.earth = _sphere("earth", float(spec["earth_radius_m"]), 512, 256)
-        self.earth.data.materials.append(_earth_surface())
+        # Shaders read the Sun from this Earth-centred frame's +Z, which each render turns by
+        # transform: no material changes between renders, which corrupted materials mid-run.
+        self.sun_frame = bpy.data.objects.new("sun_frame", None)
+        scene.collection.objects.link(self.sun_frame)
+        earth_radius = float(spec["earth_radius_m"])
+        self.earth = _sphere("earth", earth_radius, 512, 256)
+        surface = _earth_surface(assets, float(spec.get("city_lights", 0.0)), self.sun_frame)
+        self.earth.data.materials.append(surface)
         self.earth.hide_render = True
+        self.atmosphere = _sphere("atmosphere", earth_radius + ATMOSPHERE_M, 512, 256)
+        self.atmosphere.parent = self.sun_frame
+        _camera_only(self.atmosphere)
+        air = _air(earth_radius)
+        self.atmosphere.data.materials.append(air)
+        for material in (surface, air):
+            material.cycles.emission_sampling = "NONE"
+        self.stars = None
+        if spec.get("star_strength"):
+            self.stars = _star_sphere(assets["stars"], float(spec["star_strength"]))
+
+    def _build_bus(self, path):
+        """NASA's QuikSCAT model behind the docking plate: its bus scaled to the 2 m body, and
+        its solar wings on a drive that tracks the Sun about body X."""
+        meshes, holder = _import_model(path, self.target, TARGET_MODEL_SCALE, (0, 0, 0),
+                                       TARGET_MODEL_OFFSET)
+        self.wings = _wing_drive(holder)
+        self.wings.location = (0, 0, TARGET_WING_AXIS_Z)
+        bpy.context.view_layer.update()
+        for obj in meshes:
+            if any(material.name.startswith("QS_solar") for material in obj.data.materials):
+                world = obj.matrix_world.copy()
+                obj.parent = self.wings
+                obj.matrix_world = world
+        return meshes
+
+    def _update_realistic(self, request, rotation_ct, ray):
+        """Sun-tracking wings, the Sun frame at Earth's centre, and the star sphere's
+        inertial axes."""
+        toward_sun = -ray.normalized()
+        _track_sun(self.wings, rotation_ct, toward_sun)
+        frame = toward_sun.to_track_quat("Z", "Y").to_matrix().to_4x4()
+        frame.translation = self.earth.matrix_world.translation
+        self.sun_frame.matrix_world = frame
+        self.atmosphere.hide_render = self.earth.hide_render
+        if self.stars is not None:
+            self.stars.matrix_world = Matrix(request["stars_rotation_nc"]).transposed().to_4x4()
 
     def metadata(self):
         return {
@@ -483,6 +753,8 @@ class SceneRenderer:
                     raise ValueError("Earth pose must be finite")
                 self.earth.matrix_world = transform
             self.earth.hide_render = calibration or earth is None
+        if self.realistic is not None:
+            self._update_realistic(request, rotation, ray)
         if calibration:
             if not 1 <= len(points) <= len(CALIBRATION_COLORS):
                 raise ValueError("calibration fixture requires one to eight points")
