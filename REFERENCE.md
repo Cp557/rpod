@@ -662,7 +662,7 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 **Rendering:**
 - Every third tick is rendered, so each frame covers 0.3 s of simulated time. Rendering uses CUDA.
 - The video is 30 fps (9× real time) MPEG-4 Part 2 (`mp4v`). This OpenCV build cannot open an H.264 encoder.
-- At 1080p, M8 run `00` (694 frames) took a median 3.2 s per frame, 39 min in all.
+- At 1080p, M8 run `00` (694 frames) took a median 3.2 s per frame, 39 min in all. Run `29` (933 frames, wide shot throughout) took a median 4.5 s per frame, 70 min in all.
 
 **Overlay** (drawn by OpenCV on each clean render; sizes scale with the image height from a 720-line base):
 - **Bloom:** a soft glow on highlights: threshold 190, σ 9 px, gain 0.8.
