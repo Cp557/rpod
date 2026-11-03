@@ -45,6 +45,18 @@ def _signed(rng, low, high):
     return float(rng.choice([-1, 1]) * rng.uniform(low, high))
 
 
+def operational_conditions(seed, index):
+    """The operational draw from stream [seed, index, 1]: Sun angle, a chaser disturbance,
+    and qualified image degradation on even indices."""
+    rng = np.random.default_rng([seed, index, 1])
+    return {
+        "sun_angle_deg": float(rng.uniform(-30, 30)),
+        "image_degradation": (_degradation(seed, index, *QUALIFIED_DEGRADATION)
+                              if index % 2 == 0 else None),
+        "chaser_disturbance": _chaser_disturbance(rng),
+    }
+
+
 def suite_specs(seed=M5_SUITE_SEED, lidar=False, scene="simple"):
     """Resolve all 40 episodes before any rendering: 28 operational, 6 fault, 6 stress.
 
@@ -61,13 +73,7 @@ def suite_specs(seed=M5_SUITE_SEED, lidar=False, scene="simple"):
         fault_rng = np.random.default_rng([seed, index, 2])
         conditions, abort_gap, expected = {}, None, None
         if category in ("operational", "fault"):
-            conditions = {
-                "sun_angle_deg": float(conditions_rng.uniform(-30, 30)),
-                "image_degradation": (_degradation(seed, index, *QUALIFIED_DEGRADATION)
-                                      if index % 2 == 0 else None),
-                "chaser_disturbance": _chaser_disturbance(conditions_rng),
-            }
-            expected = "success"
+            conditions, expected = operational_conditions(seed, index), "success"
         if kind == "abort":
             abort_gap, expected = float(fault_rng.uniform(10, 25)), "retreated"
         elif kind == "dropped-frame":

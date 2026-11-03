@@ -4,13 +4,13 @@ This document records implemented behavior. [OVERVIEW.md](OVERVIEW.md) describes
 
 ## Current implementation
 
-RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. Individual thrusters, fuel/mass depletion, environmental disturbances, natural-feature perception, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
+RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. Individual thrusters, fuel/mass depletion, environmental disturbances, natural-feature perception, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
 
 The Rust `rpod-core` crate owns state and time. `rpod-python` exposes it through PyO3. Python defines scenarios, collects snapshots, derives relative state and diagnostics, and exports recordings. Physics has no renderer dependency.
 
 ## Environment and commands
 
-Verified on Windows x86_64 with CPython 3.15.1, uv 0.13.5, Rust/Cargo 1.99.1, Visual Studio Build Tools 2022/MSVC 14.44.35207, and Windows SDK 10.0.26100.0. Dependencies include nalgebra 0.35.0, PyO3 0.30.1, maturin 1.15.0, NumPy 2.5.4, Matplotlib 3.11.2, Rerun 0.40.0, and development dependency psutil 7.2.2.
+Verified on Windows x86_64 with CPython 3.15.1, uv 0.13.5, Rust/Cargo 1.99.1, Visual Studio Build Tools 2022/MSVC 14.44.35207, and Windows SDK 10.0.26100.0. Dependencies include nalgebra 0.35.0, rayon 1.12.0, PyO3 0.30.1 with the `numpy` crate 0.30.0, maturin 1.15.0, NumPy 2.5.4, Matplotlib 3.11.2, Rerun 0.40.0, and development dependency psutil 7.2.2.
 
 From the repository root in PowerShell:
 
@@ -221,7 +221,7 @@ The retreat request occurs at tick 5784 (578.4 s), immediately updates control, 
 
 The initial report is `benchmarks/m1.json`, measured on Windows/Intel Family 6 Model 158 with the verified release compiler. The desktop was not isolated from other workloads; these are local baselines, not hardware-independent guarantees or performance targets.
 
-Reports include raw timings, medians, warmup durations, completed counts, resolved scenario, and software/hardware metadata. Disk writes, Rerun export, and the viewer are excluded from timing. Process RSS was approximately 32.3 MB before and 32.2 MB after this run; these snapshots are neither peak memory nor memory per environment. No compute energy, per-engine allocation, batching, or scaling results have been established.
+Reports include raw timings, medians, warmup durations, completed counts, resolved scenario, and software/hardware metadata. Disk writes, Rerun export, and the viewer are excluded from timing. Process RSS was approximately 32.3 MB before and 32.2 MB after this run; these snapshots are neither peak memory nor memory per environment. No compute energy or per-engine allocation results have been established; batched stepping and thread scaling are measured in M9.
 
 An additional M2 release measurement, `benchmarks/m2-native.json`, records approximately 2.34 million rigid-body physics ticks/s for two spacecraft with zero body wrench, 0.1 s timestep, and one bulk call per 100,000-tick repetition (one warmup, five timed repetitions; reset excluded). This is native propagation only, not closed-loop Python throughput or an equivalent-work speed comparison against M1. No energy result is inferred.
 
@@ -286,7 +286,7 @@ The three uninterrupted approaches finish within 1.005× their paired oracle tim
 
 The official nominal feedback run took 362.2 wall-clock seconds for 208.4 simulated seconds, excluding its separately timed paired oracle. Its sampled Blender peak RSS was 266.2 MiB. Qualification cases ran in pairs on the same desktop, so these wall times describe that workload rather than an isolated renderer or real-time guarantee. Each run's summary preserves startup, per-render/request timing, sampled RSS, and total feedback-loop wall time.
 
-The current fast suite passes 49 Python tests and 13 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
+The current fast suite passes 58 Python tests and 18 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
 
 ### Schema 3 visual records
 
@@ -692,11 +692,106 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 - City lights, stars and plumes are brighter than a camera exposed for the sunlit spacecraft would record. Real cold-gas and monopropellant plumes are nearly invisible.
 - The atmosphere uses single scattering in a uniform 60 km shell. There is no airglow or cloud shadow.
 
+## Batched engine and Monte Carlo (M9)
+
+M9 steps many independent episodes together and turns the fixed 40-episode suites into population estimates. Nothing in the frozen evaluation changes; every new piece is checked against the scalar reference it mirrors.
+
+**Rust batch.** `RigidBodyBatch` (`crates/rpod-core/src/batch.rs`) holds one `RigidBodyEngine` per environment with shared vehicle parameters and its own rayon thread pool.
+- `step(forces, torques, active, steps)` holds each active environment's body-frame commands for `steps` ticks and returns a status per environment: 0 ok, 1 invalid command, 2 invalid state, 3 clock overflow. A failed environment keeps the ticks it completed, as the single engine does; the others still advance. Inactive environments do not move.
+- `reset(indices, states)` restarts environments at tick zero; `states()` returns (n, 2, 13) rows: per body, position, velocity, XYZW quaternion and body rate.
+- Environments share nothing, so results are bitwise identical for any thread count and bitwise equal to independent `RigidBodyEngine`s (Rust tests).
+- `pair_metrics(states, ports)` (`metrics.rs`) computes `approach.state_metrics` for every row on rayon's global pool: rho, rho_dot, LVLH basis, body rotations, port position and velocity, alignment and relative rate, in one (n, 41) array. Like the physics, it is geometry the Rust core owns.
+- The Python binding uses the `numpy` crate, reads contiguous arrays without copying and releases the GIL while stepping.
+
+**Fleet autonomy** (`fleet.py`). Vectorized copies of the reference behavior, held equal by tests:
+- `metrics` and `wrench` mirror `state_metrics` and `commanded_wrench` (agreement within 1e-11 over random states);
+- `FleetController` mirrors `VisualController.update`: acquisition, braking, reacquisition, navigation loss, the four estimated aborts, the gap profile, onboard completion and the held wrench. Over scripted input sequences that visit phases 1, 2, 5 and 6, every tick's phase, claim, abort reason, force and torque match;
+- `run_fleet` mirrors `VisualEnv` timing and scoring: target attitude control at tick 2 mod 10, the hard guard, both physical dwells, false completion, claims and the time limit. With `TruthNavigation` (the paired oracle's estimate), it reproduces `paired_truth_baseline`'s outcome and end tick for a success and a retreat.
+- `Estimates.target` holds body angular rates; the force law is a `FleetController` method (`_wrench`), the plug-in point for M10.
+
+**Navigation surrogate** (`surrogate.py`). The fleet has no renderer, so a noisy-state surrogate stands in for rendering, perception and the filter. It replays what the realistic M8 suite's filter produced:
+- **Errors at each camera delivery** (tick 2 mod 10), in four groups: target position and velocity in LVLH, keyed by center-of-mass range (bin edges 7, 8.45, 11, 13.5, 15.95, 19, 22.5, 25.95, 28.5 m); attitude (body small angle) and body rate, keyed by time since the first estimate, because they converge (edges 5, 10, 20, 30, 45, 60, 90, 120, 160 s). Means and deviations are interpolated linearly between bin centers. The along-track position bias grows from 2.9 mm near 6.6 m to 11 cm near 30.6 m.
+- **AR(1) residuals** between deliveries, with the fitted lag-1 correlation of each component (0.69 for along-track position, −0.12 to 0.76 for the rest). Between deliveries the position error drifts by the velocity error, as the filter's prediction does.
+- **Rejections:** a Bernoulli draw per delivery with the fitted probability for the time since the first estimate. Rejected deliveries hold the estimate and send `visual_update` False, so the controller brakes exactly as the reference client does. M8's operational episodes rejected 4 of about 5,900 deliveries, all 14–34 s after the first estimate.
+- `rpod fit-surrogate` validates the procedure, then fits `models/m9-surrogate.json` on all 28 operational episodes of `runs/m8-realistic`. Validation fits on half the episodes (pairs of indices alternate, so both halves hold degraded and clean images) and passes two checks: for each of completion time, minimum port gap, final port speed and braking count, at least 25 of the 28 rendered values lie inside the central 95% band of 200 surrogate runs of the same episode; and held-out estimate-error medians and P95 lie within 25% of the surrogate's.
+
+**Campaigns** (`monte_carlo.py`). `campaign_spec(seed, index)` draws the M5 operational distribution (`m5_suite.operational_conditions`, shared with the suites, and `initial_state` seed `seed × 10⁷ + index`, clear of the suites' 1000 + index). `run_campaign` runs batches of 16,384 and writes `campaign.json`, `episodes.npz` (per-episode outcome, end tick, completion time, minimum port gap and range, final speed and gap, Δv, brakes, abort reason), `failures.jsonl` and `report.json` with a Clopper–Pearson 95% interval. The same seed and batch size reproduce every episode. `rpod monte-carlo-replay CAMPAIGN --index N` reruns any episode as a full rendered visual episode.
+
+**Basilisk cross-check** (`crosscheck.py`, `tools/basilisk`). `rpod basilisk-cases` writes three cases: one 5,500 s orbit of point-mass gravity, a 1,000 s torque-free tumble with the target's inertia, and 300 s of constant body-frame force and torque on the chaser. `tools/basilisk/propagate.py` runs them in Basilisk (its own uv project on Python 3.13, `bsk` 2.12.2) with RK4 at the same 0.1 s step, and `rpod basilisk-compare` reports the largest differences against tolerances of 1 mm, 1 µm/s, 1e-6 rad and 1e-9 rad/s.
+
+```powershell
+.\.venv\Scripts\rpod.exe fit-surrogate --suite runs/m8-realistic --output models/m9-surrogate.json
+.\.venv\Scripts\rpod.exe monte-carlo --episodes 100000 --seed 9 --output runs/m9-monte-carlo
+.\.venv\Scripts\rpod.exe monte-carlo-replay runs/m9-monte-carlo --index 6 --output runs/m9-replay-6
+.\.venv\Scripts\rpod.exe benchmark --batch --output benchmarks/m9-batch.json
+.\.venv\Scripts\rpod.exe basilisk-cases --output runs/m9-crosscheck/cases.json
+uv run --project tools/basilisk python tools/basilisk/propagate.py runs/m9-crosscheck/cases.json runs/m9-crosscheck/basilisk.json
+.\.venv\Scripts\rpod.exe basilisk-compare --cases runs/m9-crosscheck/cases.json --basilisk runs/m9-crosscheck/basilisk.json --output runs/m9-crosscheck/report.json
+```
+
+### M9 results
+
+All M9 checks pass. Measured on the same desktop as earlier benchmarks (i7-8700K, 6 cores and 12 threads), not isolated: another session's Blender render ran during the campaign and the benchmark.
+
+**Equivalence:** the fleet reproduces the scalar law, supervisor and oracle (3 Python tests), and the batch reproduces independent engines bitwise for any thread count (5 Rust tests).
+
+**Surrogate validation** (`models/m9-surrogate.json`, fitted on 5,888 deliveries):
+
+| Metric | Rendered values inside the surrogate's 95% band |
+| --- | --- |
+| Completion time | 27 of 28 (outside: `12`, which braked twice) |
+| Minimum port gap | 27 of 28 (outside: `24`) |
+| Final port speed | 26 of 28 (outside: `14`, `24`) |
+| Braking count | 28 of 28 |
+
+Held-out estimate errors: position median and P95 within 4% and 5% of the surrogate's; attitude within 15% and 12%. The surrogate ended 18 of its 5,600 validation runs `navigation_lost`, where the 28 rendered episodes had none (expected about 0.1 at that rate).
+
+**Campaign** (`runs/m9-monte-carlo`, report copied to `benchmarks/m9-monte-carlo.json`): 100,000 operational episodes, seed 9, in 556 s (180 episodes/s, 380,000 environment ticks/s including episode setup).
+
+| Result | Value |
+| --- | --- |
+| Success | 99,932 (99.932%; 95% interval 99.914–99.947%) |
+| Failures | 68, all `navigation_lost`; no false completion, boundary violation, abort or time limit |
+| Completion time (successes) | 202.6–239.6 s; median 210.2 s, P99 228.6 s |
+| Minimum port gap / COM range | 4.920 m / 6.420 m |
+| Final port speed (successes) | at most 0.0034 m/s; median 0.0014 m/s |
+| Δv (successes) | median 0.365 m/s, P99 0.464 m/s |
+| Episodes that braked | 13,319 (13.3%), at most 3 times |
+
+Every failure is two consecutive delivery rejections in the first 30 s, which ages the estimate past 3 s, the reference supervisor's designed safe response. The rate is set by the fitted rejection probabilities (1 of 140 to 1 of 420 deliveries in that window), estimated from only 4 rejections and treated as independent, so the failure fraction is the campaign's least constrained number. Two reruns of seed 9 reproduced the report (apart from timing), every per-episode array and the failure list exactly.
+
+**Benchmark** (`benchmarks/m9-batch.json`): `RigidBodyBatch.step` throughput, median of 5 repetitions of about 2 million environment ticks each.
+
+| Environments | 1 thread | 2 | 4 | 6 | 12 |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 2.17 M/s | 2.19 | 2.19 | 2.18 | 2.20 |
+| 64 | 2.11 | 4.16 | 7.50 | 9.53 | 14.38 |
+| 1,024 | 2.20 | 4.27 | 7.69 | 9.58 | 15.38 |
+| 16,384 | 2.19 | 4.28 | 7.69 | 9.92 | 15.70 |
+| 131,072 | 2.16 | 4.16 | 7.63 | 9.74 | 14.30 |
+
+- Scaling is 7.2× on 12 threads over 6 physical cores at 16,384 environments; 131,072 environments lose about 9% to memory traffic.
+- Engine state is 632 bytes per environment; a reset takes 0.18 µs per environment.
+- The closed-loop fleet (reference autonomy, truth navigation, 60 s episodes) runs 669,000 environment ticks/s at 4,096 environments and 654,000 at 16,384. The scalar `paired_truth_baseline`, the same autonomy one episode at a time, runs about 730 ticks/s, so the fleet is about 900× faster. In a profile at 4,096 environments, Rust stepping and state readback take about 16% of the time and the Rust pair metrics 10%; the Python supervisor, law and bookkeeping take the rest.
+
+**Basilisk cross-check** (`runs/m9-crosscheck/report.json`, Basilisk 2.12.2): largest differences from rpod.
+
+| Case | Position | Velocity | Attitude | Body rate |
+| --- | --- | --- | --- | --- |
+| One orbit (5,500 s) | 1.5e-8 m | 1.1e-11 m/s | 0 | 0 |
+| Torque-free tumble (1,000 s) | 1.7e-9 m | 4.6e-13 m/s | 9.4e-13 rad | 1.7e-16 rad/s |
+| Constant body wrench (300 s) | 1.3e-9 m | 1.8e-11 m/s | 7.8e-11 rad | 7.3e-17 rad/s |
+
+The two RK4 integrations of the same equations agree to round-off, far inside the tolerances.
+
 ## Source layout and generated output
 
 - `crates/rpod-core`: native dynamics and Rust acceptance tests.
 - `crates/rpod-python`: PyO3 interface and compiler provenance.
-- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`).
+- `crates/rpod-core/src/batch.rs`, `metrics.rs`: the batched engine and pair metrics (M9).
+- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`).
+- `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`).
+- `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases.
 - `tests`: Python integration and contract checks; `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
 
-Frozen-file hashes are taken over raw bytes, so `.gitattributes` checks text out with LF, except `blender_worker.py`. That file is stored byte-exact with CRLF line endings, as the M8 suite hashed it. `.gitignore` excludes the environment, workspace-local uv cache, target directory, compiled extensions, Python caches, portable tools, and generated `runs/`, `datasets/`, and `benchmarks/` outputs. Blender is installed locally for M3/M4 and remains separate from the physics runtime. Contact engines and learning frameworks are not installed.
+Frozen-file hashes are taken over raw bytes, so `.gitattributes` checks text out with LF, except `blender_worker.py`. That file is stored byte-exact with CRLF line endings, as the M8 suite hashed it. `.gitignore` excludes the environment, tool environments under `tools/`, workspace-local uv cache, target directory, compiled extensions, Python caches, portable tools, and generated `runs/`, `datasets/`, and `benchmarks/` outputs. Blender is installed locally for M3/M4 and remains separate from the physics runtime. Contact engines and learning frameworks are not installed.

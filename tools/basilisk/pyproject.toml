@@ -1,0 +1,9 @@
+[project]
+name = "rpod-basilisk-check"
+version = "0.1.0"
+description = "Propagate rpod dynamics cross-check cases with Basilisk"
+requires-python = ">=3.13,<3.14"
+dependencies = ["bsk==2.12.2", "numpy>=2"]
+
+[tool.uv]
+package = false

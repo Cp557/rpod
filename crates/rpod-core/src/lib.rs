@@ -6,8 +6,12 @@ use std::fmt;
 
 use nalgebra::Vector3;
 
+mod batch;
+mod metrics;
 mod rigid_body;
 
+pub use batch::{BatchParameters, RigidBodyBatch, STATE_WIDTH};
+pub use metrics::{METRIC_WIDTH, PairMetrics, pair_metrics, write_metrics};
 pub use rigid_body::{RigidBodyEngine, RigidBodySnapshot};
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -9,3 +9,4 @@ __pycache__/
 *.pdb
 /runs/
 /benchmarks/
+/tools/*/.venv/

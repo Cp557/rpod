@@ -7,3 +7,4 @@ publish = false
 
 [dependencies]
 nalgebra = "0.35.0"
+rayon = "1.12.0"

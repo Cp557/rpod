@@ -13,6 +13,7 @@ import numpy as np
 import psutil
 
 from . import OrbitEngine, __version__, _core
+from ._core import RigidBodyBatch
 from .recording import collect_trajectory
 from .scenarios import make_scenario
 
@@ -27,8 +28,25 @@ def _timing_summary(durations_ns: list[int], completed_count: int) -> dict:
     }
 
 
-def run_benchmark(output: Path) -> dict:
-    """Measure fixed workloads and write a new JSON report without overwriting."""
+def _metadata() -> dict:
+    return {
+        "platform": platform.platform(),
+        "machine": platform.machine(),
+        "processor": platform.processor(),
+        "logical_cpus": psutil.cpu_count(),
+        "physical_cpus": psutil.cpu_count(logical=False),
+        "python": sys.version,
+        "python_implementation": platform.python_implementation(),
+        "rpod": __version__,
+        "numpy": np.__version__,
+        "rerun_sdk": version("rerun-sdk"),
+        "psutil": psutil.__version__,
+        "rustc": _core.__rustc_version__,
+        "debug_assertions": _core.__debug_assertions__,
+    }
+
+
+def _require_release(output):
     if _core.__debug_assertions__:
         raise RuntimeError(
             "Benchmarking requires a release-mode Rust extension; rebuild and "
@@ -37,7 +55,20 @@ def run_benchmark(output: Path) -> dict:
     output = Path(output)
     if output.exists():
         raise FileExistsError(f"Benchmark output already exists: {output}")
+    return output
 
+
+def _write_report(output, report):
+    serialized = json.dumps(report, indent=2, allow_nan=False) + "\n"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("x", encoding="utf-8") as destination:
+        destination.write(serialized)
+    return report
+
+
+def run_benchmark(output: Path) -> dict:
+    """Measure fixed workloads and write a new JSON report without overwriting."""
+    output = _require_release(output)
     scenario = make_scenario("circular")
     engine = OrbitEngine(
         scenario["mu_m3_s2"],
@@ -110,19 +141,7 @@ def run_benchmark(output: Path) -> dict:
     report = {
         "schema_version": 1,
         "started_at_utc": started_at,
-        "metadata": {
-            "platform": platform.platform(),
-            "machine": platform.machine(),
-            "processor": platform.processor(),
-            "python": sys.version,
-            "python_implementation": platform.python_implementation(),
-            "rpod": __version__,
-            "numpy": np.__version__,
-            "rerun_sdk": version("rerun-sdk"),
-            "psutil": psutil.__version__,
-            "rustc": _core.__rustc_version__,
-            "debug_assertions": _core.__debug_assertions__,
-        },
+        "metadata": _metadata(),
         "scenario": scenario,
         "timing": {
             "clock": "perf_counter_ns",
@@ -178,8 +197,90 @@ def run_benchmark(output: Path) -> dict:
             ),
         },
     }
-    serialized = json.dumps(report, indent=2, allow_nan=False) + "\n"
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("x", encoding="utf-8") as destination:
-        destination.write(serialized)
-    return report
+    return _write_report(output, report)
+
+
+def _batch(count, threads):
+    from .approach import make_approach_scenario
+    from .fleet import manifest_state
+
+    scenario = make_approach_scenario("approach")
+    state = manifest_state(scenario)
+    return scenario, RigidBodyBatch(
+        np.repeat(state[None], count, axis=0), scenario["mu_m3_s2"], scenario["dt_ns"],
+        scenario["masses_kg"], scenario["inertias_kg_m2"], scenario["force_limits_n"],
+        scenario["torque_limits_nm"], threads=threads,
+    )
+
+
+def run_batch_benchmark(output: Path, counts=(1, 64, 1024, 16384, 131072),
+                        threads=(1, 2, 4, 6, 12), fleet_counts=(4096, 16384)) -> dict:
+    """Measure batched stepping over environment and thread counts, memory per environment,
+    reset latency, and closed-loop fleet throughput; write a new JSON report."""
+    from .fleet import TruthNavigation, run_fleet
+    from .visual_control import MissionSpec
+    from .visual_run import initial_state
+
+    output = _require_release(output)
+    started_at = datetime.now(timezone.utc).isoformat()
+    native = []
+    for count in counts:
+        for thread_count in threads:
+            _, batch = _batch(count, thread_count)
+            steps = max(1, 2_000_000 // count)
+            zeros, active = np.zeros((count, 2, 3)), np.ones(count, bool)
+            durations = []
+            for repetition in range(6):
+                started_ns = perf_counter_ns()
+                batch.step(zeros, zeros, active, steps)
+                if repetition:
+                    durations.append(perf_counter_ns() - started_ns)
+            native.append({"environments": count, "threads": thread_count,
+                           "ticks_per_call": steps,
+                           **_timing_summary(durations, count * steps)})
+    scenario, batch = _batch(max(counts), 0)
+    rows = np.repeat(batch.states()[:1], 1024, axis=0)
+    durations = []
+    for repetition in range(6):
+        started_ns = perf_counter_ns()
+        batch.reset(list(range(1024)), rows)
+        if repetition:
+            durations.append(perf_counter_ns() - started_ns)
+    resets = _timing_summary(durations, 1024)
+    del batch
+    closed_loop = []
+    for count in fleet_counts:
+        initials = [{**initial_state("visual-m5-operational", 50_000 + index), "max_steps": 600}
+                    for index in range(count)]
+        durations = []
+        for repetition in range(4):
+            started_ns = perf_counter_ns()
+            result = run_fleet(initials, MissionSpec(), TruthNavigation(count, scenario["dt_ns"]))
+            if repetition:
+                durations.append(perf_counter_ns() - started_ns)
+        closed_loop.append({"environments": count, "simulated_seconds_per_episode": 60.0,
+                            **_timing_summary(durations, int(result["end_tick"].sum()))})
+    return _write_report(output, {
+        "schema_version": 1, "started_at_utc": started_at, "metadata": _metadata(),
+        "workloads": {
+            "native_batch": {
+                "description": ("RigidBodyBatch.step with zero commands, holding each call's "
+                                "ticks; about 2 million environment ticks per repetition; "
+                                "1 warmup and 5 measured repetitions"),
+                "count_unit": "environment ticks (two rigid bodies each)", "grid": native,
+            },
+            "memory_per_environment_bytes": {
+                "value": RigidBodyBatch.bytes_per_environment,
+                "scope": ("Rust engine state per environment (size of RigidBodyEngine); "
+                          "excludes the Python fleet's per-episode arrays"),
+            },
+            "reset_latency": {"description": "RigidBodyBatch.reset of 1024 environments",
+                              "count_unit": "environment resets", **resets},
+            "closed_loop_fleet": {
+                "description": ("run_fleet with truth navigation and the reference autonomy "
+                                "for 60 simulated seconds per episode; Python supervisor and "
+                                "law every tick; 1 warmup and 3 measured runs"),
+                "runs": closed_loop,
+            },
+        },
+    })

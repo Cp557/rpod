@@ -26,6 +26,8 @@ def main(argv=None) -> int:
         "benchmark", help="measure release-build stepping and recording"
     )
     benchmark.add_argument("--output", required=True, type=Path)
+    benchmark.add_argument("--batch", action="store_true",
+                           help="measure batched stepping, scaling and the closed-loop fleet")
     camera = commands.add_parser(
         "camera-check", help="verify calibrated Blender projection and raster alignment"
     )
@@ -65,6 +67,37 @@ def main(argv=None) -> int:
     )
     showcase.add_argument("directory", type=Path)
     showcase.add_argument("--output", required=True, type=Path)
+    fit = commands.add_parser(
+        "fit-surrogate", help="fit and validate the navigation surrogate on a recorded suite"
+    )
+    fit.add_argument("--suite", type=Path, default=Path("runs/m8-realistic"))
+    fit.add_argument("--output", type=Path, default=Path("models/m9-surrogate.json"))
+    fit.add_argument("--draws", type=int, default=200)
+    campaign = commands.add_parser(
+        "monte-carlo", help="run a batched Monte Carlo campaign with the navigation surrogate"
+    )
+    campaign.add_argument("--episodes", type=int, default=100_000)
+    campaign.add_argument("--seed", type=int, default=9)
+    campaign.add_argument("--model", type=Path, default=Path("models/m9-surrogate.json"))
+    campaign.add_argument("--output", required=True, type=Path)
+    replay_episode = commands.add_parser(
+        "monte-carlo-replay", help="rerun one campaign episode with full rendering"
+    )
+    replay_episode.add_argument("campaign", type=Path)
+    replay_episode.add_argument("--index", type=int, required=True)
+    replay_episode.add_argument("--calibration", type=Path,
+                                default=Path("datasets/m8-vbar/calibration.json"))
+    replay_episode.add_argument("--output", required=True, type=Path)
+    cases = commands.add_parser(
+        "basilisk-cases", help="write dynamics cross-check cases for tools/basilisk"
+    )
+    cases.add_argument("--output", required=True, type=Path)
+    crosscheck = commands.add_parser(
+        "basilisk-compare", help="compare rpod dynamics with Basilisk trajectories"
+    )
+    crosscheck.add_argument("--cases", required=True, type=Path)
+    crosscheck.add_argument("--basilisk", required=True, type=Path)
+    crosscheck.add_argument("--output", required=True, type=Path)
     args = parser.parse_args(argv)
     try:
         if args.command == "run":
@@ -81,9 +114,9 @@ def main(argv=None) -> int:
 
             print(f"Replay: {replay_run(args.directory, args.save_only).resolve()}")
         elif args.command == "benchmark":
-            from .benchmark import run_benchmark
+            from .benchmark import run_batch_benchmark, run_benchmark
 
-            run_benchmark(args.output)
+            (run_batch_benchmark if args.batch else run_benchmark)(args.output)
             print(f"Benchmark: {args.output.resolve()}")
         elif args.command == "camera-check":
             from .vision_eval import camera_check
@@ -118,6 +151,44 @@ def main(argv=None) -> int:
             evidence.parent.mkdir(exist_ok=True)
             shutil.copyfile(args.output / "report.json", evidence)
             print(f"{milestone} passed: {report['passed']}; report: {evidence.resolve()}")
+            return 0 if report["passed"] else 1
+        elif args.command == "fit-surrogate":
+            from .monte_carlo import fit_and_validate
+
+            model = fit_and_validate(args.suite, args.output, args.draws)
+            print(f"Surrogate: {args.output.resolve()}; validation passed: "
+                  f"{model['validation']['passed']}")
+            return 0 if model["validation"]["passed"] else 1
+        elif args.command == "monte-carlo":
+            import shutil
+
+            from .monte_carlo import run_campaign
+
+            report = run_campaign(args.output, args.episodes, args.seed, args.model)
+            evidence = Path("benchmarks") / "m9-monte-carlo.json"
+            evidence.parent.mkdir(exist_ok=True)
+            shutil.copyfile(args.output / "report.json", evidence)
+            low, high = report["success_fraction_95_interval"]
+            print(f"Success {report['success_fraction']:.5f} (95% interval {low:.5f}-{high:.5f}) "
+                  f"over {report['episodes']} episodes; report: {evidence.resolve()}")
+        elif args.command == "monte-carlo-replay":
+            from .monte_carlo import replay_episode
+
+            summary = replay_episode(args.campaign, args.index, args.calibration, args.output)
+            print(f"Rendered outcome: {summary['outcome']}; "
+                  f"report: {args.output.resolve() / 'summary.json'}")
+        elif args.command == "basilisk-cases":
+            from .crosscheck import basilisk_cases
+
+            basilisk_cases(args.output)
+            print(f"Cases: {args.output.resolve()}")
+        elif args.command == "basilisk-compare":
+            from .crosscheck import compare
+
+            report = compare(args.cases, args.basilisk, args.output)
+            for name, row in report["cases"].items():
+                print(f"{name}: position {row['max_position_m']:.2e} m, attitude "
+                      f"{row['max_attitude_rad']:.2e} rad, passed {row['passed']}")
             return 0 if report["passed"] else 1
         elif args.command == "showcase":
             from .showcase import render_showcase
