@@ -63,8 +63,8 @@ class ShowcaseRenderer(blender_worker.SceneRenderer):
         scene.cycles.denoising_use_gpu = False
         scene.cycles.denoising_quality = "FAST"
         scene.cycles.denoising_prefilter = "FAST"
-        scene.cycles.use_adaptive_sampling = True
-        scene.cycles.adaptive_threshold = 0.02
+        # The CPU denoiser takes about half of each frame; give it every core.
+        scene.render.threads_mode = "AUTO"
         scene.cycles.max_bounces = 6
         scene.cycles.diffuse_bounces = 2
         scene.cycles.glossy_bounces = 3

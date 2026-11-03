@@ -637,32 +637,45 @@ Runtime, on an unisolated desktop:
   - **Colour:** follows the Sun's elevation at the path midpoint. It is blue by day, orange to red through twilight, and black at night.
 - **Image settings:**
   - AgX view with the Medium High Contrast look, exposure +0.5, and Sun strength 4;
-  - 16 samples with adaptive sampling (threshold 0.02), then CPU OpenImageDenoise at fast quality and prefilter;
+  - 8 samples, then CPU OpenImageDenoise at fast quality and prefilter, on every CPU thread. Denoised, 8 samples differ from 16 by 39 dB PSNR over the frame and 33 dB on the target, which is not visible, at half the GPU time;
+  - no adaptive sampling: Cycles tests convergence only every 16 samples, so it never acts at these counts (with it on, 16-sample frames changed by at most 1 DN);
   - up to 6 bounces: 2 diffuse and 3 glossy.
 - **Every run uses this scene,** including simple-scene runs. A run from before M8 is filmed under its own recorded Sun, but its docking-camera inset shows the older images.
 
 `showcase.json` records the asset URLs, hashes and credits.
 
 **Camera rules.** Both shots use LVLH +radial as up and a 50° horizontal field of view at 1920×1080. Both take their normal side from the Sun: the sign of the toward-Sun normal component, so the camera sees the lit sides. In every suite episode the Sun is on the −along-track side.
-- **Wide shot** (`chase_camera`):
+- **Wide shot** (`chase_camera`), establishing both spacecraft over Earth for the first 30 s of the run (3 s of movie):
   - **Aim:** the midpoint of the two centers of mass.
   - **Direction from that midpoint**, in target LVLH: `normalize(0.25, −0.2, ±0.95)` (radial, along-track, normal). That is slightly above and behind the chaser, looking across the approach.
   - **Distance:** `max(1.5 × separation, 12 m)`.
-- **Close shot** (`close_camera`):
-  - **When:** the port gap falls below 11.5 m, until it rises above 12.5 m.
+- **Close shot** (`close_camera`), for the rest of the run, retreats included. In the wide shot the 1.1 m chaser is only 50–110 px across beside the 7 m target; here, 5.7 m from the camera, it stays about 400 px across at every gap:
   - **Position:** over the chaser's shoulder, at LVLH `(1.2, −5.0, ±2.4)` m from its center of mass.
-  - **Aim:** the target's docking port.
+  - **Aim:** midway between the directions to the chaser and to the target's docking port. Between 30 m and 5 m of port gap, the chaser's center stays near the lower-left third of the frame and the port near the upper-right third.
 
 Each frame places the target, chaser and Earth from recorded truth, with the Sun along `sunlight_direction_inertial`. Fast tests check:
 - the wide shot keeps both centers of mass inside the image with a 10% margin, at 30 m and 6.5 m separation;
 - the wide shot is on the sunlit normal side for both signs of the Sun's normal component, and Earth's center is below the image;
-- the close shot centres the port with the chaser in front of the camera;
+- the close shot keeps the chaser and the port inside the image with a 10% margin at 30 m and 1 m gaps, the chaser nearer, with Earth's center below the image;
 - plumes fire against the applied force.
 
 **Rendering:**
 - Every third tick is rendered, so each frame covers 0.3 s of simulated time. Rendering uses CUDA.
+- A second thread blooms, overlays and encodes each frame while Blender renders the next.
 - The video is 30 fps (9× real time) MPEG-4 Part 2 (`mp4v`). This OpenCV build cannot open an H.264 encoder.
-- At 1080p, M8 run `00` (694 frames) took a median 3.2 s per frame, 39 min in all. Run `29` (933 frames, wide shot throughout) took a median 4.5 s per frame, 70 min in all.
+- **Cost** at 1080p (GTX 1060 6 GB, i7-8700K): 2.0–2.8 s per frame, against 3.3 s with the earlier 16 samples.
+  - The cost grows as the target fills the close shot.
+  - Run `29` (933 frames, never nearer than 13 m) took 31 min.
+  - Run `00` (694 frames, to 5 m) took 28 min, against 39 min before.
+  - A run `29` frame splits into:
+    - about 0.9 s of GPU sampling, two thirds of it Earth's surface and the atmosphere shell;
+    - about 0.8 s for the CPU denoiser on all 12 threads (1.0 s on the base worker's 6);
+    - about 0.4 s for the BVH update and the PNG save.
+- **Tried without gain:**
+  - the OptiX denoiser (no faster);
+  - half-size Earth textures (no faster);
+  - fewer bounces (−1%);
+  - two Blender workers rendering alternate frames (−11%, at 4.9 of the GPU's 6 GB).
 
 **Overlay** (drawn by OpenCV on each clean render; sizes scale with the image height from a 720-line base):
 - **Bloom:** a soft glow on highlights: threshold 190, σ 9 px, gain 0.8.

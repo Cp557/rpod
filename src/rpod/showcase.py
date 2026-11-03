@@ -5,6 +5,7 @@ city lights, stars and thruster plumes added, under the run's own Sun. Nothing h
 physics, autonomy, or evaluation.
 """
 
+from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
 import time
@@ -27,13 +28,15 @@ VIEW = CameraModel(width=1920, height=1080, hfov_deg=50.0, camera_id="showcase")
 OFFSET_LVLH = np.array([0.25, -0.2, -0.95]) / np.linalg.norm([0.25, -0.2, -0.95])
 DISTANCE_PER_SEPARATION = 1.5
 MIN_DISTANCE_M = 12.0
-# Close shot, below CLOSE_GAP_M of port gap: over the chaser's shoulder at this LVLH offset
-# from its center of mass (normal sign as above), looking at the target's docking port.
+# Close shot, after the wide shot's first ESTABLISHING_S of the run: over the chaser's
+# shoulder at this LVLH offset from its center of mass (normal sign as above), aimed midway
+# between the chaser and the target's docking port.
 CLOSE_OFFSET_LVLH_M = np.array([1.2, -5.0, -2.4])
-CLOSE_GAP_M = (11.5, 12.5)  # enter below the first, leave above the second
+ESTABLISHING_S = 30.0
 TICKS_PER_FRAME = 3
 FPS = 30
-SAMPLES = 16
+# Denoised, 8 samples look the same as 16 at half the GPU time.
+SAMPLES = 8
 EXPOSURE = 0.5
 # A camera exposed for sunlit spacecraft would record neither stars nor city lights; these
 # keep them faint.
@@ -72,10 +75,13 @@ def chase_camera(target_n, chaser_n, basis_nl, sunlight_n):
 
 
 def close_camera(chaser_n, port_n, basis_nl, sunlight_n):
-    """Close shot: over the chaser's shoulder at the target's docking port, LVLH radial up."""
+    """Close shot: over the chaser's shoulder toward the target's docking port, LVLH radial
+    up, aimed midway between their directions so both stay in frame at any range."""
     offset = CLOSE_OFFSET_LVLH_M * [1, 1, _sun_side(basis_nl, sunlight_n)]
     position = np.asarray(chaser_n) + basis_nl @ offset
-    return position, _look(position, np.asarray(port_n), basis_nl[:, 0])
+    rays = [point - position for point in (np.asarray(chaser_n), np.asarray(port_n))]
+    aim = position + sum(ray / np.linalg.norm(ray) for ray in rays)
+    return position, _look(position, aim, basis_nl[:, 0])
 
 
 def plume_throttles(force_body_n, limit_n):
@@ -143,6 +149,12 @@ def _overlay(frame, inset, lines, close):
     return frame
 
 
+def _encode(writer, path, inset, lines, close):
+    """Bloom and overlay the clean render at `path`, then append it to the video."""
+    frame = _overlay(_bloom(read_rgb(path)), inset, lines, close)
+    writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+
+
 def render_showcase(run_dir, output, ticks=None):
     """Render `run_dir` to `output`/showcase.mp4; `ticks` defaults to every third tick."""
     run_dir = Path(run_dir)
@@ -169,11 +181,13 @@ def render_showcase(run_dir, output, ticks=None):
                              (VIEW.width, VIEW.height))
     if not writer.isOpened():
         raise OSError(f"cannot open video writer: {movie}")
-    started, render_seconds, shown, inset, close = time.perf_counter(), [], None, None, False
+    started, render_seconds, shown, inset, encoded = time.perf_counter(), [], None, None, None
     try:
-        with _ShowcaseRenderer(output) as renderer:
+        # One thread overlays and encodes each frame while Blender renders the next.
+        with _ShowcaseRenderer(output) as renderer, ThreadPoolExecutor(1) as encoder:
             for count, index in enumerate(ticks):
-                close = bool(gaps[index] < CLOSE_GAP_M[close])
+                time_ns = int(trajectory["tick"][index]) * manifest["dt_ns"]
+                close = time_ns / 1e9 >= ESTABLISHING_S
                 if close:
                     port_n = positions[index, 0] + rotations[index, 0] @ target_port_body
                     position_nc, rotation_nc = close_camera(positions[index, 1], port_n,
@@ -181,7 +195,6 @@ def render_showcase(run_dir, output, ticks=None):
                 else:
                     position_nc, rotation_nc = chase_camera(
                         positions[index, 0], positions[index, 1], basis[index], sunlight_n)
-                time_ns = int(trajectory["tick"][index]) * manifest["dt_ns"]
 
                 def pose(body):
                     return (rotation_nc.T @ rotations[index, body],
@@ -199,15 +212,19 @@ def render_showcase(run_dir, output, ticks=None):
                     image_path = captures[latest]["image_path"] if latest >= 0 else None
                     inset = None if image_path is None else read_rgb(run_dir / image_path)
                     shown = latest
-                frame = _overlay(_bloom(read_rgb(path)), inset, (
+                lines = (
                     run_dir.name,
                     f"T+ {time_ns / 1e9:6.1f} s",
                     f"Port gap {gaps[index]:5.1f} m",
                     f"Phase: {PHASE_NAMES[int(trajectory['phase'][index])]}",
-                ), close)
-                writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+                )
+                if encoded is not None:
+                    encoded.result()
+                encoded = encoder.submit(_encode, writer, path, inset, lines, close)
                 if count % 30 == 0:
                     print(f"frame {count + 1}/{len(ticks)}", flush=True)
+            if encoded is not None:
+                encoded.result()
             metadata = renderer.metadata
     finally:
         writer.release()
@@ -217,6 +234,7 @@ def render_showcase(run_dir, output, ticks=None):
         "purpose": "presentation only; not used by physics, autonomy, or evaluation",
         "camera": {key: VIEW.to_dict()[key] for key in ("width", "height", "hfov_deg", "K")},
         "wide_shot": {
+            "until_s": ESTABLISHING_S,
             "look_at": "midpoint of target and chaser centers of mass",
             "offset_direction_lvlh": OFFSET_LVLH,
             "normal_side": "sign of the toward-Sun LVLH normal component",
@@ -224,8 +242,8 @@ def render_showcase(run_dir, output, ticks=None):
             "distance_m": f"max({DISTANCE_PER_SEPARATION} * separation, {MIN_DISTANCE_M})",
         },
         "close_shot": {
-            "port_gap_m": {"enter_below": CLOSE_GAP_M[0], "leave_above": CLOSE_GAP_M[1]},
-            "offset_from_chaser_lvlh_m": CLOSE_OFFSET_LVLH_M, "look_at": "target docking port",
+            "from_s": ESTABLISHING_S, "offset_from_chaser_lvlh_m": CLOSE_OFFSET_LVLH_M,
+            "look_at": "midway between the directions to the chaser and the target docking port",
         },
         "assets": {name: {"url": url, "sha256": digest} for name, (url, digest) in ASSETS.items()},
         "credits": ASSET_CREDITS, "exposure": EXPOSURE, "star_strength": STAR_STRENGTH,

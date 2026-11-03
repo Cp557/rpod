@@ -32,19 +32,25 @@ class ChaseCameraFraming(unittest.TestCase):
                 earth_c = rotation_nc.T @ -position
                 self.assertGreater(earth_c[1], 0)
 
-    def test_close_shot_looks_past_the_chaser_at_the_target_port(self):
+    def test_close_shot_frames_chaser_before_the_target_port_at_any_range(self):
         scenario = make_approach_scenario("approach")
         target = np.asarray(scenario["initial_positions_m"][0])
         basis = relative_state(np.asarray(scenario["initial_positions_m"]),
                                np.asarray(scenario["initial_velocities_mps"]))[2]
         port = target - basis[:, 1]
-        chaser = port - 6.0 * basis[:, 1] - 0.5 * basis[:, 1]
-        position, rotation_nc = close_camera(chaser, port, basis, basis @ [0, 0.97, 0.25])
-        np.testing.assert_allclose(rotation_nc.T @ rotation_nc, np.eye(3), atol=1e-12)
-        points_c = (np.stack((port, chaser)) - position) @ rotation_nc
-        self.assertTrue(np.all(points_c[:, 2] > 0))
-        pixel = project_points(points_c[:1], np.eye(3), np.zeros(3), VIEW)[0]
-        np.testing.assert_allclose(pixel, [(VIEW.width - 1) / 2, (VIEW.height - 1) / 2], atol=1)
+        for gap in (30.0, 1.0):
+            with self.subTest(gap=gap):
+                chaser = port - (gap + 0.5) * basis[:, 1]
+                position, rotation_nc = close_camera(chaser, port, basis, basis @ [0, 0.97, 0.25])
+                np.testing.assert_allclose(rotation_nc.T @ rotation_nc, np.eye(3), atol=1e-12)
+                points_c = (np.stack((chaser, port)) - position) @ rotation_nc
+                self.assertTrue(np.all(points_c[:, 2] > 0))
+                self.assertLess(np.linalg.norm(points_c[0]), np.linalg.norm(points_c[1]))
+                pixels = project_points(points_c, np.eye(3), np.zeros(3), VIEW)
+                margin = 0.1 * np.array([VIEW.width, VIEW.height])
+                self.assertTrue(np.all(pixels > margin), pixels)
+                self.assertTrue(np.all(pixels < [VIEW.width, VIEW.height] - margin), pixels)
+                self.assertGreater((rotation_nc.T @ -position)[1], 0)
 
     def test_plumes_fire_against_the_applied_force(self):
         throttles = plume_throttles([1.0, -2.0, 0.0], 2.0)
