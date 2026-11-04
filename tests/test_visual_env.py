@@ -19,6 +19,7 @@ from rpod.approach import STATE_FIELDS, make_approach_scenario
 from rpod.camera import CameraModel
 from rpod.m5_suite import run_suite, suite_report, suite_specs
 from rpod.observations import ChaserCommand, Delivery, EnvObservation, LidarDelivery
+from rpod.policy import initial_parameters, save_policy
 from rpod.vision_records import json_value, read_jsonl
 from rpod.visual_agent import VisualAgent
 from rpod.visual_control import MissionSpec
@@ -318,11 +319,13 @@ class M5Suite(unittest.TestCase):
             initial["max_steps"] = 40
             return initial
 
-        for lidar, scene in ((False, "simple"), (True, "simple"), (False, "realistic")):
+        cases = ((False, "simple", "reference"), (True, "simple", "reference"),
+                 (False, "realistic", "reference"), (False, "realistic", "learned"))
+        for lidar, scene, controller in cases:
             specs = suite_specs(lidar=lidar, scene=scene)
             chosen = [specs[0], next(spec for spec in specs if spec["kind"] == "extended-loss")]
             with (
-                self.subTest(lidar=lidar, scene=scene),
+                self.subTest(lidar=lidar, scene=scene, controller=controller),
                 tempfile.TemporaryDirectory() as temporary,
                 redirect_stdout(io.StringIO()),
                 patch("rpod.m5_suite.suite_specs", return_value=chosen),
@@ -332,11 +335,14 @@ class M5Suite(unittest.TestCase):
             ):
                 output = Path(temporary) / "suite"
                 calibration = write_calibration(temporary, scene if scene != "simple" else None)
-                report = run_suite(output, calibration, lidar, scene)
+                policy = Path(temporary) / "policy.npy"
+                save_policy(policy, initial_parameters(3), {})
+                report = run_suite(output, calibration, lidar, scene, controller, policy)
                 self.assertEqual(suite_report(output), report)
                 self.assertTrue(report["gates"]["records_valid_and_uniform"])
                 self.assertFalse(report["passed"])
                 self.assertEqual(report.get("scene", "simple"), scene)
+                self.assertEqual("safety_filter_interventions" in report, controller == "learned")
                 self.assertEqual("lidar_pose_by_range" in report["categories"]["operational"],
                                  lidar)
                 self.assertEqual([row["id"] for row in report["failed_episodes"]],

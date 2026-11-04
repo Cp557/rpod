@@ -4,7 +4,7 @@ This document records implemented behavior. [OVERVIEW.md](OVERVIEW.md) describes
 
 ## Current implementation
 
-RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. Individual thrusters, fuel/mass depletion, environmental disturbances, natural-feature perception, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
+RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. M10 trains an approach policy in that fleet and flies it behind a runtime safety filter, scored on the same paired campaign and rendered suite as the reference controller; the learned rendered suite fails its fault gate on one abort episode. Individual thrusters, fuel/mass depletion, environmental disturbances, natural-feature perception, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
 
 The Rust `rpod-core` crate owns state and time. `rpod-python` exposes it through PyO3. Python defines scenarios, collects snapshots, derives relative state and diagnostics, and exports recordings. Physics has no renderer dependency.
 
@@ -286,7 +286,7 @@ The three uninterrupted approaches finish within 1.005× their paired oracle tim
 
 The official nominal feedback run took 362.2 wall-clock seconds for 208.4 simulated seconds, excluding its separately timed paired oracle. Its sampled Blender peak RSS was 266.2 MiB. Qualification cases ran in pairs on the same desktop, so these wall times describe that workload rather than an isolated renderer or real-time guarantee. Each run's summary preserves startup, per-render/request timing, sampled RSS, and total feedback-loop wall time.
 
-The current fast suite passes 58 Python tests and 18 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
+The current fast suite passes 61 Python tests and 18 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
 
 ### Schema 3 visual records
 
@@ -784,13 +784,105 @@ Every failure is two consecutive delivery rejections in the first 30 s, which ag
 
 The two RK4 integrations of the same equations agree to round-off, far inside the tolerances.
 
+## Learned approach control (M10)
+
+M10 replaces the reference translational law in approach with a learned policy behind a safety filter, trains it in the M9 fleet, and scores it on the same campaigns and rendered suite as the reference.
+
+**Hooks in frozen files, behavior unchanged.** M10 and M11 need plug-in points in five frozen files, added once:
+- `VisualController`: `_metrics(pair)`, `_reference_complete(reference)` and `_wrench(pair, metrics, reference, inputs)`, each defaulting to the inline code it replaced.
+- `VisualEnv`: `_renderer`, `_target_command`, `_scoring_metrics`, `_boundary`, `_physically_valid`, `_capture_due`, `_image_pose`, `_scan_ranges` and `_lidar_pose`.
+- `VisualAgent(..., controller=None, navigator=None)` and `run_episode(..., controller=None, env_class=VisualEnv, navigator=None)`.
+- `VisualNavigation` class attributes for its initialization priors and rotation process noise: `initial_velocity_sigma_mps` 0.1, `initial_rate_sigma_radps` 0.005, `rotation_spectral_density` 4e-8 and `acquisition_rotation_spectral_density` 2.5e-5, the former inline constants.
+- The 58 M9 Python tests, including the pre-refactor M4 trace digest, pass unchanged. Because the hashes changed, the realistic suite is re-run on this tree as `runs/m10-reference` (`--label m10-reference`), which is also the same-tree baseline for the learned controller.
+
+**Policy** (`policy.py`). A NumPy MLP, 13 → 64 → 64 → 3 with tanh hidden and output layers, 5,251 parameters.
+- Inputs, from onboard estimates: the port offset from the hold point at a 10 m scale and clipped at ±1 m, the port velocity at a 0.1 m/s scale and clipped at ±0.02 m/s, and the estimate age over 3 s.
+- Output: an LVLH relative acceleration of at most 0.01 m/s² per axis. `fleet.relative_force` adds the circular-LVLH transport terms and the exact gravity difference, as the reference law does, and rotates the force into chaser body axes.
+
+**Safety filter** (`safety_filter.py`), a simplex switch on estimates. Each control update predicts the port state 1 s ahead under the policy's acceleration (a double integrator; the compensated orbital terms move the chaser well under a millimetre). If the prediction leaves the safe set, the reference law's hold at the current gap replaces the policy's force for that period, and the intervention is counted. The safe set:
+- closing speed at most min(0.3, √(2 · 0.01 · (gap − goal + 0.25)) + 0.01) m/s, a braking envelope at half the chaser's thrust authority;
+- lateral port offset at most 0.5 m + 0.1 × gap;
+- gap at least the goal minus 0.25 m.
+
+**Controllers** (`learned_control.py`). `LearnedController` (one episode) and `LearnedFleetController` (vectorized; one policy, or one per group of episodes during training) keep the reference supervisor and attitude law. In approach (phase 1) the policy and filter set the force, and onboard completion no longer waits for the reference gap profile; braking, retreat and acquisition use the reference law. A test holds the two equal tick by tick, including interventions.
+
+**Training** (`train_policy.py`, `rpod train-policy`). OpenAI evolution strategies in the fleet with the M9 surrogate:
+- 64 antithetic pairs (128 candidates), σ 0.02, Adam at 0.01 with weight decay 0.005, centered-rank fitness;
+- each generation draws 16 fresh episodes (campaign seed 10) that every candidate flies, with the same surrogate noise for all (common random numbers); episodes stop at 300 s;
+- fitness per episode: a success scores 1, plus up to 1 for speed, minus Δv in m/s. A failure scores below −1, lower the farther (log scale from 5 cm) and faster it ended from the hold point and after an abort, and higher for time spent inside the onboard completion envelope. Every safety-filter intervention costs 0.002;
+- every 10 generations the mean policy flies 1,024 validation episodes (seed 11); the best is saved to `models/m10-policy.npy`, with its configuration, hashes and learning curve in `models/m10-policy.json`.
+- Training and validation seeds are disjoint from the M9 campaign (seed 9) and the suites (1000 + index).
+
+```powershell
+.\.venv\Scripts\rpod.exe train-policy --output models/m10-policy.npy --generations 300
+.\.venv\Scripts\rpod.exe monte-carlo --controller learned --episodes 100000 --seed 9 --output runs/m10-monte-carlo
+.\.venv\Scripts\rpod.exe m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --output runs/m10-reference --label m10-reference
+.\.venv\Scripts\rpod.exe m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --controller learned --output runs/m10-learned --label m10-learned
+```
+
+A learned campaign uses the M9 campaign's episodes (seed 9), so the two are paired; its `campaign.json` adds the policy's hash and the hashes of `IMPLEMENTATION_FILES` (policy, filter, controllers and fleet). Campaigns now also record each episode's safety-filter interventions and the ticks in approach whose true port state lies outside the safe set, for either controller. A learned suite records the policy's and implementation hashes in `suite.json` and in every episode manifest (`learned_controller`, which the uniform-records gate checks against the suite), and the filter's interventions per episode.
+
+### M10 results
+
+**Training** (`models/m10-policy.npy`, provenance and learning curve in `models/m10-policy.json`): 300 generations in 110 min on the 6-core desktop. Validation success rose from 0 to 99.9% between generations 30 and 40. Safety-filter interventions, up to 187 per episode early on, fell to zero by generation 70; training then shortened the approach and cut Δv. Generation 290 was kept.
+
+| Generation | Validation success | Median completion | Median Δv | Interventions per episode |
+| --- | --- | --- | --- | --- |
+| 0 | 0% | — | — | 4.4 |
+| 40 | 99.9% | 220.2 s | 0.878 m/s | 32.9 |
+| 70 | 100% | 209.7 s | 0.527 m/s | 0 |
+| 150 | 100% | 172.9 s | 0.457 m/s | 0 |
+| 290 (kept) | 100% (1,024 of 1,024) | 171.0 s | 0.426 m/s | 0 |
+
+**Paired campaign** (`runs/m10-monte-carlo`, `benchmarks/m10-monte-carlo.json`): the M9 campaign's 100,000 episodes and surrogate noise (seed 9), flown by the learned controller. The reference campaign was rerun on this tree (`runs/m10-reference-monte-carlo`): its 10 per-episode arrays and failure list are identical to M9's, and a second learned run reproduced the first exactly.
+
+| Result | Reference | Learned |
+| --- | --- | --- |
+| Success | 99,932 (99.914–99.947%) | 99,932 (99.914–99.947%) |
+| Failures | 68, all `navigation_lost` | the same 68 episodes, ending at the same ticks |
+| Completion time (successes) | median 210.2 s, P99 228.6 s | median 171.2 s, P99 177.2 s |
+| Δv (successes) | median 0.365 m/s, P99 0.464 m/s | median 0.428 m/s, P99 0.496 m/s |
+| Minimum port gap | 4.920 m | 4.966 m |
+| Final port speed (successes) | at most 3.4 mm/s | at most 2.8 mm/s |
+| Episodes that braked | 13,319 | 13,319 (the same count in every episode) |
+| Safety-filter interventions | — | 0 |
+| Ticks with the true port state outside the safe set | 0 | 0 |
+
+- Episode by episode, the learned controller finishes earlier in every success (by 35.5–53.6 s, median 39.0 s) and uses more Δv in every one (median 0.061 m/s more).
+- The failures do not depend on the controller. The surrogate draws rejections by time since the first estimate, not by state, so the same consecutive rejections end the same 68 episodes 12.1–45.1 s in, when the estimate ages past 3 s. Braking follows the same rejections, so both controllers brake identically.
+- The campaign never touches the filter's envelope, so it does not exercise the filter; training did.
+
+**Requalification** (`runs/m10-reference`, `benchmarks/m10-reference-evaluation.json`): the realistic suite on the hooked tree passes all three gates and reproduces M8's 40 outcomes, simulated durations, accepted-image counts and delivery counts exactly.
+- 18 episodes reproduce M8's trajectories exactly. In the other 22, final gap and port speed differ from M8 by at most 0.8 mm and 0.17 mm/s.
+- Each of those 22 first differs at a rendered image whose pose estimate differs, and the trajectory follows from the next tick; none differs in control first. 21 of those images differ from M8's by 1 DN in at most nine pixels, the CUDA variation measured in M8. The other (episode 02, capture 160) differs by up to 247 DN along two one-pixel columns at the bus's side edges, and moved the pose estimate by 0.02 µm.
+- Wall time was 4.1 h against M8's 2.6 h because the M11 keypoint dataset rendered on the same GPU throughout.
+
+**Learned rendered suite** (`runs/m10-learned`, `benchmarks/m10-learned-evaluation.json`): `--controller learned` passes the operational and integrity gates and fails the fault gate. All 40 records are valid with uniform hashes, and the filter never intervened. The run was stopped after episode 21 and resumed with the same command.
+
+| Category | Reference (`runs/m10-reference`) | Learned |
+| --- | --- | --- |
+| Operational | 28/28 success at 205–234 s; completion 1.004× the paired oracle (median); final gap 4.989–5.002 m; Δv median 0.369 m/s | 28/28 success at 166–175 s; completion 0.821× the oracle (median); final gap 4.972–4.978 m; final port speed ≤ 0.0021 m/s; minimum port gap 4.972 m; Δv median 0.425 m/s |
+| Fault: abort | 2/2 retreated | `28` retreated at 213 s; `29` ended `false_completion` at 251 s |
+| Fault: dropped frame | brake, reacquisition 2.0 s later; success at 271 and 265 s; minimum port gap 4.46 and 4.57 m | brake, reacquisition 2.0 s later; success at 170 and 173 s; minimum port gap 4.99 and 4.98 m |
+| Fault: extended loss | `navigation_lost` at 55.1 and 42.1 s | the same |
+| Stress | 6/6 success at 205–245 s | 6/6 success at 167–175 s |
+
+- **Time and Δv:** episode by episode, the learned controller finishes every operational success earlier, by 36–60 s (median 39 s). It uses more Δv in every one, by 0.012–0.080 m/s (median 0.059), as in the campaign. Δv here sums the applied chaser force over each episode.
+- **The false completion (`29`):**
+  - The learned approach is faster, so the abort request comes at 102.5 s instead of 131.3 s. The retreat to 30 m then runs the reference law in both runs.
+  - Both retreats stop about 0.2 m short of the hold point in truth, because the camera's range estimate at 30 m reads about 0.2 m long. The 0.2 m physical tolerance leaves no margin for that bias.
+  - Through the 10 s onboard dwell, the reference's true distance from the hold point stayed at 0.17–0.19 m. The learned run's straddled 0.19–0.21 m, so its onboard dwell completed while the physical dwell never did.
+  - The failure comes from the retreat's estimate bias against its tolerance, which the learned approach's different abort conditions exposed. It was reported rather than tuned away.
+- **Wall time** was 2.8 h over two sessions, with other jobs sharing the machine.
+
 ## Source layout and generated output
 
 - `crates/rpod-core`: native dynamics and Rust acceptance tests.
 - `crates/rpod-python`: PyO3 interface and compiler provenance.
 - `crates/rpod-core/src/batch.rs`, `metrics.rs`: the batched engine and pair metrics (M9).
-- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`).
-- `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`).
+- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`); M10 policy (`policy.py`), safety filter (`safety_filter.py`), learned controllers (`learned_control.py`) and evolution-strategies training (`train_policy.py`).
+- `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`; the M10 policy `m10-policy.npy` with `m10-policy.json`).
+- `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure).
 - `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases.
 - `tests`: Python integration and contract checks; `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
 

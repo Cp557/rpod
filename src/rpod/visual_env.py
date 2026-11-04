@@ -70,8 +70,6 @@ class VisualEnv:
             self.renderer.__exit__(*exc)
 
     def reset(self, initial, output) -> EnvObservation | None:
-        from .rendering import BlenderRenderer, realistic_scene
-
         self.__exit__(None, None, None)
         self.engine = None
         self.initial, self.output = initial, Path(output)
@@ -92,8 +90,7 @@ class VisualEnv:
         if self.lidar:
             (self.output / "lidar").mkdir(exist_ok=True)
         self.realistic = initial.get("scene") == "realistic"
-        self.renderer = BlenderRenderer(self.output, camera=self.camera,
-                                        scene=realistic_scene() if self.realistic else None)
+        self.renderer = self._renderer()
         self.renderer.__enter__()
         self._entered = True
         return self._observe()
@@ -111,7 +108,7 @@ class VisualEnv:
             raise ValueError(f"unknown chaser claim: {command.claim!r}")
         snapshot, tick = self.snapshot, int(self.snapshot.tick)
         valid = {claim: dwell.update(snapshot.time_ns,
-                                     _physical_valid(self.metrics, self.goals[claim]))
+                                     self._physically_valid(self.metrics, self.goals[claim]))
                  for claim, dwell in self.dwells.items()}
         if command.claim in valid and not valid[command.claim]:
             self._finish("false_completion", "physical_dwell_failed")
@@ -120,7 +117,7 @@ class VisualEnv:
             self._finish(command.claim or "time_limit")
             return None
         if tick % self.initial["control_period_ticks"] == self.initial["control_offset_ticks"]:
-            self.target_torque = _target_torque(snapshot, self.initial)
+            self.target_torque = self._target_command(snapshot)
         forces = np.array([np.zeros(3), force])
         torques = np.array([self.target_torque, torque])
         try:
@@ -159,14 +156,14 @@ class VisualEnv:
     def _observe(self):
         snapshot = self.engine.snapshot()
         own = self._record(snapshot)
-        self.snapshot, self.metrics = snapshot, state_metrics(snapshot, self.initial)
-        reason = _hard_guard(self.metrics)
+        self.snapshot, self.metrics = snapshot, self._scoring_metrics(snapshot)
+        reason = self._boundary(snapshot, self.metrics)
         if reason:
             self.events.append({"tick": snapshot.tick, "time_ns": snapshot.time_ns,
                                 "kind": "physical_boundary", "reason": reason})
             self._finish("physical_violation", reason)
             return None
-        if snapshot.tick % self.initial["camera_period_ticks"] == 0:
+        if self._capture_due(snapshot):
             self._capture(snapshot, own)
         if self.lidar and snapshot.tick % self.lidar.period_ticks == self.lidar.offset_ticks:
             self._scan(snapshot, own)
@@ -177,7 +174,7 @@ class VisualEnv:
                 raise ValueError("attempted delivery of a future image")
             if image.pixels is not None:
                 started = perf_counter()
-                pose = estimate_pose(image, self.camera)
+                pose = self._image_pose(image)
                 self.perception_seconds.append(perf_counter() - started)
             else:
                 pose = PoseEstimate(image.capture_time_ns, image.delivery_time_ns, False,
@@ -189,7 +186,7 @@ class VisualEnv:
         while self.lidar_pending and self.lidar_pending[0][0].delivery_time_ns <= snapshot.time_ns:
             scan, captured_own, row = self.lidar_pending.pop(0)
             started = perf_counter()
-            pose = estimate_lidar_pose(scan, self.lidar)
+            pose = self._lidar_pose(scan)
             self.lidar_seconds.append(perf_counter() - started)
             row.update({"actual_delivery_time_ns": snapshot.time_ns,
                         "pose_estimate": json_value(pose)})
@@ -241,7 +238,7 @@ class VisualEnv:
             own, snapshot.positions_m[0], snapshot.quaternions_xyzw[0], lidar
         )
         rng = np.random.default_rng([*initial["lidar"]["noise_seed"], capture_id])
-        ranges, retro = scan_target(rotation_lt, translation_lt, lidar, rng)
+        ranges, retro = self._scan_ranges(rotation_lt, translation_lt, rng)
         scan_path = self.output / "lidar" / f"{capture_id:06d}.npz"
         np.savez_compressed(scan_path, ranges_m=ranges, retroreflective=retro)
         row = {"capture_id": capture_id, "capture_time_ns": snapshot.time_ns,
@@ -254,3 +251,35 @@ class VisualEnv:
         self.lidar_pending.append(
             (LidarScan(capture_id, snapshot.time_ns, scheduled, ranges, retro), own, row)
         )
+
+    # Hooks for environment variants; the defaults are the cooperative-target environment.
+
+    def _renderer(self):
+        from .rendering import BlenderRenderer, realistic_scene
+
+        return BlenderRenderer(self.output, camera=self.camera,
+                               scene=realistic_scene() if self.realistic else None)
+
+    def _target_command(self, snapshot):
+        return _target_torque(snapshot, self.initial)
+
+    def _scoring_metrics(self, snapshot):
+        return state_metrics(snapshot, self.initial)
+
+    def _boundary(self, snapshot, metrics):
+        return _hard_guard(metrics)
+
+    def _physically_valid(self, metrics, goal):
+        return _physical_valid(metrics, goal)
+
+    def _capture_due(self, snapshot):
+        return snapshot.tick % self.initial["camera_period_ticks"] == 0
+
+    def _image_pose(self, image):
+        return estimate_pose(image, self.camera)
+
+    def _scan_ranges(self, rotation_lt, translation_lt, rng):
+        return scan_target(rotation_lt, translation_lt, self.lidar, rng)
+
+    def _lidar_pose(self, scan):
+        return estimate_lidar_pose(scan, self.lidar)

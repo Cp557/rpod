@@ -5,6 +5,7 @@ the batched engine with the fleet autonomy and a fitted surrogate, and reports o
 counts with a Clopper-Pearson interval. Any episode can be replayed as a full rendered run.
 """
 
+from collections import namedtuple
 import json
 import math
 from pathlib import Path
@@ -32,6 +33,15 @@ def campaign_spec(seed, index, scene="realistic"):
         "streams": {"conditions": [seed, index, 1], "image_noise": [seed, index, 3]},
         "scene": scene,
     }
+
+
+# What a campaign flies: its seeded episode specs, their initial states, the fleet controller
+# and the environment scoring.
+Scenario = namedtuple("Scenario", "name spec initial_state controller scoring")
+OPERATIONAL = Scenario("operational", campaign_spec, episode_initial_state,
+                       fleet.FleetController, fleet.Scoring)
+SCOPES = {"operational": "M5 operational distribution",
+          "tumbling": "M5 operational distribution against the free-tumbling M11 target"}
 
 
 def _betai(a, b, x):
@@ -82,14 +92,16 @@ def _quantiles(values):
                     np.quantile(values, QUANTILES).tolist()))
 
 
-def run_batch(specs, model, seed, controller=None, threads=0, record=False):
+def run_batch(specs, model, seed, controller=None, threads=0, record=False,
+              scenario=OPERATIONAL):
     """Run campaign specs in one fleet batch with surrogate navigation."""
-    initials = [episode_initial_state(spec) for spec in specs]
+    initials = [scenario.initial_state(spec) for spec in specs]
     navigation = SurrogateNavigation(model, len(specs), initials[0]["dt_ns"], seed, record)
     mission = MissionSpec()
-    controller = controller or fleet.FleetController(
+    controller = controller or scenario.controller(
         mission, len(specs), abort_gaps_m=[spec["abort_gap_m"] or np.nan for spec in specs])
-    result = fleet.run_fleet(initials, mission, navigation, controller, threads)
+    result = fleet.run_fleet(initials, mission, navigation, controller, threads,
+                             scenario.scoring(mission))
     result["completion_time_s"] = result["end_tick"] * initials[0]["dt_ns"] / 1e9
     return result, navigation
 
@@ -100,9 +112,9 @@ def campaign_report(config, results, wall_seconds):
     count, successes = len(outcomes), int(success.sum())
     return json_value({
         "artifact_type": "monte_carlo_report", "campaign": config, "episodes": count,
-        "scope": ("M5 operational distribution with a noisy-state navigation surrogate fitted to "
-                  "rendered realistic-scene records; reference autonomy in the batched engine; "
-                  "not image-based navigation"),
+        "scope": (f"{SCOPES[config['scenario']]} with a noisy-state navigation surrogate "
+                  f"fitted to rendered realistic-scene records; {config['controller']} controller "
+                  "in the batched engine; not image-based navigation"),
         "outcomes": {fleet.OUTCOMES[code]: int((outcomes == code).sum())
                      for code in np.unique(outcomes)},
         "success_fraction": successes / count,
@@ -113,6 +125,12 @@ def campaign_report(config, results, wall_seconds):
         "minimum_com_range_m": _quantiles(results["minimum_com_range_m"]),
         "final_port_speed_mps": _quantiles(results["final_port_speed_mps"][success]),
         "episodes_with_brakes": int((results["brakes"] > 0).sum()),
+        "safety_filter_interventions": {
+            "episodes_with_any": int((results["interventions"] > 0).sum()),
+            "per_episode": _quantiles(results["interventions"])},
+        "true_state_outside_safe_set": {
+            "episodes_with_any": int((results["envelope_violation_ticks"] > 0).sum()),
+            "ticks_per_episode": _quantiles(results["envelope_violation_ticks"])},
         "maximum_brakes": int(results["brakes"].max()),
         "abort_reasons": {fleet.ABORT_REASONS[code]: int((results["abort_reason"] == code).sum())
                           for code in np.unique(results["abort_reason"]) if code},
@@ -123,7 +141,8 @@ def campaign_report(config, results, wall_seconds):
 
 
 def run_campaign(output, count, seed, model_path, batch_size=16384, threads=0,
-                 controller_factory=None, label="reference"):
+                 controller_factory=None, label="reference", provenance=None,
+                 scenario=OPERATIONAL):
     """Run a campaign and write campaign.json, episodes.npz, failures.jsonl and report.json.
 
     `controller_factory(mission, count)` builds a fleet controller; the reference by default.
@@ -133,6 +152,8 @@ def run_campaign(output, count, seed, model_path, batch_size=16384, threads=0,
     source = Path(__file__).parent
     config = {
         "seed": seed, "episodes": count, "batch_size": batch_size, "controller": label,
+        "scenario": scenario.name,
+        **(provenance or {}),
         "model": model_path.as_posix(), "model_sha256": sha256_file(model_path),
         "implementation_sha256": {name: sha256_file(source / name) for name in (
             "fleet.py", "surrogate.py", "monte_carlo.py")},
@@ -140,15 +161,17 @@ def run_campaign(output, count, seed, model_path, batch_size=16384, threads=0,
     write_json(output / "campaign.json", config)
     started, parts = perf_counter(), []
     for first in range(0, count, batch_size):
-        specs = [campaign_spec(seed, index) for index in range(first, min(first + batch_size, count))]
+        specs = [scenario.spec(seed, index)
+                 for index in range(first, min(first + batch_size, count))]
         controller = controller_factory(MissionSpec(), len(specs)) if controller_factory else None
-        result, _ = run_batch(specs, model, [seed, first], controller, threads)
+        result, _ = run_batch(specs, model, [seed, first], controller, threads,
+                              scenario=scenario)
         parts.append(result)
         done = first + len(specs)
         print(f"{done}/{count} episodes, {perf_counter() - started:.0f} s", flush=True)
     keys = ("outcome", "end_tick", "completion_time_s", "minimum_port_gap_m",
             "minimum_com_range_m", "final_port_speed_mps", "final_gap_m", "delta_v_mps",
-            "brakes", "abort_reason")
+            "brakes", "abort_reason", "interventions", "envelope_violation_ticks")
     results = {key: np.concatenate([part[key] for part in parts]) for key in keys}
     wall = perf_counter() - started
     np.savez_compressed(output / "episodes.npz", **results)
@@ -156,7 +179,7 @@ def run_campaign(output, count, seed, model_path, batch_size=16384, threads=0,
         for index in np.flatnonzero(results["outcome"] != fleet.SUCCESS):
             stream.write(json.dumps({"index": int(index),
                                      "outcome": fleet.OUTCOMES[results["outcome"][index]],
-                                     "spec": campaign_spec(seed, int(index))}) + "\n")
+                                     "spec": scenario.spec(seed, int(index))}) + "\n")
     report = campaign_report(config, results, wall)
     write_json(output / "report.json", report)
     return report
@@ -171,7 +194,8 @@ def replay_episode(campaign, index, calibration_path, output):
                        Path(calibration_path), output, paired_baseline=True)
 
 
-def validate_surrogate(suite_directory, model, draws=200, seed=0, held_out_half=1):
+def validate_surrogate(suite_directory, model, draws=200, seed=0, held_out_half=1,
+                       scenario=OPERATIONAL):
     """Compare the surrogate fleet with the rendered suite it was fitted to.
 
     Each of the 28 operational episodes runs `draws` times; per metric, at least 25 rendered
@@ -182,7 +206,7 @@ def validate_surrogate(suite_directory, model, draws=200, seed=0, held_out_half=
     suite = json.loads((suite_directory / "suite.json").read_text(encoding="utf-8"))
     specs = [spec for spec in suite["episodes"] if spec["category"] == "operational"]
     result, navigation = run_batch([spec for spec in specs for _ in range(draws)], model, seed,
-                                   record=True)
+                                   record=True, scenario=scenario)
     rendered = []
     for spec in specs:
         path = suite_directory / "episodes" / spec["id"]
@@ -228,10 +252,13 @@ def validate_surrogate(suite_directory, model, draws=200, seed=0, held_out_half=
     }
 
 
-def fit_and_validate(suite_directory, output, draws=200):
+def fit_and_validate(suite_directory, output, draws=200, scenario=OPERATIONAL,
+                     failures="deliveries"):
     """Validate the fitting procedure on half the suite, then fit the model on all of it."""
-    validation = validate_surrogate(suite_directory, fit_surrogate(suite_directory, half=0), draws)
-    model = fit_surrogate(suite_directory)
+    validation = validate_surrogate(
+        suite_directory, fit_surrogate(suite_directory, half=0, failures=failures), draws,
+        scenario=scenario)
+    model = fit_surrogate(suite_directory, failures=failures)
     model["validation"] = {
         "procedure": ("fitted on half 0 of the operational episodes; rendered outcome metrics "
                       "of all 28 compared with surrogate bands; errors compared with half 1"),

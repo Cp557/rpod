@@ -123,6 +123,21 @@ class VisualController:
         inertia = np.asarray(self.mission.inertias_kg_m2[1])
         return inertia * alpha + np.cross(omega, inertia * omega)
 
+    def _metrics(self, pair):
+        """Port and attitude metrics of the estimated pair, in target LVLH."""
+        return state_metrics(pair, self.mission.controller_config())
+
+    def _reference_complete(self, reference):
+        """Completion waits for the gap profile to reach its goal at rest."""
+        return reference[0] == self.goal and reference[1] == 0
+
+    def _wrench(self, pair, metrics, reference, inputs):
+        """The reference law's chaser force and torque."""
+        forces, torques = commanded_wrench(
+            pair, self.mission.controller_config(), metrics, reference
+        )
+        return forces[1], torques[1]
+
     def update(self, inputs: ChaserInputs) -> ControlDecision:
         now, mission = inputs.time_ns, self.mission
         if inputs.own.time_ns != now:
@@ -142,7 +157,7 @@ class VisualController:
                            "tick": now // mission.dt_ns})
 
         pair = estimated_pair(inputs) if inputs.target is not None else None
-        metrics = state_metrics(pair, mission.controller_config()) if pair is not None else None
+        metrics = self._metrics(pair) if pair is not None else None
         if (inputs.visual_update is True and inputs.target is not None
                 and (self.last_capture_ns is None
                      or inputs.target.capture_time_ns > self.last_capture_ns)):
@@ -203,7 +218,7 @@ class VisualController:
             self.phase in (1, 2) and metrics is not None
             and inputs.target.health == "fresh"
             and now - inputs.target.capture_time_ns <= 1_200_000_000
-            and reference[0] == self.goal and reference[1] == 0
+            and self._reference_complete(reference)
             and np.linalg.norm(metrics["port_r"] - [0, -self.goal, 0]) <= 0.1
             and np.linalg.norm(metrics["port_v"]) <= 0.01
             and metrics["alignment_deg"] <= 1
@@ -218,10 +233,7 @@ class VisualController:
                 self.force = np.zeros(3)
                 self.torque = self._own_attitude_torque(inputs.own)
             else:
-                forces, torques = commanded_wrench(
-                    pair, mission.controller_config(), metrics, reference
-                )
-                self.force, self.torque = forces[1], torques[1]
+                self.force, self.torque = self._wrench(pair, metrics, reference, inputs)
         achieved = (now - self.dwell.started_ns
                     if self.dwell.started_ns is not None else 0)
         return ControlDecision(

@@ -441,14 +441,17 @@ def sunlight_direction(initial):
 
 
 def run_episode(initial, mission, calibration, calibration_path, output,
-                paired_baseline=False, qualify=None) -> dict:
+                paired_baseline=False, qualify=None, controller=None,
+                env_class=VisualEnv, navigator=None) -> dict:
     """Drive the reference client through the environment; save the actual delivered data.
 
     `qualify(summary, trajectory, observations, estimates, events)` may add summary fields.
+    `controller` and `navigator` replace the client's `VisualController` and filter, and
+    `env_class` the environment.
     """
     camera = camera_from_settings(calibration.get("camera", {}))
     lidar = LidarModel(**initial["lidar"]["model"]) if initial.get("lidar") else None
-    agent = VisualAgent(mission, camera, calibration, lidar)
+    agent = VisualAgent(mission, camera, calibration, lidar, controller, navigator)
     output = new_output(output)
     shutil.copyfile(calibration_path, output / "calibration.json")
     initial.update({
@@ -498,7 +501,7 @@ def run_episode(initial, mission, calibration, calibration_path, output,
         })
     initial["sunlight_direction_inertial"] = sunlight_direction(initial).tolist()
     baseline = paired_truth_baseline(initial, mission) if paired_baseline else None
-    env = VisualEnv(camera)
+    env = env_class(camera)
     autonomy_seconds = []
     started = perf_counter()
     try:

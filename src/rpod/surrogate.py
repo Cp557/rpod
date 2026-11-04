@@ -53,9 +53,10 @@ def apply_errors(truth, errors):
     ], axis=-1)
 
 
-def episode_samples(directory):
+def episode_samples(directory, failures="deliveries"):
     """Estimate errors at control deliveries while tracking, with their range and time keys,
-    and the episode's delivered and rejected camera captures."""
+    and the episode's failures: rejected camera deliveries, or with `failures="updates"`
+    the control ticks whose `visual_update` was False (what a multi-sensor agent brakes on)."""
     manifest, trajectory, _, observations, estimates, _ = _load_visual(directory)
     states = np.concatenate([trajectory[key] for key in (
         "positions_m", "velocities_mps", "quaternions_xyzw", "angular_velocities_body_radps",
@@ -70,6 +71,13 @@ def episode_samples(directory):
     truth = states[ticks]
     delivered = [row for row in observations if row.get("pose_estimate") is not None
                  and row["pose_estimate"].get("reason") != "missing_capture"]
+    if failures == "updates":
+        delivery_ns = manifest["delivery_delay_ticks"] * manifest["dt_ns"]
+        delivered = [{"capture_time_ns": tick * manifest["dt_ns"] - delivery_ns,
+                      "navigation_accepted": row["visual_update"]}
+                     for tick, row in enumerate(estimates)
+                     if tick % 10 == 2 and row["visual_update"] is not None
+                     and tick * manifest["dt_ns"] - delivery_ns >= first]
     return {
         "ticks": np.asarray(ticks),
         "errors": estimate_errors(truth[:, 0], estimate),
@@ -113,12 +121,13 @@ def half_specs(suite, half=None):
             and (half is None or (spec["index"] // 2) % 2 == half)]
 
 
-def fit_surrogate(suite_directory, half=None):
+def fit_surrogate(suite_directory, half=None, failures="deliveries"):
     """Fit on a recorded suite's operational episodes, or on one half (`half_specs`)."""
     suite_directory = Path(suite_directory)
     suite = json.loads((suite_directory / "suite.json").read_text(encoding="utf-8"))
     specs = half_specs(suite, half)
-    samples = [episode_samples(suite_directory / "episodes" / spec["id"]) for spec in specs]
+    samples = [episode_samples(suite_directory / "episodes" / spec["id"], failures)
+               for spec in specs]
     pooled = {key: np.concatenate([sample[key] for sample in samples])
               for key in ("errors", "range_m", "seconds", "delivery_seconds", "rejected")}
     model = {
@@ -128,7 +137,7 @@ def fit_surrogate(suite_directory, half=None):
                   "Bernoulli delivery rejection"),
         "source_suite": suite_directory.as_posix(),
         "source_suite_sha256": sha256_file(suite_directory / "suite.json"),
-        "source_episodes": [spec["id"] for spec in specs],
+        "source_episodes": [spec["id"] for spec in specs], "failures": failures,
         "implementation_sha256": sha256_file(Path(__file__)),
         "samples": len(pooled["errors"]),
         "position_velocity": {"key": "com_range_m", "edges": RANGE_EDGES_M,
@@ -164,8 +173,8 @@ class SurrogateNavigation:
     captures at whole seconds, delivered 0.2 s later, rejected with the fitted probability
     for the time since the first estimate."""
 
-    def __init__(self, model, count, dt_ns, seed, record=False):
-        self.model, self.dt_ns = model, dt_ns
+    def __init__(self, model, count, dt_ns, seed, record=False, groups=1):
+        self.model, self.dt_ns, self.groups = model, dt_ns, groups
         self.rng = np.random.default_rng(seed)
         self.phi = np.asarray(model["lag1_correlation"])
         self.started = np.zeros(count, bool)
@@ -176,6 +185,12 @@ class SurrogateNavigation:
         self.errors = np.zeros((count, 12))
         self.recorded = [] if record else None
 
+    def _draw(self, sampler, shape):
+        """Random draws, repeated for each of `groups` equal consecutive blocks of episodes,
+        so candidates compared in training see the same navigation noise."""
+        draws = sampler((shape[0] // self.groups, *shape[1:]))
+        return np.tile(draws, (self.groups,) + (1,) * (len(shape) - 1))
+
     def update(self, tick, states, active):
         time_ns = tick * self.dt_ns
         visual = np.full(len(states), NO_UPDATE)
@@ -184,8 +199,8 @@ class SurrogateNavigation:
             since_first = np.where(self.started, (capture_ns - self.first_ns) / 1e9, 0.0)
             rejection = np.asarray(self.model["rejection"]["probability"])[
                 np.digitize(since_first, TIME_EDGES_S)]
-            accepted = active & (self.rng.random(len(states)) >= rejection)
-            noise = self.rng.standard_normal(self.residual.shape)
+            accepted = active & (self._draw(self.rng.random, (len(states),)) >= rejection)
+            noise = self._draw(self.rng.standard_normal, self.residual.shape)
             first = accepted & ~self.started
             self.started |= accepted
             self.first_ns[first] = capture_ns

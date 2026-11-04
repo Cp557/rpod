@@ -17,10 +17,12 @@ class VisualAgent:
     With a lidar model, lidar poses update the same filter as camera poses.
     """
 
-    def __init__(self, mission, camera, calibration, lidar=None):
-        self.navigator = (VisualNavigation(camera=camera, calibration=calibration)
-                          if lidar is None else LidarNavigation(camera, calibration, lidar))
-        self.controller = VisualController(mission)
+    def __init__(self, mission, camera, calibration, lidar=None, controller=None,
+                 navigator=None):
+        self.navigator = navigator or (
+            VisualNavigation(camera=camera, calibration=calibration)
+            if lidar is None else LidarNavigation(camera, calibration, lidar))
+        self.controller = controller or VisualController(mission)
         self.decision = None
         self.phase, self.desired_gap_m, self.control_update = [], [], []
         self.estimates, self.events, self.accepted, self.lidar_accepted = [], [], {}, {}

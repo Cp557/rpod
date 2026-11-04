@@ -62,6 +62,9 @@ def main(argv=None) -> int:
     suite.add_argument("--output", required=True, type=Path)
     suite.add_argument("--lidar", action="store_true", help="add the flash lidar and fuse it")
     suite.add_argument("--scene", choices=("simple", "realistic"), default="simple")
+    suite.add_argument("--controller", choices=("reference", "learned"), default="reference")
+    suite.add_argument("--policy", type=Path, default=Path("models/m10-policy.npy"))
+    suite.add_argument("--label", help="evidence name in benchmarks/ (default from the scene)")
     showcase = commands.add_parser(
         "showcase", help="render a realistic outside-view movie of a saved visual run"
     )
@@ -79,6 +82,8 @@ def main(argv=None) -> int:
     campaign.add_argument("--episodes", type=int, default=100_000)
     campaign.add_argument("--seed", type=int, default=9)
     campaign.add_argument("--model", type=Path, default=Path("models/m9-surrogate.json"))
+    campaign.add_argument("--controller", choices=("reference", "learned"), default="reference")
+    campaign.add_argument("--policy", type=Path, default=Path("models/m10-policy.npy"))
     campaign.add_argument("--output", required=True, type=Path)
     replay_episode = commands.add_parser(
         "monte-carlo-replay", help="rerun one campaign episode with full rendering"
@@ -88,6 +93,15 @@ def main(argv=None) -> int:
     replay_episode.add_argument("--calibration", type=Path,
                                 default=Path("datasets/m8-vbar/calibration.json"))
     replay_episode.add_argument("--output", required=True, type=Path)
+    training = commands.add_parser(
+        "train-policy", help="train the learned approach policy with evolution strategies"
+    )
+    training.add_argument("--output", type=Path, default=Path("models/m10-policy.npy"))
+    training.add_argument("--model", type=Path, default=Path("models/m9-surrogate.json"))
+    training.add_argument("--generations", type=int, default=300)
+    training.add_argument("--pairs", type=int, default=64)
+    training.add_argument("--episodes", type=int, default=16)
+    training.add_argument("--validation-episodes", type=int, default=1024)
     cases = commands.add_parser(
         "basilisk-cases", help="write dynamics cross-check cases for tools/basilisk"
     )
@@ -142,11 +156,14 @@ def main(argv=None) -> int:
 
             from .m5_suite import run_suite
 
-            report = run_suite(args.output, args.calibration, args.lidar, args.scene)
+            report = run_suite(args.output, args.calibration, args.lidar, args.scene,
+                               args.controller, args.policy)
             if args.scene == "realistic":
                 milestone, name = "M8", "m8-realistic" + ("-lidar" if args.lidar else "")
             else:
                 milestone, name = ("M6", "m6-lidar") if args.lidar else ("M5", "m5")
+            if args.label:
+                milestone, name = args.label, args.label
             evidence = Path("benchmarks") / f"{name}-evaluation.json"
             evidence.parent.mkdir(exist_ok=True)
             shutil.copyfile(args.output / "report.json", evidence)
@@ -163,9 +180,30 @@ def main(argv=None) -> int:
             import shutil
 
             from .monte_carlo import run_campaign
+            from .vision_records import sha256_file
 
-            report = run_campaign(args.output, args.episodes, args.seed, args.model)
-            evidence = Path("benchmarks") / "m9-monte-carlo.json"
+            # The campaign hashes the fleet, surrogate and campaign code; record the
+            # controller's own code too.
+            source, provenance = Path(__file__).parent, {}
+            factory = None
+            if args.controller == "learned":
+                from .learned_control import IMPLEMENTATION_FILES, LearnedFleetController
+                from .policy import load_policy
+
+                parameters = load_policy(args.policy)
+                provenance.update(policy=args.policy.as_posix(),
+                                  policy_sha256=sha256_file(args.policy),
+                                  controller_implementation_sha256={
+                                      name: sha256_file(source / name)
+                                      for name in IMPLEMENTATION_FILES})
+
+                def factory(mission, count):
+                    return LearnedFleetController(mission, count, parameters)
+            report = run_campaign(
+                args.output, args.episodes, args.seed, args.model, controller_factory=factory,
+                label=args.controller, provenance=provenance)
+            name = "m9-monte-carlo" if args.controller == "reference" else "m10-monte-carlo"
+            evidence = Path("benchmarks") / f"{name}.json"
             evidence.parent.mkdir(exist_ok=True)
             shutil.copyfile(args.output / "report.json", evidence)
             low, high = report["success_fraction_95_interval"]
@@ -177,6 +215,14 @@ def main(argv=None) -> int:
             summary = replay_episode(args.campaign, args.index, args.calibration, args.output)
             print(f"Rendered outcome: {summary['outcome']}; "
                   f"report: {args.output.resolve() / 'summary.json'}")
+        elif args.command == "train-policy":
+            from .train_policy import train
+
+            selected = train(args.output, args.model, args.generations, args.pairs,
+                             args.episodes, validation_episodes=args.validation_episodes)
+            print(f"Policy: {args.output.resolve()}; selected generation "
+                  f"{selected['generation']}, validation success "
+                  f"{selected['success_fraction']:.4f}")
         elif args.command == "basilisk-cases":
             from .crosscheck import basilisk_cases
 

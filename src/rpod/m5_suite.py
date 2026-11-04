@@ -131,13 +131,30 @@ def episode_initial_state(spec):
     return initial
 
 
-def run_suite(output, calibration_path, lidar=False, scene="simple") -> dict:
-    """Run missing episodes of the frozen suite, then recompute the report from records."""
+def learned_controller_spec(policy_path):
+    """Provenance of the learned approach law: policy weights and implementation hashes."""
+    from .learned_control import IMPLEMENTATION_FILES
+
+    source = Path(__file__).parent
+    return {"name": "learned", "policy": Path(policy_path).as_posix(),
+            "policy_sha256": sha256_file(policy_path),
+            "implementation_sha256": {name: sha256_file(source / name)
+                                      for name in IMPLEMENTATION_FILES}}
+
+
+def run_suite(output, calibration_path, lidar=False, scene="simple", controller="reference",
+              policy_path=None) -> dict:
+    """Run missing episodes of the frozen suite, then recompute the report from records.
+
+    `controller="learned"` drives approach with the policy at `policy_path` behind the safety
+    filter (`learned_control.LearnedController`); the suite then records its provenance.
+    """
     output, calibration_path = Path(output), Path(calibration_path)
     calibration = load_qualified_calibration(calibration_path)
     if calibration.get("scene", "simple") != scene:
         raise ValueError(f"the calibration was qualified on the {calibration.get('scene', 'simple')} "
                          f"scene, not the {scene} scene")
+    learned = learned_controller_spec(policy_path) if controller == "learned" else None
     suite = json_value({
         "artifact_type": "m5_evaluation_suite", "suite_seed": M5_SUITE_SEED,
         "calibration_sha256": sha256_file(calibration_path),
@@ -146,6 +163,7 @@ def run_suite(output, calibration_path, lidar=False, scene="simple") -> dict:
         "episodes": suite_specs(lidar=lidar, scene=scene),
         **({"sensors": ["camera", "lidar"]} if lidar else {}),
         **({"scene": scene} if scene != "simple" else {}),
+        **({"controller": learned} if learned else {}),
     })
     path = output / "suite.json"
     if path.is_file():
@@ -165,10 +183,21 @@ def run_suite(output, calibration_path, lidar=False, scene="simple") -> dict:
             continue
         partial = episodes / f"{spec['id']}.partial"
         print(f"M5 episode {spec['id']}", flush=True)
+        mission, initial = MissionSpec(abort_gap_m=spec["abort_gap_m"]), episode_initial_state(spec)
+        agent_controller, qualify = None, None
+        if learned:
+            from .learned_control import LearnedController
+            from .policy import load_policy
+
+            initial["learned_controller"] = learned
+            agent_controller = LearnedController(mission, load_policy(policy_path))
+
+            def qualify(summary, *records, controller=agent_controller):
+                return {"safety_filter_interventions": controller.interventions}
         summary = run_episode(
-            episode_initial_state(spec), MissionSpec(abort_gap_m=spec["abort_gap_m"]),
-            calibration, calibration_path, partial,
-            paired_baseline=spec["category"] == "operational",
+            initial, mission, calibration, calibration_path, partial,
+            paired_baseline=spec["category"] == "operational", qualify=qualify,
+            controller=agent_controller,
         )
         partial.rename(final)
         print(f"  {summary['outcome']} after {summary['elapsed_time_ns'] / 1e9:.1f} s simulated, "
@@ -298,6 +327,7 @@ def _episode(directory, suite, spec):
             and set(hashes) == set(AUTONOMY_FILES) & set(frozen)
             and hashes == {name: frozen[name] for name in hashes}
             and manifest["m5_episode"] == spec
+            and manifest.get("learned_controller") == suite.get("controller")
         ),
         "outcome": outcome, "failure_reason": summary["failure_reason"],
         "abort_reason": summary["abort_reason"],
@@ -326,6 +356,7 @@ def _episode(directory, suite, spec):
         "image_pose_translation_error_m": _stats([row["translation_m"] for row in pose_errors]),
         "image_pose_rotation_error_deg": _stats([row["rotation_deg"] for row in pose_errors]),
         "fault_response": _fault_response(manifest, events, estimates, outcome),
+        "safety_filter_interventions": summary.get("safety_filter_interventions"),
         "wall_seconds": summary["wall_seconds"],
         "simulated_to_wall_ratio": summary["elapsed_time_ns"] / 1e9 / summary["wall_seconds"],
         "renderer_startup_seconds": renderer["startup_seconds"],
@@ -455,6 +486,9 @@ def suite_report(directory) -> dict:
                     row["record_valid"] and row["outcome"] in ("success", "retreated")))
             )
         ],
+        **({"safety_filter_interventions": sum(
+            row.get("safety_filter_interventions") or 0 for row in rows)}
+           if "controller" in suite else {}),
         "stress_findings": [row["id"] for row in rows
                             if row["category"] == "stress" and row["record_valid"] and not _safe(row)],
         "categories": categories,

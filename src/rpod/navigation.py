@@ -171,6 +171,15 @@ class VisualNavigation:
     densities; their integrated r/v and attitude/rate blocks are discretized per step.
     """
 
+    # Target velocity and angular-rate priors at initialization (velocity starts at own
+    # velocity, rate at zero), and the rotation process noise (continuous angular-acceleration
+    # spectral densities) after and during acquisition. Variants for tumbling targets override
+    # these.
+    initial_velocity_sigma_mps = 0.1
+    initial_rate_sigma_radps = 0.005
+    rotation_spectral_density = 4e-8
+    acquisition_rotation_spectral_density = 2.5e-5
+
     def __init__(self, camera=None, calibration=None):
         self.camera = camera
         self._range_bins = np.array([1e9])
@@ -223,7 +232,8 @@ class VisualNavigation:
                 if state.time_ns < end < stop:
                     stop = end
             boosted = any(start <= state.time_ns < end for start, end in intervals)
-            state = _propagate(state, stop, 2.5e-5 if boosted else 4e-8)
+            state = _propagate(state, stop, self.acquisition_rotation_spectral_density
+                               if boosted else self.rotation_spectral_density)
             path.append(state)
         return path
 
@@ -306,8 +316,8 @@ class VisualNavigation:
             if self._current is None:
                 covariance = np.zeros((12, 12))
                 covariance[np.ix_(_OBSERVED, _OBSERVED)] = measurement.covariance
-                covariance[_VELOCITY, _VELOCITY] = np.eye(3) * 0.1**2
-                covariance[_RATE, _RATE] = np.eye(3) * 0.005**2
+                covariance[_VELOCITY, _VELOCITY] = np.eye(3) * self.initial_velocity_sigma_mps**2
+                covariance[_RATE, _RATE] = np.eye(3) * self.initial_rate_sigma_radps**2
                 state = _FilterState(
                     capture, measurement.position,
                     np.asarray(own_at_capture.velocity_mps, dtype=np.float64).copy(),

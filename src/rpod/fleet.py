@@ -12,6 +12,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from ._core import RigidBodyBatch, pair_metrics
+from .safety_filter import safe
 
 OUTCOMES = ("", "success", "retreated", "navigation_lost", "acquisition_failed",
             "false_completion", "physical_violation", "time_limit", "numerical_failure")
@@ -179,29 +180,44 @@ def attitude_torque(quaternions, body_rates, desired_q, desired_rate_n, rotation
     return inertia * alpha + cross(body_rates, inertia * body_rates)
 
 
+def _frame_rates(states):
+    """Target LVLH rotation rates, as `commanded_wrench` computes them."""
+    positions, velocities = states[:, 0, :3], states[:, 0, 3:6]
+    omega_l = np.zeros((len(states), 3))
+    omega_l[:, 2] = norm(cross(positions, velocities)) / np.sum(positions**2, axis=-1)
+    return omega_l
+
+
+def relative_force(states, mission, m, relative_acceleration):
+    """Chaser body force giving an LVLH relative acceleration, with the circular-LVLH
+    transport terms and the exact gravity difference compensated, as `commanded_wrench`."""
+    omega_l = _frame_rates(states)
+    local_acc = (relative_acceleration + 2 * cross(omega_l, m["rho_dot"])
+                 + cross(omega_l, cross(omega_l, m["rho"])))
+    positions = states[..., :3]
+    gravity = -mission.mu_m3_s2 * positions / norm(positions)[..., None] ** 3
+    force_n = mission.masses_kg[1] * (apply(m["basis"], local_acc)
+                                      + gravity[:, 0] - gravity[:, 1])
+    return apply_transpose(m["rotations"][:, 1], force_n)
+
+
 def wrench(states, mission, m, reference):
     """Vectorized `commanded_wrench`: (chaser body force, target torque, chaser torque)."""
-    positions, velocities, quaternions, rates = split(states)
+    _, _, quaternions, rates = split(states)
     rotations, basis = m["rotations"], m["basis"]
-    rate = norm(cross(positions[:, 0], velocities[:, 0])) / np.sum(positions[:, 0] ** 2, axis=-1)
-    omega_l = np.zeros((len(states), 3))
-    omega_l[:, 2] = rate
+    omega_l = _frame_rates(states)
     gap, gap_rate, gap_acc = reference
     ports = mission.docking_ports_body_m
     zeros = np.zeros_like(gap)
     desired_r = np.stack([zeros, -gap - (ports[1][1] - ports[0][1]), zeros], axis=-1)
     desired_v = np.stack([zeros, -gap_rate, zeros], axis=-1)
     desired_a = np.stack([zeros, -gap_acc, zeros], axis=-1)
-    local_acc = (
+    acceleration = (
         desired_a
         + mission.position_kp_s2 * (desired_r - m["rho"])
         + mission.velocity_kd_s * (desired_v - m["rho_dot"])
-        + 2 * cross(omega_l, m["rho_dot"])
-        + cross(omega_l, cross(omega_l, m["rho"]))
     )
-    gravity = -mission.mu_m3_s2 * positions / norm(positions)[..., None] ** 3
-    force_n = mission.masses_kg[1] * (apply(basis, local_acc) + gravity[:, 0] - gravity[:, 1])
-    force_b = apply_transpose(rotations[:, 1], force_n)
+    force_b = relative_force(states, mission, m, acceleration)
     desired_q = matrix_quaternions(basis)
     desired_rate_n = apply(basis, omega_l)
     torques = [attitude_torque(quaternions[:, body], rates[:, body], desired_q, desired_rate_n,
@@ -291,8 +307,13 @@ class FleetController:
         self.force = np.zeros((count, 3))
         self.torque = np.zeros((count, 3))
         self.brakes = np.zeros(count, dtype=np.int64)
+        self.at_goal_ticks = np.zeros(count, dtype=np.int64)
 
-    def _wrench(self, pair, m, reference, rows):
+    def _metrics(self, pair):
+        """Metrics of the estimated pairs; target LVLH by default."""
+        return metrics(pair, self.mission.docking_ports_body_m)
+
+    def _wrench(self, pair, m, reference, rows, time_ns, estimates):
         """Chaser force and torque where `rows` is set; the reference law by default."""
         force, _, torque = wrench(pair[rows], self.mission, {k: v[rows] for k, v in m.items()},
                                   tuple(value[rows] for value in reference))
@@ -308,7 +329,7 @@ class FleetController:
         # `visual_control.estimated_pair`; rows without an estimate get a harmless placeholder
         # pair whose metrics go unused.
         pair = np.stack([np.where(has[:, None], estimates.target, own), own], axis=1)
-        m = metrics(pair, mission.docking_ports_body_m)
+        m = self._metrics(pair)
         gap = m["gap"]
         changed = np.zeros(self.count, bool)
         outcome = np.zeros(self.count, dtype=np.int8)
@@ -376,6 +397,7 @@ class FleetController:
             & (norm(m["port_r"] - target) <= 0.1) & (norm(m["port_v"]) <= 0.01)
             & (m["alignment_deg"] <= 1) & (m["relative_rate"] <= 0.001)
         )
+        self.at_goal_ticks += at_goal & active
         complete = self.dwell.update(time_ns, at_goal, rows=active & (outcome == 0))
         outcome[complete] = np.where(self.phase[complete] == 2, RETREATED, SUCCESS)
         transition(complete, 3)
@@ -387,8 +409,8 @@ class FleetController:
             self.torque[own_rows] = own_attitude_torque(own[own_rows], mission)
         law_rows = update & ~own_rows
         if law_rows.any():
-            self.force[law_rows], self.torque[law_rows] = self._wrench(pair, m, reference,
-                                                                       law_rows)
+            self.force[law_rows], self.torque[law_rows] = self._wrench(
+                pair, m, reference, law_rows, time_ns, estimates)
         return outcome
 
 
@@ -417,10 +439,26 @@ def target_torque(states, mission):
                                        np.zeros(count)))[1]
 
 
-def run_fleet(initials, mission, navigation, controller=None, threads=0):
+class Scoring:
+    """How the environment scores the pairs and commands the target: `VisualEnv`'s metrics
+    in target LVLH and its LVLH-holding target attitude control."""
+
+    def __init__(self, mission):
+        self.mission = mission
+
+    def metrics(self, states):
+        return metrics(states, self.mission.docking_ports_body_m)
+
+    def target_torque(self, states):
+        return target_torque(states, self.mission)
+
+
+def run_fleet(initials, mission, navigation, controller=None, threads=0, scoring=None):
     """Run every initial manifest to its end, as `VisualEnv` scores one episode.
 
-    `navigation.update(tick, states, active)` returns `Estimates`. Returns per-episode arrays.
+    `navigation.update(tick, states, active)` returns `Estimates`. Returns per-episode arrays,
+    including the ticks in approach whose true port state lies outside the safety filter's
+    safe set (for any controller) and the controller's safety-filter interventions, if any.
     """
     count = len(initials)
     first = initials[0]
@@ -429,6 +467,7 @@ def run_fleet(initials, mission, navigation, controller=None, threads=0):
                            first["inertias_kg_m2"], first["force_limits_n"],
                            first["torque_limits_nm"], threads=threads)
     controller = controller or FleetController(mission, count)
+    scoring = scoring or Scoring(mission)
     dt_ns, max_steps = first["dt_ns"], first["max_steps"]
     chaser_mass, force_limit = first["masses_kg"][1], first["force_limits_n"][1]
     success_dwell, retreat_dwell = Dwells(count, mission.dwell_ns), Dwells(count, mission.dwell_ns)
@@ -437,7 +476,8 @@ def run_fleet(initials, mission, navigation, controller=None, threads=0):
         "outcome": np.zeros(count, dtype=np.int8), "end_tick": np.zeros(count, dtype=np.int64),
         "minimum_port_gap_m": np.full(count, np.inf), "minimum_com_range_m": np.full(count, np.inf),
         "final_port_speed_mps": np.zeros(count), "final_gap_m": np.zeros(count),
-        "delta_v_mps": np.zeros(count),
+        "final_lateral_m": np.zeros(count), "delta_v_mps": np.zeros(count),
+        "envelope_violation_ticks": np.zeros(count, dtype=np.int64),
     }
     target_torques = np.zeros((count, 3))
 
@@ -447,12 +487,13 @@ def run_fleet(initials, mission, navigation, controller=None, threads=0):
         result["end_tick"][rows] = tick
         result["final_port_speed_mps"][rows] = norm(m["port_v"][rows])
         result["final_gap_m"][rows] = m["gap"][rows]
+        result["final_lateral_m"][rows] = norm(m["port_r"][rows][:, [0, 2]])
         active[rows] = False
 
     for tick in range(max_steps + 1):
         time_ns = tick * dt_ns
         states = batch.states()
-        truth = metrics(states, mission.docking_ports_body_m)
+        truth = scoring.metrics(states)
         result["minimum_port_gap_m"][active] = np.minimum(result["minimum_port_gap_m"],
                                                           truth["gap"])[active]
         result["minimum_com_range_m"][active] = np.minimum(
@@ -462,6 +503,8 @@ def run_fleet(initials, mission, navigation, controller=None, threads=0):
             break
         claims = controller.update(time_ns, states[:, 1], navigation.update(tick, states, active),
                                    active)
+        result["envelope_violation_ticks"] += active & (controller.phase == 1) & ~safe(
+            truth["port_r"], truth["port_v"], controller.goal)
         valid = {SUCCESS: success_dwell.update(time_ns, physical_valid(truth, mission.final_gap_m)),
                  RETREATED: retreat_dwell.update(time_ns,
                                                  physical_valid(truth, mission.retreat_gap_m))}
@@ -473,7 +516,7 @@ def run_fleet(initials, mission, navigation, controller=None, threads=0):
         if not active.any():
             break
         if tick % first["control_period_ticks"] == first["control_offset_ticks"]:
-            target_torques = target_torque(states, mission)
+            target_torques = scoring.target_torque(states)
         forces = np.zeros((count, 2, 3))
         forces[:, 1] = controller.force
         torques = np.stack([target_torques, controller.torque], axis=1)
@@ -483,4 +526,6 @@ def run_fleet(initials, mission, navigation, controller=None, threads=0):
         finish(status > 0, NUMERICAL, tick, truth)
     result["abort_reason"] = controller.abort_reason
     result["brakes"] = controller.brakes
+    result["at_goal_ticks"] = controller.at_goal_ticks
+    result["interventions"] = getattr(controller, "interventions", np.zeros(count, np.int64))
     return result
