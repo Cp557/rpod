@@ -4,13 +4,13 @@ This document records implemented behavior. [OVERVIEW.md](OVERVIEW.md) describes
 
 ## Current implementation
 
-RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. M10 trains an approach policy in that fleet and flies it behind a runtime safety filter, scored on the same paired campaign and rendered suite as the reference controller; the learned rendered suite fails its fault gate on one abort episode. Individual thrusters, fuel/mass depletion, environmental disturbances, natural-feature perception, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
+RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. M10 trains an approach policy in that fleet and flies it behind a runtime safety filter, scored on the same paired campaign and rendered suite as the reference controller; the learned rendered suite fails its fault gate on one abort episode. M11 removes the cooperative aids and lets the target tumble freely: the chaser navigates by lidar shape matching against the target mesh, optionally fused with camera keypoints from a trained network, and holds in the tumbling port's frame; its lidar-only and fused suites pass all gates, but the M9 surrogate does not validate against the fused suite, so M11 makes no Monte Carlo claim. Individual thrusters, fuel/mass depletion, environmental disturbances, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
 
 The Rust `rpod-core` crate owns state and time. `rpod-python` exposes it through PyO3. Python defines scenarios, collects snapshots, derives relative state and diagnostics, and exports recordings. Physics has no renderer dependency.
 
 ## Environment and commands
 
-Verified on Windows x86_64 with CPython 3.15.1, uv 0.13.5, Rust/Cargo 1.99.1, Visual Studio Build Tools 2022/MSVC 14.44.35207, and Windows SDK 10.0.26100.0. Dependencies include nalgebra 0.35.0, rayon 1.12.0, PyO3 0.30.1 with the `numpy` crate 0.30.0, maturin 1.15.0, NumPy 2.5.4, Matplotlib 3.11.2, Rerun 0.40.0, and development dependency psutil 7.2.2.
+Verified on Windows x86_64 with CPython 3.15.1, uv 0.13.5, Rust/Cargo 1.99.1, Visual Studio Build Tools 2022/MSVC 14.44.35207, and Windows SDK 10.0.26100.0. Dependencies include nalgebra 0.35.0, rayon 1.12.0, parry3d-f64 0.31.1, PyO3 0.30.1 with the `numpy` crate 0.30.0, maturin 1.15.0, NumPy 2.5.4, Matplotlib 3.11.2, Rerun 0.40.0, and development dependency psutil 7.2.2.
 
 From the repository root in PowerShell:
 
@@ -286,7 +286,7 @@ The three uninterrupted approaches finish within 1.005× their paired oracle tim
 
 The official nominal feedback run took 362.2 wall-clock seconds for 208.4 simulated seconds, excluding its separately timed paired oracle. Its sampled Blender peak RSS was 266.2 MiB. Qualification cases ran in pairs on the same desktop, so these wall times describe that workload rather than an isolated renderer or real-time guarantee. Each run's summary preserves startup, per-render/request timing, sampled RSS, and total feedback-loop wall time.
 
-The current fast suite passes 61 Python tests and 18 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
+The current fast suite passes 70 Python tests and 21 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
 
 ### Schema 3 visual records
 
@@ -653,6 +653,11 @@ Runtime, on an unisolated desktop:
   - **Position:** over the chaser's shoulder, at LVLH `(1.2, −5.0, ±2.4)` m from its center of mass.
   - **Aim:** midway between the directions to the chaser and to the target's docking port. Between 30 m and 5 m of port gap, the chaser's center stays near the lower-left third of the frame and the port near the upper-right third.
 
+**M11 runs** (scenario `visual-m11-*`) are filmed as the docking camera saw them, around a tumbling target:
+- `m11_showcase_worker.py` combines the two workers (`UnmarkedShowcaseRenderer(ShowcaseRenderer, UnmarkedRenderer)`): the showcase chaser and image settings, with the cooperative aids removed and the wings stowed.
+- The close shot's offset and up are in the target's body axes instead of LVLH, so the camera rides with the tumble while Earth and the stars sweep past. Its normal side is the one the Sun lights on average over the shot, held for the whole shot so the camera never jumps. The wide shot is unchanged.
+- The port gap comes from `tumble_metrics` (the port frame), and a fifth label shows the target's tumble rate.
+
 Each frame places the target, chaser and Earth from recorded truth, with the Sun along `sunlight_direction_inertial`. Fast tests check:
 - the wide shot keeps both centers of mass inside the image with a 10% margin, at 30 m and 6.5 m separation;
 - the wide shot is on the sunlit normal side for both signs of the Sun's normal component, and Earth's center is below the image;
@@ -680,7 +685,7 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 **Overlay** (drawn by OpenCV on each clean render; sizes scale with the image height from a 720-line base):
 - **Bloom:** a soft glow on highlights: threshold 190, σ 9 px, gain 0.8.
 - **Inset:** the run's most recent docking-camera image captured at or before that tick, or a "no image" box for a missing capture. It is 405 px wide, at the bottom centre in the wide shot and the bottom right in the close shot, clear of the spacecraft.
-- **Labels:** run name, elapsed time, port gap and supervisor phase.
+- **Labels:** run name, elapsed time, port gap and supervisor phase; for M11 runs, also the target's tumble rate.
 
 **Outputs:**
 - `frames/NNNNNN.png`: clean renders, without bloom or overlay.
@@ -875,15 +880,135 @@ A learned campaign uses the M9 campaign's episodes (seed 9), so the two are pair
   - The failure comes from the retreat's estimate bias against its tolerance, which the learned approach's different abort conditions exposed. It was reported rather than tuned away.
 - **Wall time** was 2.8 h over two sessions, with other jobs sharing the machine.
 
+## Unmarked, tumbling target (M11)
+
+M11 removes the cooperative aids and lets the target tumble: the chaser must find and track QuikSCAT by its shape, follow its rotating docking axis in, and hold 5 m off the port in the port's frame.
+
+**Scenario** (`tumble.py`). `tumble_initial_state` takes the M5 initialization, then:
+- sets the target turning freely at a given rate about a given body axis;
+- places the chaser synchronized on the rotating docking axis: 30 m port to port, co-rotating, with the target's attitude and rate (the analogue of the M2 handoff, after an inspection and synchronization phase that is not simulated). The M5 chaser disturbance applies in target body axes.
+- The target gets no torque (`TumbleEnv._target_command`).
+
+**Guidance** (`TumbleController`). The reference supervisor, with metrics (`tumble_metrics`) in the target body frame: chaser-minus-target position and port offset in target axes, with rates as seen in that rotating frame. The law tracks the gap profile along the rotating −Y axis with the same gains, adding rotating-frame feedforward (2ω×ρ̇, ω̇×ρ, ω×(ω×ρ)) with the target's torque-free ω̇ from its known inertia, and the exact gravity difference. The chaser's attitude tracks the target's, with rate and angular-acceleration feedforward. With truth estimates (`tumble_truth_baseline`, the paired oracle) it docks in about 209 s at rates up to 1.2°/s.
+
+**Navigation** (`TumbleNavigation`). The M4 filter with lidar, adapted to a free tumble by subclassing (the frozen filter is unchanged):
+- **Priors:** velocity 1 m/s (the co-rotating chaser moves up to 0.7 m/s relative to the target 30 m out) and rate 0.02 rad/s (1.15°/s). With the M4 priors, accurate ICP poses were gated out within 5 s.
+- **Torque-free prediction** (`torque_free_propagate`) instead of the M4 constant rate: the target's inertial angular momentum stays fixed and its rate precesses with its attitude (Euler's equations with its known inertia, midpoint rule per 0.1 s step). Over 300 s at 1°/s it stays within 1.3e-7 rad and 4e-10 rad/s of the engine's tumble; a constant rate drifts 42°. The covariance keeps the constant-rate linearization.
+- **Rotation process noise** 1e-10 rad²/s³ instead of 4e-8, which the exact model allows. The rate estimate matters because metrics live in the rotating port frame: a rate error of 3e-4 rad/s, the constant-rate filter's median, is 9 mm/s of apparent port velocity at 30 m, near the 10 mm/s onboard completion limit. The value was chosen on lidar-only episodes outside the suite (stream root 99): on three abort episodes the constant-rate filter never confirmed the 30 m retreat within 600 s, while torque-free prediction at 4e-8, 2e-9 and 1e-10 confirmed it after holds of 63–332, 55–103 and 43–53 s, with median rate errors of 3e-4, 1e-4 and 4e-5 rad/s; four approach episodes at 1e-10 all succeeded, and every lidar pose was accepted.
+- The simulated tumble is exactly torque-free with a known inertia. On orbit, gravity-gradient and other torques (about 4e-7 rad/s² for this inertia) and inertia uncertainty would set the process noise.
+
+**Unmarked target** (`m11_worker.py`, `target_mesh.py`). A Blender worker subclassing the realistic `SceneRenderer`:
+- removes the 20 cooperative aids from the rendered target: 4 marker tags, 4 white pads, 4 lidar reflector discs and the 8 posts holding the raised pads;
+- leaves the solar wings stowed instead of tracking the Sun, as on a dead satellite;
+- with `export_mesh_path`, writes every remaining target triangle in body axes. `datasets/m11/target_mesh.npz` holds 68,573 triangles (36,295 vertices) in 21 parts, spanning 8.3 m across the wings.
+
+**Mesh queries** (`crates/rpod-core/src/mesh.rs`). `TargetMesh` wraps a parry3d-f64 `TriMesh` and its bounding-volume hierarchy: `cast_rays` (rayon) for the lidar, and `closest_points` (point, unit triangle normal, distance) for ICP and clearance.
+
+**Natural-feature lidar** (`natural_lidar.py`):
+- `scan_mesh` casts the same 256×256 pinhole rays as `scan_target`, with the same 2 cm range noise, against the mesh; there are no retroreflective returns. A scan takes about 20 ms.
+- `IcpTracker` is the lidar's own pose processing; it never sees truth or the filter. It runs point-to-plane Gauss–Newton ICP with Huber weights on 2,000 sampled returns for up to 60 iterations (about 70 ms). Tracking predicts from its last solution: translation moves with the shift of the measured cloud's centroid and attitude at the last measured rate. Without that prediction, 0.44 m/s of relative drift held ICP in a biased minimum (10–20 cm, 2–4°).
+- Without a solution it acquires: coarse ICP from 72 attitude hypotheses 30° apart, full ICP from the best 6, and rejection as ambiguous if a solution more than 15° away scores within 25% of the best.
+- A fit is rejected if the inlier RMS exceeds 6 cm or fewer than 70% of points lie within 10 cm.
+- Poses use the `LidarPose` convention, so `LidarNavigation` fuses them unchanged. Their covariance comes from `models/m11-lidar-calibration.json`: per-range-bin mean-square errors of 900 tracked scans against truth (random attitudes, 5.5–35 m, priors off by up to 3° and 0.15 m), about 0.8 cm laterally, 1.1 cm in range and 0.15–0.2° per axis; bins with fewer than 30 samples use the pooled value.
+
+**Camera keypoints** (`keypoints.py`, `tools/keypoints`):
+- 20 keypoints (`models/m11-keypoints.json`): 12 farthest-point mesh vertices over the satellite, and 8 on the docking face within 1.2 m of the axis, which stay in view at the hold point.
+- `rpod keypoint-dataset` renders the unmarked target with `UnmarkedRenderer` at random attitudes, 5.5–35 m, random Sun (no eclipse) and Earth placement from a random orbit position. A view so close to nadir that the Earth eclipses (nearly) every Sun direction in the split's phase window is redrawn. Each label holds every keypoint's pixel and its visibility, from a mesh ray cast. Splits: 9,000 training and 1,000 validation images at Sun phase angles below 70°, and 1,500 held-out test images at 70–100° with 3 DN / 0.75 px degradation, which training never sees.
+- `tools/keypoints/train.py` (its own uv project: Python 3.13, PyTorch 2.14.1 for CUDA 12.6, the last line built for the GTX 1060's sm_61, and onnx 1.23.2 for the export) trains a ResNet-18 encoder with three 128-channel transposed-convolution stages to stride-4 heatmaps from 512×512 inputs, with blur, noise, scale, shift, gain and gamma augmentation, and exports ONNX.
+- `KeypointEstimator` runs the ONNX network through OpenCV DNN, refines each heatmap peak to sub-pixel, keeps keypoints above 0.3 confidence, and solves EPnP with RANSAC (6 px) and LM refinement, needing 6 inliers and at most 4 px RMS reprojection error. It then rejects a pose whose predicted uncertainty exceeds 0.25 m or 1°: the root-trace of the translation and rotation-vector covariance implied by the inlier residuals and the reprojection Jacobian. The check was chosen on the validation split. Without it, 15 accepted validation poses at 19–34 m, solved from 6–9 inliers, were off by more than 1 m or 10°. It removes all 15 and keeps 533 of the 828 accepted poses; requiring 12 inliers instead would have kept 244.
+- `rpod keypoint-calibrate` writes `models/m11-camera-calibration.json` in the M3 format from validation errors, so `VisualNavigation` weights keypoint poses by range bin as it did marker poses. Like M3, it qualifies only if no accepted validation pose is off by more than 1 m or 10°. `benchmarks/m11-keypoint-evaluation.json` holds coverage and the error median, P95 and maximum per range bin for the validation and held-out test splits.
+
+**Environment** (`TumbleEnv`). `VisualEnv` through the hooks: no target torque; scoring in the port frame; the camera through the keypoint estimator, or off with no Blender at all for lidar-only runs; the lidar through `scan_mesh` and a per-episode `IcpTracker`. A further hard boundary ends the episode as `physical_violation` (`minimum_mesh_clearance`) if any of 150 points on the chaser's 1 m hull comes within 0.5 m of the target mesh.
+
+**Suite** (`m11_suite.py`, `rpod m11-suite`). The 40 M5 lidar-suite episodes (conditions, faults, seeds 1000 + index), each with a tumble from stream [11, index, 5]: U(0.2, 1.0)°/s about a uniform random axis.
+- `qualify` replaces the runner's LVLH physical fields with port-frame values, adds the minimum hull clearance, and times completion against `tumble_truth_baseline`, so the M5 report and gates apply unchanged: 28 operational successes within 1.5× the oracle, the 6 faults' expected responses (lidar: no braking), and valid, uniform records.
+- `suite.json` adds the M11 files' hashes and the mesh, calibration, keypoint and model hashes. Configurations: lidar only, or fused with camera keypoints (`--keypoint-model`, with `--calibration models/m11-camera-calibration.json`).
+
+**Fleet variant** (`tumble_fleet.py`). `TumbleFleetController` and `TumbleScoring` vectorize `TumbleController` and `TumbleEnv`'s physics and scoring for the M9 fleet; a test holds the fleet's outcomes and end ticks equal to `tumble_truth_baseline` for two tumbles. The fleet keeps the center-of-mass and port-gap boundaries but does not check hull clearance against the mesh.
+- `rpod fit-surrogate --scenario tumbling` fits and validates the M9 surrogate on a tumbling suite. As failures it counts the ticks 0.2 s after each whole second whose `visual_update` was False, what a multi-sensor agent brakes on.
+- `rpod monte-carlo --scenario tumbling` runs a campaign of `tumbling_spec` episodes (the operational draw plus a tumble, drawn as the suite draws it) and copies its report to `benchmarks/m11-monte-carlo.json`.
+
+```powershell
+.\.venv\Scripts\rpod.exe m11-assets
+.\.venv\Scripts\rpod.exe keypoint-dataset --output datasets/m11/keypoints
+uv run --project tools/keypoints python tools/keypoints/train.py datasets/m11/keypoints runs/m11-keypoints
+.\.venv\Scripts\rpod.exe keypoint-calibrate --model runs/m11-keypoints/keypoints.onnx
+.\.venv\Scripts\rpod.exe m11-suite --output runs/m11-lidar --label m11-lidar
+.\.venv\Scripts\rpod.exe m11-suite --output runs/m11-fused --keypoint-model runs/m11-keypoints/keypoints.onnx --calibration models/m11-camera-calibration.json --label m11-fused
+.\.venv\Scripts\rpod.exe fit-surrogate --suite runs/m11-fused --scenario tumbling --output benchmarks/m11-surrogate.json
+```
+
+The surrogate fit exits 1 because its validation fails (see M11 results).
+
+### M11 results
+
+**Lidar only** (`runs/m11-lidar`, `benchmarks/m11-lidar-evaluation.json`) passes all three gates. All 40 records are valid with uniform hashes; no episode failed and there are no stress findings. The tumbles span 0.2–1.0°/s.
+
+| Category | Outcomes | Measured |
+| --- | --- | --- |
+| Operational | 28/28 success | 206–238 s; completion 1.002× the paired oracle (median; max 1.140×); final gap 4.991–5.005 m; final port speed ≤ 0.0031 m/s; minimum port gap 4.960 m |
+| Fault: abort | 2/2 retreated | final gap 29.96 and 29.99 m at 244 and 306 s |
+| Fault: dropped frame, extended loss | 4/4 success, no brake | 207–212 s |
+| Stress | 6/6 success | 209–217 s |
+
+- **Faults:** the suite's faults drop or blank camera frames. Lidar-only runs have no camera, so those four episodes test nothing beyond their conditions.
+- **Acceptance:** ICP accepted 8,525 of 8,526 delivered scans. The one rejection, in `06` at 202.7 s near the hold, braked the approach; tracking resumed 2.0 s later and the episode finished at 1.14× the oracle.
+- **Errors:** over operational episodes, filtered target position error has median 1.3 cm, P95 2.3 cm and maximum 4.1 cm; attitude error has median 0.09°, P95 0.27° and maximum 1.0°. Accepted ICP poses have median errors of 1.0–1.5 cm and 0.18–0.24° per range bin.
+- **Clearance:** the chaser's hull came no closer than 4.76 m to the target mesh.
+- **Repeatability:** two earlier runs of the suite, superseded only because `keypoints.py` changed afterwards, had identical outcomes, durations and metrics. Wall time was 14.5 min on the CPU, without a renderer, while the M10 suite rendered on the same machine.
+
+**Camera keypoints** (`runs/m11-keypoints`, `benchmarks/m11-keypoint-evaluation.json`):
+- **Training:** 30 epochs took 2.8 h on the GTX 1060. The kept epoch, 25, places half the visible validation keypoints' heatmap peaks on the labelled heatmap pixel and 90% within one diagonal heatmap pixel (11 image pixels).
+- **Calibration:** `models/m11-camera-calibration.json` qualifies, with no accepted validation pose off by more than 1 m or 10°. It accepts 533 of 1,000 validation images.
+- **Held-out test:** 677 of 1,500 images give a pose, and none is off by more than 1 m or 10°. Most rejections are uncertain poses at long range, and few keypoints are found when the satellite overflows the frame at close range.
+
+| Camera range | Images | Pose given | Translation error (median, P95, max) | Rotation error (median, P95, max) |
+| --- | --- | --- | --- | --- |
+| below 5.7 m | 11 | 0% | — | — |
+| 5.7–8.45 m | 137 | 16% | 0.06, 0.14, 0.14 m | 1.1, 2.4, 2.6° |
+| 8.45–15.95 m | 375 | 57% | 0.05, 0.20, 0.34 m | 0.7, 2.1, 3.2° |
+| 15.95–25.95 m | 506 | 58% | 0.07, 0.26, 0.58 m | 0.7, 1.7, 4.0° |
+| 25.95–31.95 m | 306 | 36% | 0.10, 0.37, 0.74 m | 0.7, 2.0, 2.4° |
+| above 31.95 m | 165 | 22% | 0.13, 0.47, 0.78 m | 0.9, 2.0, 3.6° |
+
+**Fused** (`runs/m11-fused`, `benchmarks/m11-fused-evaluation.json`): lidar ICP and camera keypoints in realistic renders pass all three gates. All 40 records are valid with uniform hashes; no episode failed, and there are no stress findings, false completions or boundary violations.
+
+| Category | Outcomes | Measured |
+| --- | --- | --- |
+| Operational | 28/28 success | 205–240 s; completion 0.996× the paired oracle (median; max 1.144×); final gap 4.998–5.010 m, and 5.089 m in `21`; final port speed ≤ 0.0025 m/s; minimum port gap 4.968 m |
+| Fault: abort | 2/2 retreated | final gap 29.94 and 29.98 m at 234 and 305 s |
+| Fault: dropped frame, extended loss | 4/4 success, no brake | 207–210 s; the lidar carried navigation through the lost images |
+| Stress | 6/6 success | 207–214 s |
+
+- **Acceptance:** the filter accepted keypoint poses from 6,662 of 8,482 delivered images (57–86% per operational episode); the keypoint estimator gave 6,720 poses and the filter's innovation gate refused 58. Near the hold, within 7 m of the target's center, the satellite overflows the frame: only 25 of 719 operational images there gave an accepted pose, so the lidar navigates almost alone. The lidar accepted 8,475 of 8,477 scans. The two refusals were good ICP fits (1.6 and 1.7 cm RMS) that the filter's innovation gate refused: `30` at 16.5 s, and `21` at 208.5 s near the hold, which braked. Tracking resumed 2.0 s later, and `21` finished at 1.14× the oracle, 5.09 m from the port, inside the onboard 0.1 m completion radius.
+- **Errors:** over operational episodes, filtered target position error has median 1.2 cm and P95 2.1 cm; attitude error has median 0.10° and P95 0.26°. The maxima, 18.3 cm and 1.5°, fall in the half second after acquisition, when the estimate rests on two camera poses and one lidar pose; the next lidar pose corrects it. After the first 2 s of tracking the maxima are 3.8 cm and 1.0°, against lidar-only's 4.1 cm and 1.0°. Accepted keypoint poses have median errors of 2.8–9.2 cm and 0.54–1.15° per range bin; ICP poses 1.0–1.5 cm and 0.18–0.23°.
+- **What the camera adds:** acquisition at 1.2 s instead of 2.7 s, because images count toward the three valid observations it needs, so operational episodes finish 1.6 s sooner (median 207.7 s against 209.3 s). With the lidar healthy, accuracy barely changes: after the first 2 s of tracking, position P95 is 2.0 cm against 2.2 cm. The suite's faults drop camera frames only, so it does not test the camera as a backup for the lidar.
+- **Clearance:** the chaser's hull came no closer than 4.76 m to the target mesh.
+- **Wall time** was 3.3 h on the GTX 1060: a median 1.0 s render, 0.11 s keypoint inference and pose and 0.05 s ICP per delivery.
+
+**Tumbling surrogate** (`benchmarks/m11-surrogate.json`): the M9 surrogate fitted to the fused suite's 28 operational episodes fails validation. M11 therefore makes no Monte Carlo claim, and no tumbling campaign was run as evidence.
+
+| Check | Result |
+| --- | --- |
+| Held-out estimate errors | pass: position median and P95 within 5% and 4% of the surrogate's; attitude within 5% and 9% |
+| Completion time | fail: 6 of 28 rendered values inside the surrogate's 95% band |
+| Minimum port gap | fail: 23 of 28 |
+| Final port speed | pass: 26 of 28 |
+| Braking count | pass: 28 of 28 |
+
+- **Timing.** The surrogate has one delivery stream at the camera's cadence, so it acquires at 2.2 s, as the truth-navigation oracle does; its median completion time matches the oracle's in nearly every episode, with the band's lower edge 0.1–0.2 s below. The fused agent updates on camera and lidar deliveries, twice a second. It acquires at 1.2 s and finishes about 1 s before the oracle, scattered by about ±0.5 s. Passing would take a second delivery stream and that scatter, fitted and judged on the same 28 episodes.
+- **Failures.** The fit counts a failure only at the camera's delivery ticks, so it misses lidar refusals: `21`'s brake began at a lidar tick, and the fit recorded only the refused camera tick that followed. It spreads that one rejection's probability over everything after 160 s, so 12% of surrogate runs brake; they overshoot to a median 4.40 m and finish at a median 295 s. The rendered run's one brake came at the hold and cost 30 s.
+- The tumbling fleet is checked only against the scalar oracle (outcomes and end ticks for two tumbles).
+
 ## Source layout and generated output
 
 - `crates/rpod-core`: native dynamics and Rust acceptance tests.
 - `crates/rpod-python`: PyO3 interface and compiler provenance.
-- `crates/rpod-core/src/batch.rs`, `metrics.rs`: the batched engine and pair metrics (M9).
-- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`); M10 policy (`policy.py`), safety filter (`safety_filter.py`), learned controllers (`learned_control.py`) and evolution-strategies training (`train_policy.py`).
-- `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`; the M10 policy `m10-policy.npy` with `m10-policy.json`).
-- `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure).
-- `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases.
+- `crates/rpod-core/src/batch.rs`, `metrics.rs`: the batched engine and pair metrics (M9); `mesh.rs` (with its binding in `crates/rpod-python/src/mesh.rs`): target-mesh ray casts and closest points (M11).
+- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`); M10 policy (`policy.py`), safety filter (`safety_filter.py`), learned controllers (`learned_control.py`) and evolution-strategies training (`train_policy.py`); M11 tumbling scenario, guidance and navigation (`tumble.py`) and its fleet variant (`tumble_fleet.py`), unmarked target worker and mesh (`m11_worker.py`, `target_mesh.py`), natural-feature lidar (`natural_lidar.py`), camera keypoints (`keypoints.py`), suite (`m11_suite.py`) and tumbling showcase worker (`m11_showcase_worker.py`).
+- `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`; the M10 policy `m10-policy.npy` with `m10-policy.json`; M11's `m11-keypoints.json`, `m11-lidar-calibration.json` and `m11-camera-calibration.json`).
+- `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`).
+- `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases. `tools/keypoints`: a separate uv project (Python 3.13, PyTorch) that trains the keypoint network and exports it to ONNX.
 - `tests`: Python integration and contract checks; `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
 
-Frozen-file hashes are taken over raw bytes, so `.gitattributes` checks text out with LF, except `blender_worker.py`. That file is stored byte-exact with CRLF line endings, as the M8 suite hashed it. `.gitignore` excludes the environment, tool environments under `tools/`, workspace-local uv cache, target directory, compiled extensions, Python caches, portable tools, and generated `runs/`, `datasets/`, and `benchmarks/` outputs. Blender is installed locally for M3/M4 and remains separate from the physics runtime. Contact engines and learning frameworks are not installed.
+Frozen-file hashes are taken over raw bytes, so `.gitattributes` checks text out with LF, except `blender_worker.py`. That file is stored byte-exact with CRLF line endings, as the M8 suite hashed it. `.gitignore` excludes the environment, tool environments under `tools/`, workspace-local uv cache, target directory, compiled extensions, Python caches, portable tools, and generated `runs/`, `datasets/`, and `benchmarks/` outputs. Blender is installed locally for M3/M4 and remains separate from the physics runtime. Contact engines are not installed, and PyTorch exists only in the `tools/keypoints` environment; the simulator runs the exported network through OpenCV.

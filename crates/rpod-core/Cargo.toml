@@ -7,4 +7,5 @@ publish = false
 
 [dependencies]
 nalgebra = "0.35.0"
+parry3d-f64 = "0.31.1"
 rayon = "1.12.0"

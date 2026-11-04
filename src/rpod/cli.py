@@ -1,6 +1,7 @@
 """Command-line entry points for orbital and controlled approach experiments."""
 
 import argparse
+import json
 from pathlib import Path
 import sys
 
@@ -76,6 +77,7 @@ def main(argv=None) -> int:
     fit.add_argument("--suite", type=Path, default=Path("runs/m8-realistic"))
     fit.add_argument("--output", type=Path, default=Path("models/m9-surrogate.json"))
     fit.add_argument("--draws", type=int, default=200)
+    fit.add_argument("--scenario", choices=("operational", "tumbling"), default="operational")
     campaign = commands.add_parser(
         "monte-carlo", help="run a batched Monte Carlo campaign with the navigation surrogate"
     )
@@ -83,6 +85,8 @@ def main(argv=None) -> int:
     campaign.add_argument("--seed", type=int, default=9)
     campaign.add_argument("--model", type=Path, default=Path("models/m9-surrogate.json"))
     campaign.add_argument("--controller", choices=("reference", "learned"), default="reference")
+    campaign.add_argument("--scenario", choices=("operational", "tumbling"),
+                          default="operational")
     campaign.add_argument("--policy", type=Path, default=Path("models/m10-policy.npy"))
     campaign.add_argument("--output", required=True, type=Path)
     replay_episode = commands.add_parser(
@@ -102,6 +106,29 @@ def main(argv=None) -> int:
     training.add_argument("--pairs", type=int, default=64)
     training.add_argument("--episodes", type=int, default=16)
     training.add_argument("--validation-episodes", type=int, default=1024)
+    commands.add_parser("m11-assets", help="export the unmarked mesh, choose keypoints and "
+                                          "calibrate lidar ICP")
+    dataset = commands.add_parser("keypoint-dataset", help="render labelled keypoint images")
+    dataset.add_argument("--output", type=Path, default=Path("datasets/m11/keypoints"))
+    dataset.add_argument("--train", type=int, default=9000)
+    dataset.add_argument("--val", type=int, default=1000)
+    dataset.add_argument("--test", type=int, default=1500)
+    dataset.add_argument("--calibration", type=Path,
+                         default=Path("datasets/m8-vbar/calibration.json"))
+    keypoint_calibration = commands.add_parser(
+        "keypoint-calibrate", help="evaluate the keypoint network and write its calibration")
+    keypoint_calibration.add_argument("--dataset", type=Path,
+                                      default=Path("datasets/m11/keypoints"))
+    keypoint_calibration.add_argument("--model", type=Path, required=True)
+    keypoint_calibration.add_argument("--calibration", type=Path,
+                                      default=Path("datasets/m8-vbar/calibration.json"))
+    keypoint_calibration.add_argument("--output", type=Path,
+                                      default=Path("models/m11-camera-calibration.json"))
+    m11 = commands.add_parser("m11-suite", help="run or resume the M11 tumbling-target suite")
+    m11.add_argument("--output", required=True, type=Path)
+    m11.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
+    m11.add_argument("--keypoint-model", type=Path, help="fuse camera keypoints from this model")
+    m11.add_argument("--label", default="m11", help="evidence name in benchmarks/")
     cases = commands.add_parser(
         "basilisk-cases", help="write dynamics cross-check cases for tools/basilisk"
     )
@@ -170,21 +197,35 @@ def main(argv=None) -> int:
             print(f"{milestone} passed: {report['passed']}; report: {evidence.resolve()}")
             return 0 if report["passed"] else 1
         elif args.command == "fit-surrogate":
-            from .monte_carlo import fit_and_validate
+            from .monte_carlo import OPERATIONAL, fit_and_validate
 
-            model = fit_and_validate(args.suite, args.output, args.draws)
+            if args.scenario == "tumbling":
+                from .tumble_fleet import tumbling_scenario
+
+                model = fit_and_validate(args.suite, args.output, args.draws,
+                                         tumbling_scenario(), failures="updates")
+            else:
+                model = fit_and_validate(args.suite, args.output, args.draws, OPERATIONAL)
             print(f"Surrogate: {args.output.resolve()}; validation passed: "
                   f"{model['validation']['passed']}")
             return 0 if model["validation"]["passed"] else 1
         elif args.command == "monte-carlo":
             import shutil
 
-            from .monte_carlo import run_campaign
+            from .monte_carlo import OPERATIONAL, run_campaign
             from .vision_records import sha256_file
 
-            # The campaign hashes the fleet, surrogate and campaign code; record the
-            # controller's own code too.
+            # The campaign hashes the fleet, surrogate and campaign code; record the scenario's
+            # and controller's own code too.
             source, provenance = Path(__file__).parent, {}
+            scenario = OPERATIONAL
+            if args.scenario == "tumbling":
+                from .tumble_fleet import tumbling_scenario
+
+                scenario = tumbling_scenario()
+                provenance["scenario_implementation_sha256"] = {
+                    name: sha256_file(source / name) for name in ("tumble_fleet.py", "tumble.py")}
+
             factory = None
             if args.controller == "learned":
                 from .learned_control import IMPLEMENTATION_FILES, LearnedFleetController
@@ -201,8 +242,9 @@ def main(argv=None) -> int:
                     return LearnedFleetController(mission, count, parameters)
             report = run_campaign(
                 args.output, args.episodes, args.seed, args.model, controller_factory=factory,
-                label=args.controller, provenance=provenance)
-            name = "m9-monte-carlo" if args.controller == "reference" else "m10-monte-carlo"
+                label=args.controller, scenario=scenario, provenance=provenance)
+            name = ("m11-monte-carlo" if args.scenario == "tumbling" else
+                    "m9-monte-carlo" if args.controller == "reference" else "m10-monte-carlo")
             evidence = Path("benchmarks") / f"{name}.json"
             evidence.parent.mkdir(exist_ok=True)
             shutil.copyfile(args.output / "report.json", evidence)
@@ -223,6 +265,65 @@ def main(argv=None) -> int:
             print(f"Policy: {args.output.resolve()}; selected generation "
                   f"{selected['generation']}, validation success "
                   f"{selected['success_fraction']:.4f}")
+        elif args.command == "m11-assets":
+            from .m11_suite import prepare_assets
+
+            print(f"M11 assets ready; removed cooperative aids: {', '.join(prepare_assets())}")
+        elif args.command == "keypoint-dataset":
+            from .keypoints import load_keypoints, render_dataset
+            from .m11_suite import KEYPOINTS
+            from .target_mesh import MESH_PATH, UnmarkedRenderer, load_target_mesh
+            from .visual_run import camera_from_settings, load_qualified_calibration
+
+            camera = camera_from_settings(load_qualified_calibration(args.calibration)["camera"])
+            render_dataset(args.output, {"train": args.train, "val": args.val, "test": args.test},
+                           11, camera, load_target_mesh(MESH_PATH), load_keypoints(KEYPOINTS),
+                           lambda folder: UnmarkedRenderer(folder, camera=camera))
+            print(f"Keypoint dataset: {args.output.resolve()}")
+        elif args.command == "keypoint-calibrate":
+            from .keypoints import (KeypointEstimator, calibrate_keypoints, error_summary,
+                                    evaluate, load_keypoints, model_provenance)
+            from .m11_suite import KEYPOINTS
+            from .recording import write_json
+            from .visual_run import camera_from_settings, load_qualified_calibration
+
+            settings = load_qualified_calibration(args.calibration)["camera"]
+            camera = camera_from_settings(settings)
+            estimator = KeypointEstimator(args.model, load_keypoints(KEYPOINTS), camera)
+            bins = [5.7, 8.45, 15.95, 25.95, 31.95, 1e9]
+            provenance = model_provenance(args.model, KEYPOINTS)
+            validation = evaluate(args.dataset, "val", estimator)
+            calibration = calibrate_keypoints(validation, bins, settings, provenance)
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(calibration, indent=2) + "\n", encoding="utf-8",
+                                   newline="\n")
+            test = evaluate(args.dataset, "test", estimator, seed=1)
+            evidence = Path("benchmarks") / "m11-keypoint-evaluation.json"
+            evidence.parent.mkdir(exist_ok=True)
+            write_json(evidence, {
+                "artifact_type": "m11_keypoint_evaluation", **provenance,
+                "calibration_qualified": calibration["qualification_passed"],
+                "gross_errors": calibration["gross_errors"],
+                "validation_by_range": error_summary(validation, bins),
+                "held_out_test_by_range": error_summary(test, bins),
+                "held_out_conditions": "Sun phase 70-100 degrees, 3 DN / 0.75 px degradation",
+                "held_out_rows": test})
+            valid = [row for row in test if row["valid"]]
+            print(f"Keypoint calibration: {args.output.resolve()}; qualified "
+                  f"{calibration['qualification_passed']}; held-out valid "
+                  f"{len(valid)}/{len(test)}; report: {evidence.resolve()}")
+            return 0 if calibration["qualification_passed"] else 1
+        elif args.command == "m11-suite":
+            import shutil
+
+            from .m11_suite import run_m11_suite
+
+            report = run_m11_suite(args.output, args.calibration, args.keypoint_model)
+            evidence = Path("benchmarks") / f"{args.label}-evaluation.json"
+            evidence.parent.mkdir(exist_ok=True)
+            shutil.copyfile(args.output / "report.json", evidence)
+            print(f"M11 passed: {report['passed']}; report: {evidence.resolve()}")
+            return 0 if report["passed"] else 1
         elif args.command == "basilisk-cases":
             from .crosscheck import basilisk_cases
 

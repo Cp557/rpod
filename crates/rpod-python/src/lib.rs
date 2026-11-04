@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 use pyo3::{exceptions::PyOverflowError, exceptions::PyValueError};
 
 mod batch;
+mod mesh;
 mod rigid_body;
 
 type VectorTuple = (f64, f64, f64);
@@ -102,6 +103,7 @@ fn _core(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<rigid_body::RigidBodyEngine>()?;
     module.add_class::<rigid_body::RigidBodySnapshot>()?;
     module.add_class::<batch::RigidBodyBatch>()?;
+    module.add_class::<mesh::TargetMesh>()?;
     module.add_function(wrap_pyfunction!(batch::pair_metrics, module)?)?;
     Ok(())
 }

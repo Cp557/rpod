@@ -1,8 +1,9 @@
 """Presentation-only movie of a saved visual run, filmed by outside cameras.
 
 Reads a validated schema-3 record and renders it in the realistic scene, with a chaser,
-city lights, stars and thruster plumes added, under the run's own Sun. Nothing here feeds
-physics, autonomy, or evaluation.
+city lights, stars and thruster plumes added, under the run's own Sun. An M11 run is filmed
+around the unmarked target, with the close shot riding in its tumbling body axes. Nothing
+here feeds physics, autonomy, or evaluation.
 """
 
 from concurrent.futures import ThreadPoolExecutor
@@ -16,6 +17,7 @@ import numpy as np
 from .camera import CameraModel, earth_rotation_ne
 from .frames import port_relative_state, quaternion_matrices, relative_state
 from .rendering import ASSET_CREDITS, ASSETS, BlenderRenderer, realistic_scene
+from .tumble import tumble_metrics
 from .vision_records import json_value, new_output, read_jsonl, read_rgb, sha256_file
 from .visual_recording import load_visual_run
 from .visualization import PHASE_NAMES
@@ -29,9 +31,10 @@ OFFSET_LVLH = np.array([0.25, -0.2, -0.95]) / np.linalg.norm([0.25, -0.2, -0.95]
 DISTANCE_PER_SEPARATION = 1.5
 MIN_DISTANCE_M = 12.0
 # Close shot, after the wide shot's first ESTABLISHING_S of the run: over the chaser's
-# shoulder at this LVLH offset from its center of mass (normal sign as above), aimed midway
-# between the chaser and the target's docking port.
-CLOSE_OFFSET_LVLH_M = np.array([1.2, -5.0, -2.4])
+# shoulder at this offset from its center of mass, aimed midway between the chaser and the
+# target's docking port. The offset is in target LVLH, or in the target's body axes when it
+# tumbles (the two coincide for a target holding LVLH), with the normal sign toward the Sun.
+CLOSE_OFFSET_M = np.array([1.2, -5.0, -2.4])
 ESTABLISHING_S = 30.0
 TICKS_PER_FRAME = 3
 FPS = 30
@@ -56,9 +59,10 @@ def _look(position, aim, up):
     return np.column_stack((np.cross(down, forward), down, forward))
 
 
-def _sun_side(basis_nl, sunlight_n):
-    """+1 or -1: the LVLH normal side the Sun shines from (`sunlight_n` is the incident ray)."""
-    return 1.0 if (basis_nl.T @ sunlight_n)[2] >= 0 else -1.0
+def _sun_side(frames_nl, sunlight_n):
+    """+1 or -1: the normal side the Sun shines from (`sunlight_n` is the incident ray), on
+    average over one frame-to-inertial rotation or a stack of them."""
+    return 1.0 if np.sum(np.asarray(frames_nl)[..., :, 2] @ sunlight_n) >= 0 else -1.0
 
 
 def chase_camera(target_n, chaser_n, basis_nl, sunlight_n):
@@ -74,14 +78,14 @@ def chase_camera(target_n, chaser_n, basis_nl, sunlight_n):
     return position, _look(position, middle, basis_nl[:, 0])
 
 
-def close_camera(chaser_n, port_n, basis_nl, sunlight_n):
-    """Close shot: over the chaser's shoulder toward the target's docking port, LVLH radial
-    up, aimed midway between their directions so both stay in frame at any range."""
-    offset = CLOSE_OFFSET_LVLH_M * [1, 1, _sun_side(basis_nl, sunlight_n)]
-    position = np.asarray(chaser_n) + basis_nl @ offset
+def close_camera(chaser_n, port_n, frame_nl, side):
+    """Close shot: over the chaser's shoulder toward the target's docking port, frame +x up,
+    aimed midway between their directions so both stay in frame at any range. `side` (+1 or
+    -1) is the frame's normal side the camera takes."""
+    position = np.asarray(chaser_n) + frame_nl @ (CLOSE_OFFSET_M * [1, 1, side])
     rays = [point - position for point in (np.asarray(chaser_n), np.asarray(port_n))]
     aim = position + sum(ray / np.linalg.norm(ray) for ray in rays)
-    return position, _look(position, aim, basis_nl[:, 0])
+    return position, _look(position, aim, frame_nl[:, 0])
 
 
 def plume_throttles(force_body_n, limit_n):
@@ -96,12 +100,12 @@ def plume_throttles(force_body_n, limit_n):
 class _ShowcaseRenderer(BlenderRenderer):
     """BlenderRenderer process handling, driving the showcase worker."""
 
-    def __init__(self, output_dir):
+    def __init__(self, output_dir, worker="showcase_worker.py"):
         scene = {**realistic_scene(samples=SAMPLES), "exposure": EXPOSURE,
                  "star_strength": STAR_STRENGTH, "city_lights": CITY_LIGHTS,
                  "plume_glow": PLUME_GLOW}
         super().__init__(output_dir, camera=VIEW, scene=scene)
-        self._worker = Path(__file__).with_name("showcase_worker.py").resolve()
+        self._worker = Path(__file__).with_name(worker).resolve()
 
     def render_view(self, output_path, target, chaser, earth, light_direction_c, rotation_nc,
                     throttles):
@@ -163,10 +167,13 @@ def render_showcase(run_dir, output, ticks=None):
     positions, quaternions = trajectory["positions_m"], trajectory["quaternions_xyzw"]
     rotations = quaternion_matrices(quaternions)
     basis = relative_state(positions, trajectory["velocities_mps"])[2]
-    gaps = -port_relative_state(
-        positions, trajectory["velocities_mps"], quaternions,
-        trajectory["angular_velocities_body_radps"], manifest["docking_ports_body_m"],
-    )[0][:, 1]
+    states = (positions, trajectory["velocities_mps"], quaternions,
+              trajectory["angular_velocities_body_radps"], manifest["docking_ports_body_m"])
+    # M11 runs: an unmarked target tumbling freely, scored in its port frame.
+    tumbling = manifest["scenario"].startswith("visual-m11-")
+    gaps = tumble_metrics(*states)["gap"] if tumbling else -port_relative_state(*states)[0][:, 1]
+    tumble_deg_s = np.degrees(np.linalg.norm(trajectory["angular_velocities_body_radps"][:, 0],
+                                             axis=-1))
     target_port_body = np.asarray(manifest["docking_ports_body_m"][0], dtype=np.float64)
     forces = trajectory["applied_forces_body_n"][:, 1]
     force_limit = float(manifest["force_limits_n"][1])
@@ -174,6 +181,12 @@ def render_showcase(run_dir, output, ticks=None):
     captures = read_jsonl(run_dir / "observations.jsonl")
     capture_times = np.array([row["capture_time_ns"] for row in captures])
     ticks = range(0, len(trajectory["tick"]), TICKS_PER_FRAME) if ticks is None else ticks
+    close_ticks = [index for index in ticks
+                   if trajectory["tick"][index] * manifest["dt_ns"] / 1e9 >= ESTABLISHING_S]
+    # The close shot rides in the tumbling target's body axes, on the side the Sun lights for
+    # most of the shot, so the camera never jumps.
+    shot_frames = rotations[:, 0] if tumbling else basis
+    side = _sun_side(shot_frames[close_ticks], sunlight_n)
 
     frames = output / "frames"
     movie = output / "showcase.mp4"
@@ -184,14 +197,15 @@ def render_showcase(run_dir, output, ticks=None):
     started, render_seconds, shown, inset, encoded = time.perf_counter(), [], None, None, None
     try:
         # One thread overlays and encodes each frame while Blender renders the next.
-        with _ShowcaseRenderer(output) as renderer, ThreadPoolExecutor(1) as encoder:
+        worker = "m11_showcase_worker.py" if tumbling else "showcase_worker.py"
+        with _ShowcaseRenderer(output, worker) as renderer, ThreadPoolExecutor(1) as encoder:
             for count, index in enumerate(ticks):
                 time_ns = int(trajectory["tick"][index]) * manifest["dt_ns"]
                 close = time_ns / 1e9 >= ESTABLISHING_S
                 if close:
                     port_n = positions[index, 0] + rotations[index, 0] @ target_port_body
                     position_nc, rotation_nc = close_camera(positions[index, 1], port_n,
-                                                            basis[index], sunlight_n)
+                                                            shot_frames[index], side)
                 else:
                     position_nc, rotation_nc = chase_camera(
                         positions[index, 0], positions[index, 1], basis[index], sunlight_n)
@@ -217,7 +231,7 @@ def render_showcase(run_dir, output, ticks=None):
                     f"T+ {time_ns / 1e9:6.1f} s",
                     f"Port gap {gaps[index]:5.1f} m",
                     f"Phase: {PHASE_NAMES[int(trajectory['phase'][index])]}",
-                )
+                ) + ((f"Target tumbling {tumble_deg_s[index]:.2f} deg/s",) if tumbling else ())
                 if encoded is not None:
                     encoded.result()
                 encoded = encoder.submit(_encode, writer, path, inset, lines, close)
@@ -242,9 +256,11 @@ def render_showcase(run_dir, output, ticks=None):
             "distance_m": f"max({DISTANCE_PER_SEPARATION} * separation, {MIN_DISTANCE_M})",
         },
         "close_shot": {
-            "from_s": ESTABLISHING_S, "offset_from_chaser_lvlh_m": CLOSE_OFFSET_LVLH_M,
+            "from_s": ESTABLISHING_S, "offset_from_chaser_m": CLOSE_OFFSET_M,
+            "frame": "target body axes" if tumbling else "target LVLH", "normal_side": side,
             "look_at": "midway between the directions to the chaser and the target docking port",
         },
+        "target": "unmarked, tumbling (M11 worker)" if tumbling else "M8 realistic target",
         "assets": {name: {"url": url, "sha256": digest} for name, (url, digest) in ASSETS.items()},
         "credits": ASSET_CREDITS, "exposure": EXPOSURE, "star_strength": STAR_STRENGTH,
         "city_lights": CITY_LIGHTS, "plume_glow": PLUME_GLOW,

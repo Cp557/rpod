@@ -41,7 +41,7 @@ class ChaseCameraFraming(unittest.TestCase):
         for gap in (30.0, 1.0):
             with self.subTest(gap=gap):
                 chaser = port - (gap + 0.5) * basis[:, 1]
-                position, rotation_nc = close_camera(chaser, port, basis, basis @ [0, 0.97, 0.25])
+                position, rotation_nc = close_camera(chaser, port, basis, 1.0)
                 np.testing.assert_allclose(rotation_nc.T @ rotation_nc, np.eye(3), atol=1e-12)
                 points_c = (np.stack((chaser, port)) - position) @ rotation_nc
                 self.assertTrue(np.all(points_c[:, 2] > 0))
