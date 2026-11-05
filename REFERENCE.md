@@ -997,6 +997,7 @@ The surrogate fit exits 1 because its validation fails (see M11 results).
 | Final port speed | pass: 26 of 28 |
 | Braking count | pass: 28 of 28 |
 
+The validation runs the fit to half the episodes, 200 times per episode. The diagnostics below come from 50 runs per episode of the final fit to all 28.
 - **Timing.** The surrogate has one delivery stream at the camera's cadence, so it acquires at 2.2 s, as the truth-navigation oracle does; its median completion time matches the oracle's in nearly every episode, with the band's lower edge 0.1–0.2 s below. The fused agent updates on camera and lidar deliveries, twice a second. It acquires at 1.2 s and finishes about 1 s before the oracle, scattered by about ±0.5 s. Passing would take a second delivery stream and that scatter, fitted and judged on the same 28 episodes.
 - **Failures.** The fit counts a failure only at the camera's delivery ticks, so it misses lidar refusals: `21`'s brake began at a lidar tick, and the fit recorded only the refused camera tick that followed. It spreads that one rejection's probability over everything after 160 s, so 12% of surrogate runs brake; they overshoot to a median 4.40 m and finish at a median 295 s. The rendered run's one brake came at the hold and cost 30 s.
 - The tumbling fleet is checked only against the scalar oracle (outcomes and end ticks for two tumbles).

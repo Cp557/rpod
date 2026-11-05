@@ -6,7 +6,7 @@ Simulation, perception and autonomy for spacecraft rendezvous, proximity operati
 
 *Episode 16 of the M11 suite, sped up 22×: the chaser follows QuikSCAT's docking axis as the target tumbles at 1°/s, navigating by lidar shape matching and camera keypoints. The inset is the docking camera. `rpod showcase` rendered it from the run's saved record.*
 
-A chaser spacecraft flies itself to a 5 m hold point at a satellite using only what its sensors deliver: camera images that Blender renders from the simulated state, and a simulated flash lidar, arriving late and sometimes dropped or degraded. Physics runs in Rust. Guidance, navigation, perception and evaluation run in Python and never see the true state. Every result below comes from a frozen, hash-checked evaluation suite or a seeded Monte Carlo campaign, and every run saves records that replay without rerunning the physics.
+A chaser spacecraft flies itself to a 5 m hold point at a satellite using only what its sensors deliver: camera images that Blender renders from the simulated state, and a simulated flash lidar, arriving late and sometimes dropped or degraded. Physics runs in Rust. Guidance, navigation, perception and evaluation run in Python and never see the true state. Every result below comes from a frozen, hash-checked evaluation suite, a seeded Monte Carlo campaign or a recorded benchmark, and every run saves records that replay without rerunning the physics.
 
 ## Results
 
