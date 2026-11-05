@@ -672,6 +672,7 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
   - The cost grows as the target fills the close shot.
   - Run `29` (933 frames, never nearer than 13 m) took 31 min.
   - Run `00` (694 frames, to 5 m) took 28 min, against 39 min before.
+  - M11 fused run `16` (694 frames, to 5 m, the target tumbling at 0.99°/s) took 29 min.
   - A run `29` frame splits into:
     - about 0.9 s of GPU sampling, two thirds of it Earth's surface and the atmosphere shell;
     - about 0.8 s for the CPU denoiser on all 12 threads (1.0 s on the base worker's 6);
@@ -1002,12 +1003,14 @@ The surrogate fit exits 1 because its validation fails (see M11 results).
 
 ## Source layout and generated output
 
+- `README.md`, `LICENSE` (Apache-2.0, declared in `pyproject.toml` and the Cargo workspace) and `NOTICE` (credits for the NASA and ESA data downloaded at run time, which `docs/showcase.gif` is rendered from).
+- `.github/workflows/ci.yml`: on pushes to `main` and on pull requests, Windows and Ubuntu runners sync the locked environment, run the Rust tests, formatting and lints, build the release extension and run the Python tests. It has not run yet; the repository is unpublished.
 - `crates/rpod-core`: native dynamics and Rust acceptance tests.
 - `crates/rpod-python`: PyO3 interface and compiler provenance.
 - `crates/rpod-core/src/batch.rs`, `metrics.rs`: the batched engine and pair metrics (M9); `mesh.rs` (with its binding in `crates/rpod-python/src/mesh.rs`): target-mesh ray casts and closest points (M11).
 - `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`); M10 policy (`policy.py`), safety filter (`safety_filter.py`), learned controllers (`learned_control.py`) and evolution-strategies training (`train_policy.py`); M11 tumbling scenario, guidance and navigation (`tumble.py`) and its fleet variant (`tumble_fleet.py`), unmarked target worker and mesh (`m11_worker.py`, `target_mesh.py`), natural-feature lidar (`natural_lidar.py`), camera keypoints (`keypoints.py`), suite (`m11_suite.py`) and tumbling showcase worker (`m11_showcase_worker.py`).
 - `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`; the M10 policy `m10-policy.npy` with `m10-policy.json`; M11's `m11-keypoints.json`, `m11-lidar-calibration.json` and `m11-camera-calibration.json`).
-- `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`).
+- `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`) and the README's `showcase.gif`, cut from the M11 showcase movie.
 - `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases. `tools/keypoints`: a separate uv project (Python 3.13, PyTorch) that trains the keypoint network and exports it to ONNX.
 - `tests`: Python integration and contract checks; `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
 

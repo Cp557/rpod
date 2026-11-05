@@ -1,0 +1,17 @@
+RPOD
+Copyright 2026 Connor Park
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party data, downloaded at run time and not distributed with this repository,
+used under its providers' terms:
+- Earth imagery: NASA Earth Observatory (Blue Marble Next Generation, Blue Marble
+  clouds, Black Marble 2016).
+- Star map: NASA/Goddard Space Flight Center Scientific Visualization Studio, Deep Star
+  Maps 2020; Gaia DR2: ESA/Gaia/DPAC.
+- Spacecraft models: NASA 3D Resources (QuikSCAT, IBEX).
+
+docs/showcase.gif is rendered from these assets.
+
+Optional tools install their own dependencies: Basilisk (tools/basilisk) and PyTorch
+with torchvision ImageNet weights (tools/keypoints).

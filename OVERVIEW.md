@@ -6,7 +6,7 @@ It begins as a portfolio project, with the longer-term intention of exploring wh
 
 The current direction is a custom Rust simulation core, Python for experiments and autonomy, Rerun for engineering visualization, and Blender for spacecraft assets and camera imagery.
 
-This document describes the project's purpose and intended direction. The implementation includes orbital motion, rigid-body rotation, bounded actuation, and truth-state approach control. It now also renders calibrated cooperative-target images, estimates relative pose from marker pixels, and uses delayed visual navigation for approach, retreat, and tracking-loss handling. An optional simulated flash lidar with target retroreflectors feeds the same navigation filter, and an optional realistic scene renders a detailed satellite under space lighting with a procedural Earth. Broader task environments, natural-feature perception, and physical contact remain future work. [REFERENCE.md](REFERENCE.md) records implemented behavior and qualification results; this overview is not an implementation specification.
+This document describes the project's purpose and intended direction. The implementation includes orbital motion, rigid-body rotation, bounded actuation, and truth-state approach control. It renders calibrated camera images and uses delayed visual navigation for approach, retreat, and tracking-loss handling, first from cooperative markers and then, on an unmarked tumbling satellite, from keypoints found by a trained network. A simulated flash lidar feeds the same navigation filter; on the unmarked satellite, matching its scans to the satellite's shape carries most of the navigation. A realistic scene renders NASA spacecraft models under space lighting with an imaged Earth. A batched engine runs Monte Carlo campaigns of 100,000 episodes, in which a learned approach controller is trained and evaluated behind a safety filter. Broader task environments, individual thrusters, and physical contact remain future work. [REFERENCE.md](REFERENCE.md) records implemented behavior and qualification results; this overview is not an implementation specification.
 
 ## End goal
 
@@ -63,7 +63,7 @@ Basilisk remains a useful reference for spacecraft models and selected compariso
 
 The Rust core should run without a viewer or renderer. Visual tools consume its timestamped outputs. Rendering time on the computer must not implicitly advance physical simulation time.
 
-The setup includes nalgebra for dynamics mathematics, PyO3 and maturin for the Python bridge and packaging, NumPy and Matplotlib for experiments, OpenCV for image-based pose estimation, and Rerun for replay. Blender runs as a separate persistent renderer. Parry's double-precision geometry queries remain a candidate for collision work. Installed versions and setup commands are recorded in [REFERENCE.md](REFERENCE.md). A general plugin system or interchangeable-engine framework is not an initial requirement.
+The setup includes nalgebra for dynamics mathematics, PyO3 and maturin for the Python bridge and packaging, NumPy and Matplotlib for experiments, OpenCV for image-based pose estimation, and Rerun for replay. Blender runs as a separate persistent renderer. Parry's double-precision geometry answers mesh ray casts and clearance queries; it remains a candidate for collision work. Installed versions and setup commands are recorded in [REFERENCE.md](REFERENCE.md). A general plugin system or interchangeable-engine framework is not an initial requirement.
 
 ## Foundation rules
 
@@ -144,19 +144,20 @@ Verification should include analytical motion cases, frame and port-kinematics c
 
 - Target users, useful applications, and product scope for potential commercialization.
 - Physical parameters and task thresholds beyond the current fixed suites.
-- Target attitude and motion assumptions beyond the controlled cooperative target.
+- Targets of unknown shape or inertia, and the inspection and synchronization that precede a tumbling-target approach.
 - When ideal force/torque actuation should give way to individual thruster models.
-- Camera, illumination, noise, latency, and sensor models beyond the calibrated pinhole baseline.
-- Controller and navigation alternatives, and learning methods.
+- Camera, illumination, noise, latency, and sensor models beyond the calibrated pinhole baseline, and perception validated on real imagery.
+- Controller and navigation alternatives beyond the reference law and the evolution-strategies policy.
 - The accuracy and operating limits required of collision, dwell, and retreat checks.
 - Scaling the rendered feedback loop and acceptable runtime for larger experiments.
 - The docking mechanism and contact solver, if physical capture becomes a requirement.
-- Distribution, licensing, and publication plans.
 
 Game engines, Isaac Sim, a contact engine, GPU execution, and a large-scale learning stack are not prerequisites for the initial build. They remain future choices to assess against a concrete need and available hardware.
 
 ## Project documents
 
+- [README.md](README.md): a summary of results, architecture, and quickstart.
 - [CLAUDE.md](CLAUDE.md): instructions for working in this repository.
 - [OVERVIEW.md](OVERVIEW.md): purpose, intended direction, proposed scope, and open decisions.
 - [REFERENCE.md](REFERENCE.md): the canonical record of implemented architecture, interfaces, invariants, and operational behavior.
+- [docs](docs): milestone write-ups with method, results, limitations, and reproduction commands.

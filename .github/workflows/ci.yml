@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install Python and dependencies
+        run: uv sync --locked
+      - name: Rust tests, formatting and lints
+        shell: bash
+        run: |
+          export PYO3_PYTHON="$(uv run --no-sync python -c 'import sys; print(sys.executable)')"
+          cargo test -p rpod-core --locked
+          cargo fmt --all -- --check
+          cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Build the release extension
+        run: uv run --no-sync maturin develop --release --locked
+      - name: Python tests
+        run: uv run --no-sync python -W error -m unittest discover -s tests
