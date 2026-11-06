@@ -135,6 +135,11 @@ def main(argv=None) -> int:
     m12.add_argument("--keypoint-model", type=Path, help="fuse camera keypoints from this model")
     m12.add_argument("--configuration", choices=("m11", "robust"), default="m11")
     m12.add_argument("--label", default="m12", help="evidence name in benchmarks/")
+    commands.add_parser("m13-calibrate", help="calibrate the M13 docking lidar against truth")
+    m13 = commands.add_parser("m13-suite", help="run or resume the M13 docking suite")
+    m13.add_argument("--output", required=True, type=Path)
+    m13.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
+    m13.add_argument("--label", default="m13", help="evidence name in benchmarks/")
     passive = commands.add_parser(
         "passive-safety", help="coast from every 10 s of a tumbling suite's operational episodes"
     )
@@ -346,6 +351,24 @@ def main(argv=None) -> int:
             evidence.parent.mkdir(exist_ok=True)
             shutil.copyfile(args.output / "report.json", evidence)
             print(f"M12 passed: {report['passed']}; recovered {report['recovered']} of "
+                  f"{len(report['episodes'])}; report: {evidence.resolve()}")
+            return 0 if report["passed"] else 1
+        elif args.command == "m13-calibrate":
+            from .m13_suite import LIDAR_CALIBRATION, prepare_docking_calibration
+
+            calibration = prepare_docking_calibration()
+            print(f"Docking lidar calibration: {LIDAR_CALIBRATION.resolve()}; samples per bin "
+                  f"{calibration['samples']}")
+        elif args.command == "m13-suite":
+            import shutil
+
+            from .m13_suite import run_m13_suite
+
+            report = run_m13_suite(args.output, args.calibration)
+            evidence = Path("benchmarks") / f"{args.label}-evaluation.json"
+            evidence.parent.mkdir(exist_ok=True)
+            shutil.copyfile(args.output / "report.json", evidence)
+            print(f"M13 passed: {report['passed']}; docked {report['docked']} of "
                   f"{len(report['episodes'])}; report: {evidence.resolve()}")
             return 0 if report["passed"] else 1
         elif args.command == "passive-safety":

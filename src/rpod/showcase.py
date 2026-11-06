@@ -133,8 +133,22 @@ def _bloom(image):
     return np.clip(image + BLOOM_GAIN * glow, 0, 255).astype(np.uint8)
 
 
-def _overlay(frame, inset, lines, close):
-    """Docking-camera inset at the bottom, clear of the spacecraft (centre in the wide shot,
+def _lidar_inset(path):
+    """A lidar scan as a depth image: nearer returns brighter, no return black."""
+    with np.load(path) as data:
+        ranges = data["ranges_m"].astype(np.float64)
+    returns = np.isfinite(ranges)
+    if not returns.any():
+        return None
+    near, far = np.percentile(ranges[returns], [2, 98])
+    depth = np.clip((far - np.where(returns, ranges, far)) / max(far - near, 1e-6), 0, 1)
+    colored = cv2.applyColorMap((depth * 255).astype(np.uint8), cv2.COLORMAP_INFERNO)
+    colored[~returns] = 0
+    return cv2.cvtColor(colored, cv2.COLOR_BGR2RGB)
+
+
+def _overlay(frame, inset, lines, close, sensor="Docking camera"):
+    """Docking-sensor inset at the bottom, clear of the spacecraft (centre in the wide shot,
     right in the close shot), and labels at the top left."""
     height, width = frame.shape[:2]
     margin = round(16 * SCALE)
@@ -146,16 +160,16 @@ def _overlay(frame, inset, lines, close):
         frame[y:y + INSET_PX, x:x + INSET_PX] = cv2.resize(
             inset, (INSET_PX, INSET_PX), interpolation=cv2.INTER_AREA)
     cv2.rectangle(frame, (x - 1, y - 1), (x + INSET_PX, y + INSET_PX), (200, 200, 200), 1)
-    _text(frame, "Docking camera" + ("" if inset is not None else ": no image"),
+    _text(frame, sensor + ("" if inset is not None else ": no image"),
           (x, y - round(8 * SCALE)), 0.5)
     for row, line in enumerate(lines):
         _text(frame, line, (margin, round((32 + 28 * row) * SCALE)), 0.7)
     return frame
 
 
-def _encode(writer, path, inset, lines, close):
+def _encode(writer, path, inset, lines, close, sensor):
     """Bloom and overlay the clean render at `path`, then append it to the video."""
-    frame = _overlay(_bloom(read_rgb(path)), inset, lines, close)
+    frame = _overlay(_bloom(read_rgb(path)), inset, lines, close, sensor)
     writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
 
@@ -178,8 +192,15 @@ def render_showcase(run_dir, output, ticks=None):
     forces = trajectory["applied_forces_body_n"][:, 1]
     force_limit = float(manifest["force_limits_n"][1])
     sunlight_n = np.asarray(manifest["sunlight_direction_inertial"], dtype=np.float64)
+    # Without camera images (lidar-only runs) the inset shows the latest lidar scan.
     captures = read_jsonl(run_dir / "observations.jsonl")
+    sensor = "Docking camera"
+    if not any(row.get("image_path") for row in captures) and (run_dir / "lidar.jsonl").is_file():
+        captures, sensor = read_jsonl(run_dir / "lidar.jsonl"), "Docking lidar"
     capture_times = np.array([row["capture_time_ns"] for row in captures])
+    # M13 docking runs mark the captured, detumbling stack with phase 0.
+    phase_names = (("captured",) + PHASE_NAMES[1:] if manifest["scenario"].endswith("-docking")
+                   else PHASE_NAMES)
     ticks = range(0, len(trajectory["tick"]), TICKS_PER_FRAME) if ticks is None else ticks
     close_ticks = [index for index in ticks
                    if trajectory["tick"][index] * manifest["dt_ns"] / 1e9 >= ESTABLISHING_S]
@@ -223,18 +244,22 @@ def render_showcase(run_dir, output, ticks=None):
                 render_seconds.append(result["render_seconds"])
                 latest = int(np.searchsorted(capture_times, time_ns, side="right")) - 1
                 if latest != shown:
-                    image_path = captures[latest]["image_path"] if latest >= 0 else None
-                    inset = None if image_path is None else read_rgb(run_dir / image_path)
+                    row = captures[latest] if latest >= 0 else {}
+                    if sensor == "Docking lidar":
+                        inset = _lidar_inset(run_dir / row["scan_path"]) if row else None
+                    else:
+                        image_path = row.get("image_path")
+                        inset = None if image_path is None else read_rgb(run_dir / image_path)
                     shown = latest
                 lines = (
                     run_dir.name,
                     f"T+ {time_ns / 1e9:6.1f} s",
                     f"Port gap {gaps[index]:5.1f} m",
-                    f"Phase: {PHASE_NAMES[int(trajectory['phase'][index])]}",
+                    f"Phase: {phase_names[int(trajectory['phase'][index])]}",
                 ) + ((f"Target tumbling {tumble_deg_s[index]:.2f} deg/s",) if tumbling else ())
                 if encoded is not None:
                     encoded.result()
-                encoded = encoder.submit(_encode, writer, path, inset, lines, close)
+                encoded = encoder.submit(_encode, writer, path, inset, lines, close, sensor)
                 if count % 30 == 0:
                     print(f"frame {count + 1}/{len(ticks)}", flush=True)
             if encoded is not None:

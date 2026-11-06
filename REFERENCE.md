@@ -4,7 +4,7 @@ This document records implemented behavior. [OVERVIEW.md](OVERVIEW.md) describes
 
 ## Current implementation
 
-RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. M10 trains an approach policy in that fleet and flies it behind a runtime safety filter, scored on the same paired campaign and rendered suite as the reference controller; the learned rendered suite fails its fault gate on one abort episode. M11 removes the cooperative aids and lets the target tumble freely: the chaser navigates by lidar shape matching against the target mesh, optionally fused with camera keypoints from a trained network, and holds in the tumbling port's frame; its lidar-only and fused suites pass all gates, but the M9 surrogate does not validate against the fused suite, so M11 makes no Monte Carlo claim. M12 fails the lidar itself on the tumbling target, adds a collision-avoidance burn after a navigation loss and a coast check for passive safety, and fixes a mesh-normal defect that had degraded M11's lidar shape matching; with the fixed core and a more tolerant configuration, the chaser recovers from all twelve suite faults. Individual thrusters, fuel/mass depletion, environmental disturbances, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
+RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. M10 trains an approach policy in that fleet and flies it behind a runtime safety filter, scored on the same paired campaign and rendered suite as the reference controller; the learned rendered suite fails its fault gate on one abort episode. M11 removes the cooperative aids and lets the target tumble freely: the chaser navigates by lidar shape matching against the target mesh, optionally fused with camera keypoints from a trained network, and holds in the tumbling port's frame; its lidar-only and fused suites pass all gates, but the M9 surrogate does not validate against the fused suite, so M11 makes no Monte Carlo claim. M12 fails the lidar itself on the tumbling target, adds a collision-avoidance burn after a navigation loss and a coast check for passive safety, and fixes a mesh-normal defect that had degraded M11's lidar shape matching; with the fixed core and a more tolerant configuration, the chaser recovers from all twelve suite faults. M13 docks: with a 90-degree lidar on its docking axis, an attitude hold close in and a committed final coast, the chaser closes on the tumbling port, is captured inside a stated envelope by a momentum-conserving latch, and detumbles the joined stack, in all 28 suite episodes. Individual thrusters, fuel/mass depletion, environmental disturbances, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
 
 The Rust `rpod-core` crate owns state and time. `rpod-python` exposes it through PyO3. Python defines scenarios, collects snapshots, derives relative state and diagnostics, and exports recordings. Physics has no renderer dependency.
 
@@ -286,7 +286,7 @@ The three uninterrupted approaches finish within 1.005× their paired oracle tim
 
 The official nominal feedback run took 362.2 wall-clock seconds for 208.4 simulated seconds, excluding its separately timed paired oracle. Its sampled Blender peak RSS was 266.2 MiB. Qualification cases ran in pairs on the same desktop, so these wall times describe that workload rather than an isolated renderer or real-time guarantee. Each run's summary preserves startup, per-render/request timing, sampled RSS, and total feedback-loop wall time.
 
-The current fast suite passes 77 Python tests and 22 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
+The current fast suite passes 85 Python tests and 22 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
 
 ### Schema 3 visual records
 
@@ -685,7 +685,7 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 
 **Overlay** (drawn by OpenCV on each clean render; sizes scale with the image height from a 720-line base):
 - **Bloom:** a soft glow on highlights: threshold 190, σ 9 px, gain 0.8.
-- **Inset:** the run's most recent docking-camera image captured at or before that tick, or a "no image" box for a missing capture. It is 405 px wide, at the bottom centre in the wide shot and the bottom right in the close shot, clear of the spacecraft.
+- **Inset:** the run's most recent docking-camera image captured at or before that tick, or a "no image" box for a missing capture. It is 405 px wide, at the bottom centre in the wide shot and the bottom right in the close shot, clear of the spacecraft. A run without camera images (lidar only) shows its latest lidar scan instead, as a depth image (inferno colormap, nearer brighter, scaled between the scan's 2nd and 98th percentile ranges). In M13 docking runs the phase label reads "captured" for phase 0, the latched stack.
 - **Labels:** run name, elapsed time, port gap and supervisor phase; for M11 runs, also the target's tumble rate.
 
 **Outputs:**
@@ -1094,6 +1094,88 @@ Both were chosen from off-suite episodes (M11 operational episodes 12–18). The
 - **At the hold**, 12 of 86 states reach the target later, the latest after 54 min, when the relative orbit brings the chaser back.
 - **Inside 12 m, safety rests on active control.** The burn provides it after a navigation loss; nothing provides it after a total loss of thrust.
 
+## Docking with the tumbling target (M13)
+
+M13 carries the M11 approach through to contact: from the 5 m hold the chaser closes on the tumbling port, is captured inside a stated envelope, and detumbles the joined stack. Capture is a momentum-conserving latch, not a contact-dynamics model.
+
+**Docking lidar** (`docking.py`). M13's chaser carries one flash lidar on its docking axis: 90 degrees wide, 512×512, mounted at the port (0, 0.5, 0) and looking along +Y. It replaces M11's 30-degree unit for the whole approach.
+- **Why this sensor.** Off-line sweeps on the mesh compared three lidars along an aligned approach.
+  - M11's 30-degree unit loses the face inside about 1.5 m.
+  - A 60-degree unit loses lateral position inside about 0.5 m.
+  - The 90-degree unit tracks to about 1 cm from 30 m down to a 1 m gap, and acquires from scratch even at 5 m.
+- **Calibration** (`models/m13-lidar-calibration.json`, `rpod m13-calibrate`). 1,800 tracked poses against truth, along the approach geometry: on the port axis within 0.1 m plus 1% of the gap and 3 degrees, the target at any roll. Gaps run from the minimum range to 33 m.
+  - Per distance bin, sigmas are about 0.3 cm laterally, 0.7 cm in range and 0.03–0.1 degrees beyond 6.5 m from the target's center.
+  - Inside 3 m they rise to 0.7–0.9 cm.
+  - An earlier calibration at random attitudes underestimated the approach's errors two- to sixfold, and the filter then refused good scans.
+  - A floor at M11's level (0.8 cm, 0.15 degrees) covers the fits' heavier tails, which reach 4–6 sigma at 30 m.
+
+**Close-range tracking** (`DockingIcpTracker`, a `CoastingIcpTracker`).
+- **Attitude hold.** Inside 3.5 m of the target's center (a 2.5 m gap) only the docking face is in view. Roll about the boresight is unobservable, and a tilt about the target's center, a meter behind the face, trades against a sideways shift.
+  - A free fit there let attitude wander by degrees, and through the face's asymmetric details it dragged translation by 3–7 cm.
+  - So the tracker holds the relative attitude at its last value and fits translation only. The chaser's attitude loop keeps the relative attitude nearly constant.
+  - It reports attitude as uninformative (1 rad sigma). Fusing the held attitude would let the filter's attitude walk with the chaser's.
+  - It keeps its track through a poor fit, because a fresh acquisition that close is ambiguous.
+- **Minimum range.** Inside a 1.3 m gap the tracker reports nothing (`below_minimum_range`), judged by its track or, without one, by the scan's median return. From about 1 m in, a face-only fit has a competing minimum about 4.5 cm away, the depth of the docking ring.
+
+**Navigation** (`DockingNavigation`, a `TumbleNavigation`). The target's translation is exactly modeled (central gravity), but M4's translation process noise (2.5e-5 m²/s³) let the velocity estimate follow measurement noise by ±3 mm/s.
+- Within 7 m of the target's center, after the last accepted lidar fix, the noise drops to 2.5e-8, so the committed coast integrates a steady velocity.
+- Farther out it stays at M4's level. A filter with the low noise from the start settled on early errors and refused good scans.
+- `navigation._propagate` adds M4's noise on every step; each step removes the excess. This is exact because process noise enters additively.
+
+**Guidance** (`DockingController`, a `CamTumbleController`).
+- **To the hold:** M12's supervisor, with its collision-avoidance burn after a navigation loss, flies to the 5 m hold, and the onboard 10 s dwell completes there.
+- **Terminal segment:** a gap profile at 0.04 m/s with 0.002 m/s² acceleration, aimed 0.3 m past contact so contact comes at cruise speed.
+  - Gains are stiffer: 0.01 s⁻² and 0.2 s⁻¹, a natural frequency of 0.1 rad/s, critically damped.
+  - The estimate age limit becomes 45 s.
+- **Commit:** inside an estimated 1.3 m gap, sensor failures no longer brake the approach. The chaser closes the last 1.24 m, about 31 s, on prediction.
+- **Detumble:** once the mechanism reports a latch, rate damping (gain 100 N·m·s/rad, bounded at 0.5 N·m) runs until the stack turns slower than 0.002 rad/s for 10 s, and the controller then claims success.
+
+**Contact and capture** (`DockingEnv`, a `TumbleEnv`; `StackEngine`).
+- **Contact:** the hatch stands 6.3 cm proud of the target port, so an aligned chaser face touches it at a port gap of 0.063 m. The environment checks the capture envelope there, from truth in the target port frame:
+
+| Condition | Limit |
+| --- | --- |
+| Lateral offset | 5 cm |
+| Alignment | 3 degrees |
+| Closing speed | 0.01–0.06 m/s |
+| Lateral speed | 0.02 m/s |
+| Relative rate | 0.0035 rad/s |
+
+- **Outside the envelope** the episode ends as `physical_violation` (`contact_outside_capture_envelope`).
+- **Inside it,** `StackEngine` replaces the engine. It merges the bodies, conserving linear and angular momentum: composite mass, center, inertia tensor and angular velocity about the principal axes, with a fresh `RigidBodyEngine` on the original clock. Snapshots place both spacecraft rigidly on the stack, so records stay valid. The chaser's wrench, bounded by its own limits, acts at its lever arm. Tests hold the merge to momentum conservation within 1e-8 and the bodies rigid within 1e-8 m.
+- **Boundaries:** M11's port-gap, center-range and 0.5 m clearance boundaries would stop any docking, so before capture `DockingEnv` checks only the hull points away from the docking interface, which must keep 2 cm. The interface is the chaser face within 0.25 m of the port. `_physically_valid` defines success as a latched stack turning slower than 0.004 rad/s.
+- **Latch status:** `DockingMechanism` carries it to the controller, the stand-in for a soft-capture mechanism's capture signal.
+
+**Suite** (`m13_suite.py`, `rpod m13-suite`). The 28 M11 operational episodes (same conditions, tumbles and seeds) are flown to capture and detumble with the docking lidar only, under M12's robust settings.
+- Each episode records the contact the envelope judged, the filter's port error at the last pre-latch tick, latch time, detumble time, delta-v and the closest outer-hull clearance.
+- **Gates:** records are valid and uniform; every episode docks (success, a latch inside the envelope, both dwells satisfied, actuator bounds); no false completion or physical violation.
+- The fleet cannot carry a merged stack (masses and inertias are batch-wide in Rust), so M13 has no Monte Carlo campaign.
+
+```powershell
+.\.venv\Scripts\rpod.exe m13-calibrate
+.\.venv\Scripts\rpod.exe m13-suite --output runs/m13 --label m13
+```
+
+The design above was settled on off-suite episodes (M11's fault and stress specs 28–39). With the final design, all 12 docked, at 0.3–1.0 cm lateral offset and under 0.11 degrees misalignment.
+
+### M13 results
+
+**Docking suite** (`runs/m13`, `benchmarks/m13-evaluation.json`): all 28 episodes docked, and all three gates pass. Every record is valid with uniform hashes, with no false completion or physical violation. One episode braked once; the other 27 never braked.
+
+| At contact | Median | P95 | Max | Envelope |
+| --- | --- | --- | --- | --- |
+| Lateral offset | 0.60 cm | 1.02 cm | 1.12 cm | 5 cm |
+| Alignment | 0.06° | 0.10° | 0.13° | 3° |
+| Closing speed | 0.0386 m/s | 0.0392 m/s | 0.0393 m/s | 0.01–0.06 m/s |
+| Lateral speed | 0.2 mm/s | 0.3 mm/s | 0.4 mm/s | 2 cm/s |
+| Relative rate | under 1e-5 rad/s | | | 0.0035 rad/s |
+
+- **Estimate at contact:** the filter's port estimate on the last tick before the latch was off by a median 0.64 cm laterally (max 1.2 cm) and 0.91 cm axially (max 1.5 cm), after the 31 s committed coast.
+- **Timing:** the latch came at 340–358 s (median 342 s). The detumble took 10.9–20.2 s (median 14.4 s), growing with the tumble rate (correlation 0.95). Episodes end at 353–369 s.
+- **Delta-v:** 0.42–1.98 m/s per episode (median 0.87), growing with the square of the tumble rate (correlation 0.94). Holding a rotating docking axis takes continual centripetal thrust: at 1°/s the 30 m approach costs about four times as much as at 0.2°/s.
+- **Clearance:** before the latch, hull points away from the interface stayed at least 6.3 cm from the mesh. That is the outer face over the plate at contact.
+- **Wall time:** 34 min on the CPU (68–80 s per episode), without a renderer.
+
 ## Source layout and generated output
 
 - `README.md`, `LICENSE` (Apache-2.0, declared in `pyproject.toml` and the Cargo workspace) and `NOTICE` (credits for the NASA and ESA data downloaded at run time, which `docs/showcase.gif` is rendered from).
@@ -1101,8 +1183,8 @@ Both were chosen from off-suite episodes (M11 operational episodes 12–18). The
 - `crates/rpod-core`: native dynamics and Rust acceptance tests.
 - `crates/rpod-python`: PyO3 interface and compiler provenance.
 - `crates/rpod-core/src/batch.rs`, `metrics.rs`: the batched engine and pair metrics (M9); `mesh.rs` (with its binding in `crates/rpod-python/src/mesh.rs`): target-mesh ray casts and closest points (M11).
-- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`); M10 policy (`policy.py`), safety filter (`safety_filter.py`), learned controllers (`learned_control.py`) and evolution-strategies training (`train_policy.py`); M11 tumbling scenario, guidance and navigation (`tumble.py`) and its fleet variant (`tumble_fleet.py`), unmarked target worker and mesh (`m11_worker.py`, `target_mesh.py`), natural-feature lidar (`natural_lidar.py`), camera keypoints (`keypoints.py`), suite (`m11_suite.py`) and tumbling showcase worker (`m11_showcase_worker.py`); M12 lidar faults, collision-avoidance burn and coast checks (`lidar_faults.py`) and suite (`m12_suite.py`).
-- `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`; the M10 policy `m10-policy.npy` with `m10-policy.json`; M11's `m11-keypoints.json`, `m11-lidar-calibration.json` and `m11-camera-calibration.json`).
+- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`); M10 policy (`policy.py`), safety filter (`safety_filter.py`), learned controllers (`learned_control.py`) and evolution-strategies training (`train_policy.py`); M11 tumbling scenario, guidance and navigation (`tumble.py`) and its fleet variant (`tumble_fleet.py`), unmarked target worker and mesh (`m11_worker.py`, `target_mesh.py`), natural-feature lidar (`natural_lidar.py`), camera keypoints (`keypoints.py`), suite (`m11_suite.py`) and tumbling showcase worker (`m11_showcase_worker.py`); M12 lidar faults, collision-avoidance burn and coast checks (`lidar_faults.py`) and suite (`m12_suite.py`); M13 docking lidar, close-range tracker, docking filter, capture latch, controller and environment (`docking.py`) and suite (`m13_suite.py`).
+- `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`; the M10 policy `m10-policy.npy` with `m10-policy.json`; M11's `m11-keypoints.json`, `m11-lidar-calibration.json` and `m11-camera-calibration.json`; M13's `m13-lidar-calibration.json`).
 - `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`, `m12-lidar-faults.md`) and the README's `showcase.gif`, cut from the M11 showcase movie.
 - `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases. `tools/keypoints`: a separate uv project (Python 3.13, PyTorch) that trains the keypoint network and exports it to ONNX.
 - `tests`: Python integration and contract checks; `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.

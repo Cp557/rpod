@@ -6,7 +6,7 @@ Simulation, perception and autonomy for spacecraft rendezvous, proximity operati
 
 *Episode 16 of the M11 suite, sped up 22×: the chaser follows QuikSCAT's docking axis as the target tumbles at 1°/s, navigating by lidar shape matching and camera keypoints. The inset is the docking camera. `rpod showcase` rendered it from the run's saved record.*
 
-A chaser spacecraft flies itself to a 5 m hold point at a satellite using only what its sensors deliver: camera images that Blender renders from the simulated state, and a simulated flash lidar, arriving late and sometimes dropped or degraded. Physics runs in Rust. Guidance, navigation, perception and evaluation run in Python and never see the true state. Every result below comes from a frozen, hash-checked evaluation suite, a seeded Monte Carlo campaign or a recorded benchmark, and every run saves records that replay without rerunning the physics.
+A chaser spacecraft flies itself to a satellite and docks with it, using only what its sensors deliver: camera images that Blender renders from the simulated state, and a simulated flash lidar, arriving late and sometimes dropped or degraded. The hardest case is a dead, unmarked satellite tumbling freely. The chaser recognizes it by its shape, follows its rotating docking axis in, is captured, and stops the tumble. Physics runs in Rust. Guidance, navigation, perception and evaluation run in Python and never see the true state. Every result below comes from a frozen, hash-checked evaluation suite, a seeded Monte Carlo campaign or a recorded benchmark, and every run saves records that replay without rerunning the physics.
 
 ## Results
 
@@ -23,6 +23,7 @@ A chaser spacecraft flies itself to a 5 m hold point at a satellite using only w
 | M10 | Learned approach policy behind a runtime safety filter | same success rate as the reference, median completion 171 s instead of 210 s for 17% more Δv, no filter interventions; in the rendered suite, 28/28 operational successes 18% faster, and one abort ended in a false completion at the retreat tolerance |
 | M11 | Unmarked, tumbling target: lidar shape matching and a keypoint network | lidar-only and camera-plus-lidar suites both pass every gate: 28/28 operational successes at the oracle's pace, both aborts retreated, target position error 1.2 cm median; the surrogate does not validate, so no population estimate |
 | M12 | Lidar faults on the tumbling target, a collision-avoidance burn after a navigation loss, passive-safety coasts | fixes a mesh bug that had degraded M11's lidar matching (target error now 0.9 cm median); with M11's settings 6 of 12 lidar faults lose navigation and the burn keeps all six clear, while a more tolerant configuration recovers from all 12; a coasting chaser often hits the target from inside 12 m |
+| M13 | Docking: a wide lidar on the docking axis, a committed final coast, a momentum-conserving capture latch and a detumble | all 28 episodes dock with the satellite tumbling at up to 1°/s: contact within 1.1 cm and 0.13° of the port (envelope 5 cm, 3°) at 0.039 m/s, then the joined stack detumbled in 11–20 s |
 
 28/28 is a fixed-suite result; population claims come from the Monte Carlo campaigns, which M11 does not have. [REFERENCE.md](REFERENCE.md) records every gate, metric and caveat.
 
@@ -72,12 +73,12 @@ Rendered experiments need Blender 5.2.3, at `.tools/blender-5.2.3-windows-x64/bl
 
 - [OVERVIEW.md](OVERVIEW.md): purpose, direction and open decisions.
 - [REFERENCE.md](REFERENCE.md): the canonical specification of implemented behavior, interfaces and results.
-- Milestone write-ups: [M9, batched engine and Monte Carlo](docs/m9-batched-engine.md), [M10, learned control](docs/m10-learned-control.md), [M11, tumbling target](docs/m11-tumbling-target.md), [M12, lidar faults](docs/m12-lidar-faults.md).
+- Milestone write-ups: [M9, batched engine and Monte Carlo](docs/m9-batched-engine.md), [M10, learned control](docs/m10-learned-control.md), [M11, tumbling target](docs/m11-tumbling-target.md), [M12, lidar faults](docs/m12-lidar-faults.md), [M13, docking](docs/m13-docking.md).
 
 ## Limitations
 
 - Actuation is ideal bounded force and torque: no individual thrusters, plume effects or fuel depletion.
-- There is no contact model. Episodes end at a 5 m pre-contact hold.
+- There is no contact-dynamics model. M13 captures at contact with an envelope check and a momentum-conserving latch; the other suites end at a 5 m pre-contact hold.
 - Perception is trained and tested on renders only; transfer to real imagery is untested.
 - Reproducibility covers the same code, dependencies, build and platform. GPU rendering is not bitwise repeatable, so rendered reruns reproduce outcomes, not every pixel.
 
