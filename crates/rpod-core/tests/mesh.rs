@@ -61,6 +61,26 @@ fn closest_points_give_face_normals_and_distances() {
 }
 
 #[test]
+fn every_face_reports_its_own_normal() {
+    let mesh = cube();
+    let queries = [
+        [2.0, 0.1, -0.2],
+        [-2.0, 0.1, -0.2],
+        [0.1, 2.0, -0.2],
+        [0.1, -2.0, -0.2],
+        [0.1, -0.2, 2.0],
+        [0.1, -0.2, -2.0],
+    ];
+    for (query, found) in queries.iter().zip(mesh.closest_points(&queries)) {
+        let axis = query.iter().position(|value| value.abs() == 2.0).unwrap();
+        assert!(
+            (found.normal[axis].abs() - 1.0).abs() < 1e-12,
+            "{query:?}: {found:?}"
+        );
+    }
+}
+
+#[test]
 fn invalid_meshes_are_rejected() {
     assert!(TargetMesh::new(&[[0.0; 3]; 3], &[[0, 1, 3]]).is_err());
     assert!(TargetMesh::new(&[[f64::NAN, 0.0, 0.0]; 3], &[[0, 1, 2]]).is_err());

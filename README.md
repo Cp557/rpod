@@ -22,6 +22,7 @@ A chaser spacecraft flies itself to a 5 m hold point at a satellite using only w
 | M9 | Batched multithreaded engine, vectorized autonomy, validated navigation surrogate | 15.7 million environment ticks/s on 12 threads; 99.932% success over 100,000 episodes (95% interval 99.914–99.947%); agrees with Basilisk to 1.5e-8 m |
 | M10 | Learned approach policy behind a runtime safety filter | same success rate as the reference, median completion 171 s instead of 210 s for 17% more Δv, no filter interventions; in the rendered suite, 28/28 operational successes 18% faster, and one abort ended in a false completion at the retreat tolerance |
 | M11 | Unmarked, tumbling target: lidar shape matching and a keypoint network | lidar-only and camera-plus-lidar suites both pass every gate: 28/28 operational successes at the oracle's pace, both aborts retreated, target position error 1.2 cm median; the surrogate does not validate, so no population estimate |
+| M12 | Lidar faults on the tumbling target, a collision-avoidance burn after a navigation loss, passive-safety coasts | fixes a mesh bug that had degraded M11's lidar matching (target error now 0.9 cm median); with M11's settings 6 of 12 lidar faults lose navigation and the burn keeps all six clear, while a more tolerant configuration recovers from all 12; a coasting chaser often hits the target from inside 12 m |
 
 28/28 is a fixed-suite result; population claims come from the Monte Carlo campaigns, which M11 does not have. [REFERENCE.md](REFERENCE.md) records every gate, metric and caveat.
 
@@ -71,7 +72,7 @@ Rendered experiments need Blender 5.2.3, at `.tools/blender-5.2.3-windows-x64/bl
 
 - [OVERVIEW.md](OVERVIEW.md): purpose, direction and open decisions.
 - [REFERENCE.md](REFERENCE.md): the canonical specification of implemented behavior, interfaces and results.
-- Milestone write-ups: [M9, batched engine and Monte Carlo](docs/m9-batched-engine.md), [M10, learned control](docs/m10-learned-control.md), [M11, tumbling target](docs/m11-tumbling-target.md).
+- Milestone write-ups: [M9, batched engine and Monte Carlo](docs/m9-batched-engine.md), [M10, learned control](docs/m10-learned-control.md), [M11, tumbling target](docs/m11-tumbling-target.md), [M12, lidar faults](docs/m12-lidar-faults.md).
 
 ## Limitations
 

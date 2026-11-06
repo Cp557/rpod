@@ -129,6 +129,17 @@ def main(argv=None) -> int:
     m11.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
     m11.add_argument("--keypoint-model", type=Path, help="fuse camera keypoints from this model")
     m11.add_argument("--label", default="m11", help="evidence name in benchmarks/")
+    m12 = commands.add_parser("m12-suite", help="run or resume the M12 lidar-fault suite")
+    m12.add_argument("--output", required=True, type=Path)
+    m12.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
+    m12.add_argument("--keypoint-model", type=Path, help="fuse camera keypoints from this model")
+    m12.add_argument("--configuration", choices=("m11", "robust"), default="m11")
+    m12.add_argument("--label", default="m12", help="evidence name in benchmarks/")
+    passive = commands.add_parser(
+        "passive-safety", help="coast from every 10 s of a tumbling suite's operational episodes"
+    )
+    passive.add_argument("run", type=Path)
+    passive.add_argument("--output", required=True, type=Path)
     cases = commands.add_parser(
         "basilisk-cases", help="write dynamics cross-check cases for tools/basilisk"
     )
@@ -324,6 +335,28 @@ def main(argv=None) -> int:
             shutil.copyfile(args.output / "report.json", evidence)
             print(f"M11 passed: {report['passed']}; report: {evidence.resolve()}")
             return 0 if report["passed"] else 1
+        elif args.command == "m12-suite":
+            import shutil
+
+            from .m12_suite import run_m12_suite
+
+            report = run_m12_suite(args.output, args.calibration, args.keypoint_model,
+                                   args.configuration)
+            evidence = Path("benchmarks") / f"{args.label}-evaluation.json"
+            evidence.parent.mkdir(exist_ok=True)
+            shutil.copyfile(args.output / "report.json", evidence)
+            print(f"M12 passed: {report['passed']}; recovered {report['recovered']} of "
+                  f"{len(report['episodes'])}; report: {evidence.resolve()}")
+            return 0 if report["passed"] else 1
+        elif args.command == "passive-safety":
+            from .lidar_faults import passive_safety_map
+            from .recording import write_json
+            from .target_mesh import MESH_PATH, load_target_mesh
+
+            result = passive_safety_map(args.run, load_target_mesh(MESH_PATH))
+            write_json(args.output, result)
+            print(f"Passively safe from {result['passively_safe']} of {result['samples']} "
+                  f"states; report: {args.output.resolve()}")
         elif args.command == "basilisk-cases":
             from .crosscheck import basilisk_cases
 

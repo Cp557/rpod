@@ -75,11 +75,10 @@ impl TargetMesh {
                 let (projection, feature) = self.mesh.project_local_point_and_get_feature(query);
                 let offset = query - projection.point;
                 let distance = offset.length();
+                // The feature is the triangle's own (front or back face); the projection
+                // names the triangle.
                 let face = match feature {
-                    FeatureId::Face(index) => self
-                        .mesh
-                        .triangle(index % self.mesh.num_triangles() as u32)
-                        .normal(),
+                    FeatureId::Face(_) => self.mesh.triangle(projection.subshape).normal(),
                     _ => None,
                 };
                 let normal = face
