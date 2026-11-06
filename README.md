@@ -2,9 +2,9 @@
 
 Simulation, perception and autonomy for spacecraft rendezvous, proximity operations and docking, on a Rust physics core.
 
-![The chaser following the unmarked QuikSCAT's tumbling docking axis in to a 5 m hold](docs/showcase.gif)
+![The chaser following the unmarked QuikSCAT's tumbling docking axis in to contact, capture and detumble](docs/showcase.gif)
 
-*Episode 16 of the M11 suite, sped up 22×: the chaser follows QuikSCAT's docking axis as the target tumbles at 1°/s, navigating by lidar shape matching and camera keypoints. The inset is the docking camera. `rpod showcase` rendered it from the run's saved record.*
+*Episode 16 of the M13 suite, from 16 m out, sped up 27×: the chaser follows QuikSCAT's docking axis as the target tumbles at 1°/s, docks, and stops the tumble. The inset is the docking lidar's depth image. `rpod showcase` rendered it from the run's saved record.*
 
 A chaser spacecraft flies itself to a satellite and docks with it, using only what its sensors deliver: camera images that Blender renders from the simulated state, and a simulated flash lidar, arriving late and sometimes dropped or degraded. The hardest case is a dead, unmarked satellite tumbling freely. The chaser recognizes it by its shape, follows its rotating docking axis in, is captured, and stops the tumble. Physics runs in Rust. Guidance, navigation, perception and evaluation run in Python and never see the true state. Every result below comes from a frozen, hash-checked evaluation suite, a seeded Monte Carlo campaign or a recorded benchmark, and every run saves records that replay without rerunning the physics.
 
