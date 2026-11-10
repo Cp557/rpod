@@ -18,7 +18,6 @@ from .rendering import BlenderRenderer, realistic_scene
 from .scenarios import ORBIT_RADIUS_M
 from .vision_records import (
     degrade_image, json_value, new_output, read_rgb, sha256_file, write_jsonl, write_rgb,
-    read_jsonl,
 )
 
 RANGES_M = (4.5, 5.0, 10.0, 20.0, 30.0, 32.0)
@@ -456,76 +455,4 @@ def camera_check(output, blender_path=None, scene=None):
             report["projection_max_error_px"] <= 0.05 and report["raster_max_error_px"] <= 0.5
         )
     write_json(output / "report.json", report)
-    return report
-
-
-def evaluate_saved_dataset(directory):
-    """Re-evaluate the same PNGs after calibration-only estimator repairs."""
-    directory = Path(directory)
-    evaluation_started = time.perf_counter()
-    manifest = json.loads((directory / "dataset.json").read_text(encoding="utf-8"))
-    camera_fields = (
-        "width", "height", "hfov_deg", "mount_position_body_m", "rotation_bc", "camera_id",
-    )
-    camera = CameraModel(**{key: manifest["camera"][key] for key in camera_fields})
-    observations = read_jsonl(directory / "observations.jsonl")
-    label_rows = read_jsonl(directory / "truth" / "poses.jsonl")
-    _validate_m3_records(label_rows)
-    labels = {row["capture_id"]: row for row in label_rows}
-    _validate_m3_records([
-        {
-            **labels.get(row.get("capture_id") if type(row.get("capture_id")) is int else None, {}),
-            **row,
-        }
-        for row in observations
-    ])
-    combined = []
-    for row in observations:
-        path = directory / row["image"]
-        if sha256_file(path) != row["image_sha256"]:
-            raise ValueError(f"dataset image changed: {path}")
-        old = row["pose"]
-        transfer_started = time.perf_counter()
-        pixels = read_rgb(path)
-        image_transfer_seconds = time.perf_counter() - transfer_started
-        image = ImageObservation(
-            row["capture_id"], old["capture_time_ns"], old["delivery_time_ns"], pixels,
-        )
-        started = time.perf_counter()
-        pose = estimate_pose(image, camera)
-        estimation_seconds = time.perf_counter() - started
-        label = labels[row["capture_id"]]
-        errors = _error(pose, np.asarray(label["rotation_ct"]), np.asarray(label["translation_ct"]))
-        row.update({
-            "pose": _pose_record(pose), "estimation_seconds": estimation_seconds,
-            "image_transfer_seconds": image_transfer_seconds,
-        })
-        label.update(errors)
-        combined.append({**row, **label})
-    report = _qualify(combined)
-    geometry = json.loads((directory / "camera-check" / "report.json").read_text(encoding="utf-8"))
-    report["gates"]["camera_geometry"] = geometry["qualification_passed"]
-    report["qualification_passed"] = all(report["gates"].values())
-    calibration = _calibration(combined, report)
-    calibration.update({key: manifest[key] for key in ("scene", "earth_geometry") if key in manifest})
-    calibration["camera"] = camera.to_dict()
-    calibration["implementation_sha256"] = {
-        name: sha256_file(Path(__file__).with_name(name))
-        for name in ("camera.py", "perception.py", "blender_worker.py")
-    }
-    manifest["implementation_sha256"] = calibration["implementation_sha256"]
-    write_jsonl(directory / "observations.jsonl", observations)
-    write_jsonl(directory / "truth" / "poses.jsonl", list(labels.values()))
-    write_json(directory / "report.json", report)
-    write_json(directory / "calibration.json", calibration)
-    write_json(directory / "dataset.json", manifest)
-    performance = json.loads((directory / "performance.json").read_text(encoding="utf-8"))
-    durations = [row["estimation_seconds"] for row in observations]
-    performance.update({
-        "requalification_seconds": time.perf_counter() - evaluation_started,
-        "estimation_median_seconds": float(np.median(durations)),
-        "estimation_p95_seconds": float(np.percentile(durations, 95)),
-        **_image_transfer_performance(observations),
-    })
-    write_json(directory / "performance.json", performance)
     return report

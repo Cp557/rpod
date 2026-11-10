@@ -1,0 +1,3378 @@
+{
+  "artifact_type": "m11_evaluation_report",
+  "suite_seed": 11,
+  "calibration_sha256": "137bcc4b8e1c939d99e84904690f3a2cde63e1283b93de7b4216978e5f72c2ed",
+  "implementation_sha256": {
+    "visual_control.py": "7f7febd60d325a2c1178a17e3313597102755e372138106d85890c1603ed1f15",
+    "navigation.py": "eb4b6b7f671697c4d65e8d70a4877134b3547d3dcea3285c8584f645a1ab8c02",
+    "visual_agent.py": "e66a66ea4bd32139961a72dc9344e185d519f29a63c66b7b442b3fc29dd46d65",
+    "visual_env.py": "56cc4fd9e9ac920ae90d94704383f65a1cb0f8d3adbbcc3ba3f76da7fe27ea4d",
+    "visual_run.py": "81113b04d27d9c1b166a57198918a9dcb54b487c3cd67e232f5a9050e5778278",
+    "lidar.py": "31ecbc67b9c8969a48a2da6c3f43cee8119850a49823b853be23be977c2a8978",
+    "approach.py": "bf040d5de940abd018e45dca3acd34e96879e26b863c46d8b86fdf278c923f9e",
+    "blender_worker.py": "9c535fde08a8f508b288b8133645ecfcc7ad3e94628d6e52897485492d23df87",
+    "camera.py": "744ca40f60c5c406d9c2e47ccedc33250a20b6fdfd42929479c23a2da58120e2",
+    "frames.py": "99d5e2ed694059488a91e2382023b368d36467da24528369481e3e941ca50cab",
+    "observations.py": "7dba454f84439b4c18695c52925e3a8400fff86edf96c511a1c0c3cce8474adf",
+    "perception.py": "9491669c2584448582df01163bb730198cf1d02e5e42227d09189ce25024e18e",
+    "rendering.py": "3f71cd6bea2c1cfdec870a4f344cf963073a62a776196bdcb0ce548d3cb14ceb",
+    "vision_records.py": "4e236fb5537bba430e78087e4043c4273cfdc14ea911d8f82804cc1d0277c875",
+    "tumble.py": "07ec30d418fa990c9252c14f7ee0a4c31b8db5c8dcf59fc3a66ddba5611f8bd8",
+    "natural_lidar.py": "f767fe1ff3bcec5562844ba17e123bb0c3ff9fc58ffd37fd3cebeb0dc4985b77",
+    "target_mesh.py": "df637cfb3d64598025a29ce70f02810b60b4ab1123efcbaad337f0e3170aa6ff",
+    "m11_worker.py": "1ccfa817bd3c9964dc7d3d735f8e5ca222ad61a088f6dc80e323328e539b5fba",
+    "keypoints.py": "c82e7bc5562b65a98dc319f8c2aa4e73b7cbd93ef11521cdc205ffedfdecc109",
+    "m11_suite.py": "ba76c536a2bba3c9dcb5ddd0e95a140265ed74d57117174e0babcaec4ba57b71"
+  },
+  "report_implementation_sha256": "a87287df1c847cf12cb65d7560de3e6bb6233c9dbf7c2431dc9fb46fc77e4542",
+  "scope": "Fixed 40-episode suite against the unmarked QuikSCAT tumbling at 0.2-1.0 deg/s, chaser starting synchronized 30 m out on the rotating docking axis; natural-feature lidar ICP; port-frame metrics; not a population reliability estimate or contact validation",
+  "passed": false,
+  "gates": {
+    "operational_all_succeed": true,
+    "fault_expected_responses": false,
+    "records_valid_and_uniform": true
+  },
+  "failed_episodes": [
+    {
+      "id": "28-fault-abort",
+      "category": "fault",
+      "outcome": "time_limit",
+      "expected_outcome": "retreated",
+      "path": "episodes/28-fault-abort"
+    }
+  ],
+  "stress_findings": [],
+  "categories": {
+    "operational": {
+      "episodes": 28,
+      "outcomes": {
+        "success": 28
+      },
+      "completion_time_ratio": {
+        "count": 28,
+        "median": 1.047773199367803,
+        "p95": 1.2295958727742227,
+        "max": 1.3081761006289307
+      },
+      "final_gap_m": {
+        "count": 28,
+        "median": 5.004236359144635,
+        "p95": 5.020187481973443,
+        "max": 5.074828685916293
+      },
+      "final_port_speed_mps": {
+        "count": 28,
+        "median": 0.0011584787529159936,
+        "p95": 0.0022402874777011843,
+        "max": 0.0027531209447069506
+      },
+      "minimum_com_range_m": 6.357468805281807,
+      "minimum_port_gap_m": 4.857432081761307,
+      "estimated_target_position_error_m": {
+        "count": 61859,
+        "median": 0.012532286654173583,
+        "p95": 0.02213471346741522,
+        "max": 0.04485743371881365
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 61859,
+        "median": 0.14123649349633297,
+        "p95": 0.36379944850958423,
+        "max": 1.9056427503027031
+      },
+      "image_pose_by_range": [
+        {
+          "camera_range_m": [
+            0.0,
+            5.7
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            5.7,
+            8.45
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            8.45,
+            15.95
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            15.95,
+            25.95
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            25.95,
+            31.95
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            31.95,
+            1000000000.0
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        }
+      ],
+      "lidar_pose_by_range": [
+        {
+          "camera_range_m": [
+            0.0,
+            5.7
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            5.7,
+            8.45
+          ],
+          "translation_m": {
+            "count": 1551,
+            "median": 0.009644454161231511,
+            "p95": 0.017021339346676725,
+            "max": 0.025700885286119943
+          },
+          "rotation_deg": {
+            "count": 1551,
+            "median": 0.25582494136421424,
+            "p95": 0.5146054899384118,
+            "max": 0.9137546220486937
+          }
+        },
+        {
+          "camera_range_m": [
+            8.45,
+            15.95
+          ],
+          "translation_m": {
+            "count": 1397,
+            "median": 0.01278450660454315,
+            "p95": 0.02219769456830543,
+            "max": 0.03140021872568065
+          },
+          "rotation_deg": {
+            "count": 1397,
+            "median": 0.20275986989891828,
+            "p95": 0.41878638140931,
+            "max": 0.640694188747272
+          }
+        },
+        {
+          "camera_range_m": [
+            15.95,
+            25.95
+          ],
+          "translation_m": {
+            "count": 1863,
+            "median": 0.013194484257014909,
+            "p95": 0.020794140124302904,
+            "max": 0.02903110509375377
+          },
+          "rotation_deg": {
+            "count": 1863,
+            "median": 0.1833917247185063,
+            "p95": 0.3881535893921571,
+            "max": 0.6380573106329631
+          }
+        },
+        {
+          "camera_range_m": [
+            25.95,
+            31.95
+          ],
+          "translation_m": {
+            "count": 1440,
+            "median": 0.01480863589300266,
+            "p95": 0.02509028842521204,
+            "max": 0.037320145646871354
+          },
+          "rotation_deg": {
+            "count": 1440,
+            "median": 0.20910524073749537,
+            "p95": 0.4471457787538654,
+            "max": 0.7205030490856142
+          }
+        },
+        {
+          "camera_range_m": [
+            31.95,
+            1000000000.0
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        }
+      ]
+    },
+    "fault": {
+      "episodes": 6,
+      "outcomes": {
+        "time_limit": 1,
+        "retreated": 1,
+        "success": 4
+      },
+      "completion_time_ratio": null,
+      "final_gap_m": {
+        "count": 4,
+        "median": 5.005078976600297,
+        "p95": 5.008801962116844,
+        "max": 5.009140421608926
+      },
+      "final_port_speed_mps": {
+        "count": 4,
+        "median": 0.0013328316265429356,
+        "p95": 0.002398716584062002,
+        "max": 0.002584681657780426
+      },
+      "minimum_com_range_m": 6.462171709689951,
+      "minimum_port_gap_m": 4.962158657209204,
+      "estimated_target_position_error_m": {
+        "count": 19233,
+        "median": 0.014495901980763668,
+        "p95": 0.02907421980662108,
+        "max": 0.04341659428601013
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 19233,
+        "median": 0.1400433484478534,
+        "p95": 0.3298922766817115,
+        "max": 0.889781545027441
+      },
+      "image_pose_by_range": [
+        {
+          "camera_range_m": [
+            0.0,
+            5.7
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            5.7,
+            8.45
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            8.45,
+            15.95
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            15.95,
+            25.95
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            25.95,
+            31.95
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            31.95,
+            1000000000.0
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        }
+      ],
+      "lidar_pose_by_range": [
+        {
+          "camera_range_m": [
+            0.0,
+            5.7
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            5.7,
+            8.45
+          ],
+          "translation_m": {
+            "count": 191,
+            "median": 0.009535275141689434,
+            "p95": 0.016923922976546445,
+            "max": 0.021383758051495807
+          },
+          "rotation_deg": {
+            "count": 191,
+            "median": 0.24841445550099703,
+            "p95": 0.5145288247324457,
+            "max": 0.7008152403851282
+          }
+        },
+        {
+          "camera_range_m": [
+            8.45,
+            15.95
+          ],
+          "translation_m": {
+            "count": 269,
+            "median": 0.012932934432239694,
+            "p95": 0.021298279663704504,
+            "max": 0.027874461037936265
+          },
+          "rotation_deg": {
+            "count": 269,
+            "median": 0.20459890810062378,
+            "p95": 0.4364444210589397,
+            "max": 0.6455478395766692
+          }
+        },
+        {
+          "camera_range_m": [
+            15.95,
+            25.95
+          ],
+          "translation_m": {
+            "count": 487,
+            "median": 0.01352259283421739,
+            "p95": 0.022202915783512155,
+            "max": 0.030229339211214054
+          },
+          "rotation_deg": {
+            "count": 487,
+            "median": 0.1782692517753268,
+            "p95": 0.37908068520553895,
+            "max": 0.5077636868524378
+          }
+        },
+        {
+          "camera_range_m": [
+            25.95,
+            31.95
+          ],
+          "translation_m": {
+            "count": 992,
+            "median": 0.01730165698822183,
+            "p95": 0.02974449665698793,
+            "max": 0.03975373869142379
+          },
+          "rotation_deg": {
+            "count": 992,
+            "median": 0.20910923587774155,
+            "p95": 0.5097740022214929,
+            "max": 0.7075886397189244
+          }
+        },
+        {
+          "camera_range_m": [
+            31.95,
+            1000000000.0
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        }
+      ]
+    },
+    "stress": {
+      "episodes": 6,
+      "outcomes": {
+        "success": 6
+      },
+      "completion_time_ratio": null,
+      "final_gap_m": {
+        "count": 6,
+        "median": 5.013886994768517,
+        "p95": 5.019672270703058,
+        "max": 5.020163393400558
+      },
+      "final_port_speed_mps": {
+        "count": 6,
+        "median": 0.0014589656029668737,
+        "p95": 0.001953091141649784,
+        "max": 0.0020059203553476194
+      },
+      "minimum_com_range_m": 6.465750761230735,
+      "minimum_port_gap_m": 4.965720111526454,
+      "estimated_target_position_error_m": {
+        "count": 13104,
+        "median": 0.012556924967872578,
+        "p95": 0.022476741064351966,
+        "max": 0.0499072626313785
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 13104,
+        "median": 0.13991299292223197,
+        "p95": 0.36657575565303496,
+        "max": 1.329790483368867
+      },
+      "image_pose_by_range": [
+        {
+          "camera_range_m": [
+            0.0,
+            5.7
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            5.7,
+            8.45
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            8.45,
+            15.95
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            15.95,
+            25.95
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            25.95,
+            31.95
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            31.95,
+            1000000000.0
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        }
+      ],
+      "lidar_pose_by_range": [
+        {
+          "camera_range_m": [
+            0.0,
+            5.7
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            5.7,
+            8.45
+          ],
+          "translation_m": {
+            "count": 312,
+            "median": 0.009915367613205604,
+            "p95": 0.01635056703722615,
+            "max": 0.024454847755470587
+          },
+          "rotation_deg": {
+            "count": 312,
+            "median": 0.24180279108596459,
+            "p95": 0.4665291997270896,
+            "max": 0.6821234850330072
+          }
+        },
+        {
+          "camera_range_m": [
+            8.45,
+            15.95
+          ],
+          "translation_m": {
+            "count": 300,
+            "median": 0.012533293475501259,
+            "p95": 0.021883442117035315,
+            "max": 0.03011643353182575
+          },
+          "rotation_deg": {
+            "count": 300,
+            "median": 0.21865407095812972,
+            "p95": 0.4458529573356955,
+            "max": 0.644075544060006
+          }
+        },
+        {
+          "camera_range_m": [
+            15.95,
+            25.95
+          ],
+          "translation_m": {
+            "count": 401,
+            "median": 0.013086525618622393,
+            "p95": 0.022029574818810703,
+            "max": 0.032478400868912925
+          },
+          "rotation_deg": {
+            "count": 401,
+            "median": 0.18049919797674815,
+            "p95": 0.37912730169519754,
+            "max": 0.5901201673219434
+          }
+        },
+        {
+          "camera_range_m": [
+            25.95,
+            31.95
+          ],
+          "translation_m": {
+            "count": 312,
+            "median": 0.014990511254854393,
+            "p95": 0.025346681183610723,
+            "max": 0.031137077452826983
+          },
+          "rotation_deg": {
+            "count": 312,
+            "median": 0.20889416311482947,
+            "p95": 0.4548398401053624,
+            "max": 0.7163857887450181
+          }
+        },
+        {
+          "camera_range_m": [
+            31.95,
+            1000000000.0
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        }
+      ]
+    }
+  },
+  "performance": {
+    "total_wall_seconds": 1179.9167694999942,
+    "episode_wall_seconds": {
+      "count": 40,
+      "median": 27.421534950000023,
+      "p95": 35.10586312999852,
+      "max": 69.18899369999963
+    },
+    "simulated_to_wall_ratio": {
+      "count": 40,
+      "median": 8.09350796879578,
+      "p95": 8.456430240409903,
+      "max": 8.689050564324463
+    },
+    "render_seconds": null,
+    "perception_seconds": null,
+    "autonomy_step_seconds": {
+      "count": 95316,
+      "median": 0.0009945000001607696,
+      "p95": 0.002291199999035598,
+      "max": 0.07212330000038492
+    },
+    "renderer_startup_seconds": {
+      "count": 40,
+      "median": 0.0,
+      "p95": 0.0,
+      "max": 0.0
+    },
+    "sampled_peak_blender_rss_mib": null,
+    "scope": "Wall times on an unisolated desktop; renderer timing includes PNG writes; RSS sampled every 0.1 s, not OS high-water memory",
+    "lidar_perception_seconds": {
+      "count": 9520,
+      "median": 0.06526765000035084,
+      "p95": 0.0894931749993702,
+      "max": 0.9918820000002597
+    }
+  },
+  "episodes": [
+    {
+      "id": "00-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/00-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 221.3,
+      "completion_time_ratio": 1.0732298739088264,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.011926325997222,
+      "final_port_speed_mps": 0.0008105579194912596,
+      "final_alignment_deg": 0.14316002618201945,
+      "final_relative_rate_radps": 0.0008144362321276571,
+      "minimum_com_range_m": 6.480192363517824,
+      "minimum_port_gap_m": 4.980098826532518,
+      "max_applied_forces_n": [
+        0.0,
+        1.2465790695804926
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.4847035680666239
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2186,
+        "median": 0.012324311731250846,
+        "p95": 0.02217040699416592,
+        "max": 0.0332058954560993
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2186,
+        "median": 0.14256781918541675,
+        "p95": 0.32702215620107616,
+        "max": 0.46705788242998575
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.527721099999326,
+      "simulated_to_wall_ratio": 8.03916892343135,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 221,
+      "lidar_accepted_observations": 221,
+      "lidar_pose_translation_error_m": {
+        "count": 221,
+        "median": 0.01252306007178135,
+        "p95": 0.022021904345135467,
+        "max": 0.02581329968889072
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 221,
+        "median": 0.20311590957840148,
+        "p95": 0.4237968598739462,
+        "max": 0.651682929233476
+      }
+    },
+    {
+      "id": "01-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/01-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 216.7,
+      "completion_time_ratio": 1.0519417475728154,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.011528593582692,
+      "final_port_speed_mps": 0.0015615267351116772,
+      "final_alignment_deg": 0.3801720978320089,
+      "final_relative_rate_radps": 0.0008519268054017651,
+      "minimum_com_range_m": 6.4657350020860225,
+      "minimum_port_gap_m": 4.9655736103779695,
+      "max_applied_forces_n": [
+        0.0,
+        1.883715488774892
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2140,
+        "median": 0.01187539557103712,
+        "p95": 0.02143450594846434,
+        "max": 0.029487218688251153
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2140,
+        "median": 0.13819699163118404,
+        "p95": 0.32917742378495873,
+        "max": 0.6204832322769638
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.21320249999917,
+      "simulated_to_wall_ratio": 7.963046613128558,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 217,
+      "lidar_accepted_observations": 217,
+      "lidar_pose_translation_error_m": {
+        "count": 217,
+        "median": 0.011886997443776972,
+        "p95": 0.021507757063731193,
+        "max": 0.025388272068201972
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 217,
+        "median": 0.20659613710773966,
+        "p95": 0.4278623161664075,
+        "max": 0.6562878364198914
+      }
+    },
+    {
+      "id": "02-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/02-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 210.9,
+      "completion_time_ratio": 1.0023764258555132,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.99923708759038,
+      "final_port_speed_mps": 0.0013029699696702293,
+      "final_alignment_deg": 0.2376277902023448,
+      "final_relative_rate_radps": 0.0005475781077809865,
+      "minimum_com_range_m": 6.484591592602264,
+      "minimum_port_gap_m": 4.984545554457511,
+      "max_applied_forces_n": [
+        0.0,
+        2.0
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.43557259359751227
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2082,
+        "median": 0.013235835494353771,
+        "p95": 0.02194441779437486,
+        "max": 0.034555927712365125
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2082,
+        "median": 0.1501157093074585,
+        "p95": 0.3677824740561744,
+        "max": 0.7812451240505088
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.01697250000143,
+      "simulated_to_wall_ratio": 8.106246797162445,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 211,
+      "lidar_accepted_observations": 211,
+      "lidar_pose_translation_error_m": {
+        "count": 211,
+        "median": 0.013198193808866093,
+        "p95": 0.02222293325189436,
+        "max": 0.029084943977089172
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 211,
+        "median": 0.20009817541810107,
+        "p95": 0.40708662539443063,
+        "max": 0.6861705655568975
+      }
+    },
+    {
+      "id": "03-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/03-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 209.5,
+      "completion_time_ratio": 1.0023923444976077,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.998873139773573,
+      "final_port_speed_mps": 0.002160871517646804,
+      "final_alignment_deg": 0.2682890207101795,
+      "final_relative_rate_radps": 0.0004088365280740031,
+      "minimum_com_range_m": 6.469585513917233,
+      "minimum_port_gap_m": 4.969587037207464,
+      "max_applied_forces_n": [
+        0.0,
+        1.0340492224466609
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.2500400884267765
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2068,
+        "median": 0.013064974389158358,
+        "p95": 0.022394684089323717,
+        "max": 0.02982730830061903
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2068,
+        "median": 0.14421952584168946,
+        "p95": 0.3386011422201592,
+        "max": 0.6608194430502258
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.828051599999526,
+      "simulated_to_wall_ratio": 7.8089904970960955,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 209,
+      "lidar_accepted_observations": 209,
+      "lidar_pose_translation_error_m": {
+        "count": 209,
+        "median": 0.012621332449210276,
+        "p95": 0.022410077118631817,
+        "max": 0.028982764053571773
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 209,
+        "median": 0.1997620303468361,
+        "p95": 0.4313417485860487,
+        "max": 0.6837408024221215
+      }
+    },
+    {
+      "id": "04-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/04-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 270.4,
+      "completion_time_ratio": 1.3081761006289307,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.945297408911696,
+      "final_port_speed_mps": 0.002033822613818152,
+      "final_alignment_deg": 0.1581528241415793,
+      "final_relative_rate_radps": 0.00030129961907295944,
+      "minimum_com_range_m": 6.357468805281807,
+      "minimum_port_gap_m": 4.857432081761307,
+      "max_applied_forces_n": [
+        0.0,
+        1.57683499163445
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.25734955123108505
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2677,
+        "median": 0.012174348905523557,
+        "p95": 0.023415616394394444,
+        "max": 0.03882194341395889
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2677,
+        "median": 0.15921226859370965,
+        "p95": 0.4053830779718844,
+        "max": 0.720944366935202
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 34.060001299998476,
+      "simulated_to_wall_ratio": 7.938930994697645,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 270,
+      "lidar_accepted_observations": 269,
+      "lidar_pose_translation_error_m": {
+        "count": 269,
+        "median": 0.012174777280266641,
+        "p95": 0.021831036699974285,
+        "max": 0.030053280187879904
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 269,
+        "median": 0.22387887603942921,
+        "p95": 0.47552325443737603,
+        "max": 0.9137546220486937
+      }
+    },
+    {
+      "id": "05-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/05-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.9,
+      "completion_time_ratio": 1.0056953013763645,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.004336202676979,
+      "final_port_speed_mps": 0.0011465672496060967,
+      "final_alignment_deg": 0.3203974548877696,
+      "final_relative_rate_radps": 0.0007670760821400033,
+      "minimum_com_range_m": 6.49973812806584,
+      "minimum_port_gap_m": 4.9997356622067155,
+      "max_applied_forces_n": [
+        0.0,
+        1.3634535299085069
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.2702822082757679
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2092,
+        "median": 0.012597069393500481,
+        "p95": 0.02146972644458607,
+        "max": 0.02994255540640778
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2092,
+        "median": 0.13190788693590894,
+        "p95": 0.35538605165329573,
+        "max": 0.6764458973272643
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 28.492449399998804,
+      "simulated_to_wall_ratio": 7.437058043876315,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 212,
+      "lidar_accepted_observations": 212,
+      "lidar_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.012505373343039139,
+        "p95": 0.021345101680613213,
+        "max": 0.02713140370407499
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.20444955591518185,
+        "p95": 0.4207418710785298,
+        "max": 0.5437253533379252
+      }
+    },
+    {
+      "id": "06-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/06-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 247.8,
+      "completion_time_ratio": 1.189059500959693,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.011810705127173,
+      "final_port_speed_mps": 0.00043699601810199163,
+      "final_alignment_deg": 0.2457836924084027,
+      "final_relative_rate_radps": 0.0006159020742510766,
+      "minimum_com_range_m": 6.488370493337522,
+      "minimum_port_gap_m": 4.988378582587024,
+      "max_applied_forces_n": [
+        0.0,
+        1.0729027250942214
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.27661000962528604
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2451,
+        "median": 0.012191377351701437,
+        "p95": 0.020649368851057878,
+        "max": 0.03579581089061722
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2451,
+        "median": 0.14593561285023796,
+        "p95": 0.35261079779490795,
+        "max": 0.6947233758323952
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 33.71783140000116,
+      "simulated_to_wall_ratio": 7.349227091751562,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 248,
+      "lidar_accepted_observations": 248,
+      "lidar_pose_translation_error_m": {
+        "count": 248,
+        "median": 0.01263410389396674,
+        "p95": 0.02087555702409963,
+        "max": 0.028232812178158047
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 248,
+        "median": 0.22093121705372415,
+        "p95": 0.43467348260250005,
+        "max": 0.6885011117063919
+      }
+    },
+    {
+      "id": "07-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/07-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.1,
+      "completion_time_ratio": 1.0018984337921215,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.002420380143601,
+      "final_port_speed_mps": 0.0007001218374993597,
+      "final_alignment_deg": 0.175596884001227,
+      "final_relative_rate_radps": 0.000794145455808176,
+      "minimum_com_range_m": 6.4976640662699685,
+      "minimum_port_gap_m": 4.997659798014885,
+      "max_applied_forces_n": [
+        0.0,
+        1.588312245717319
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.23881116615382508
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2084,
+        "median": 0.013201001415451556,
+        "p95": 0.022626924062635747,
+        "max": 0.04284667555735925
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2084,
+        "median": 0.1367594643673049,
+        "p95": 0.31866339182739734,
+        "max": 0.9298920139409573
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 25.620171799999298,
+      "simulated_to_wall_ratio": 8.239601266061994,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 211,
+      "lidar_accepted_observations": 211,
+      "lidar_pose_translation_error_m": {
+        "count": 211,
+        "median": 0.013138579847582375,
+        "p95": 0.022194282341440847,
+        "max": 0.02970865613374522
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 211,
+        "median": 0.22267253299421627,
+        "p95": 0.40775876098922503,
+        "max": 0.5719048903063079
+      }
+    },
+    {
+      "id": "08-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/08-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 227.3,
+      "completion_time_ratio": 1.0933140933140932,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.020289412772591,
+      "final_port_speed_mps": 0.0010345615135825478,
+      "final_alignment_deg": 0.2059931319383648,
+      "final_relative_rate_radps": 0.0011975876192590843,
+      "minimum_com_range_m": 6.46503830693549,
+      "minimum_port_gap_m": 4.96501282857839,
+      "max_applied_forces_n": [
+        0.0,
+        1.4971117792780657
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.36626743794891214
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2246,
+        "median": 0.012509617750112844,
+        "p95": 0.020649446278020227,
+        "max": 0.029064711958852147
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2246,
+        "median": 0.14435137355419464,
+        "p95": 0.3866494806826196,
+        "max": 0.732979077430458
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.228059699998994,
+      "simulated_to_wall_ratio": 8.348005789043,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 227,
+      "lidar_accepted_observations": 227,
+      "lidar_pose_translation_error_m": {
+        "count": 227,
+        "median": 0.012402578624695591,
+        "p95": 0.022222413961366982,
+        "max": 0.025543631078771795
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 227,
+        "median": 0.21399315789622536,
+        "p95": 0.45491171976881495,
+        "max": 0.6743985174127832
+      }
+    },
+    {
+      "id": "09-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/09-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 263.8,
+      "completion_time_ratio": 1.2514231499051234,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.074828685916293,
+      "final_port_speed_mps": 0.002142213362038543,
+      "final_alignment_deg": 0.17957637774172078,
+      "final_relative_rate_radps": 0.00035821750004997704,
+      "minimum_com_range_m": 6.458599513210166,
+      "minimum_port_gap_m": 4.958584854398643,
+      "max_applied_forces_n": [
+        0.0,
+        1.036240799483992
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.37955149805133553
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2611,
+        "median": 0.01235916498951297,
+        "p95": 0.022626397700932492,
+        "max": 0.037911054841085874
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2611,
+        "median": 0.15868756850308818,
+        "p95": 0.37096927233636723,
+        "max": 0.7956911514424545
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 32.459657600000355,
+      "simulated_to_wall_ratio": 8.127011173401815,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 264,
+      "lidar_accepted_observations": 263,
+      "lidar_pose_translation_error_m": {
+        "count": 263,
+        "median": 0.01230639569080265,
+        "p95": 0.023178111897212434,
+        "max": 0.035228260880957825
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 263,
+        "median": 0.22315585657817683,
+        "p95": 0.4260601930517004,
+        "max": 0.8346819516411788
+      }
+    },
+    {
+      "id": "10-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/10-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 215.4,
+      "completion_time_ratio": 1.0415860735009672,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.001543045639101,
+      "final_port_speed_mps": 0.0009179122452821031,
+      "final_alignment_deg": 0.25844347518440214,
+      "final_relative_rate_radps": 0.00046135687706564885,
+      "minimum_com_range_m": 6.500954456521419,
+      "minimum_port_gap_m": 5.000943859362798,
+      "max_applied_forces_n": [
+        0.0,
+        1.2006671453592805
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.4003514344885018
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2127,
+        "median": 0.012723495462296418,
+        "p95": 0.0206618632946875,
+        "max": 0.03242011397293548
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2127,
+        "median": 0.13199423611789854,
+        "p95": 0.3346685713151708,
+        "max": 0.7474312665852525
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.399588199999926,
+      "simulated_to_wall_ratio": 7.861432019624316,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 215,
+      "lidar_accepted_observations": 215,
+      "lidar_pose_translation_error_m": {
+        "count": 215,
+        "median": 0.013153325658485647,
+        "p95": 0.021138418758616023,
+        "max": 0.02936938343982014
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 215,
+        "median": 0.21203554278890144,
+        "p95": 0.4248658511546739,
+        "max": 0.5835381202417436
+      }
+    },
+    {
+      "id": "11-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/11-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 209.6,
+      "completion_time_ratio": 1.0019120458891013,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.0017442899584035,
+      "final_port_speed_mps": 0.0016706928403385358,
+      "final_alignment_deg": 0.10104478015757797,
+      "final_relative_rate_radps": 0.0012070636627391886,
+      "minimum_com_range_m": 6.476865908490044,
+      "minimum_port_gap_m": 4.976856062490895,
+      "max_applied_forces_n": [
+        0.0,
+        1.1329809180291064
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.28718442710964776
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2069,
+        "median": 0.012138308204271246,
+        "p95": 0.022001955591199437,
+        "max": 0.03189347787093703
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2069,
+        "median": 0.1416649103599778,
+        "p95": 0.3570498890235147,
+        "max": 0.6940113745349084
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.945860699999685,
+      "simulated_to_wall_ratio": 7.77856021500187,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 209,
+      "lidar_accepted_observations": 209,
+      "lidar_pose_translation_error_m": {
+        "count": 209,
+        "median": 0.012633158401074896,
+        "p95": 0.02138943124990555,
+        "max": 0.026971184040247093
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 209,
+        "median": 0.19719150298415858,
+        "p95": 0.4231713039759252,
+        "max": 0.6586776573814883
+      }
+    },
+    {
+      "id": "12-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/12-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 208.6,
+      "completion_time_ratio": 1.0024026910139356,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.998996643633187,
+      "final_port_speed_mps": 0.0018367120737972074,
+      "final_alignment_deg": 0.1576715658854778,
+      "final_relative_rate_radps": 0.0005104825644979726,
+      "minimum_com_range_m": 6.476683593333492,
+      "minimum_port_gap_m": 4.976683614412894,
+      "max_applied_forces_n": [
+        0.0,
+        1.2203618958678368
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.4146185042881438
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2059,
+        "median": 0.01250765149343459,
+        "p95": 0.02276855413951034,
+        "max": 0.034636437932994625
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2059,
+        "median": 0.13508059812342116,
+        "p95": 0.35891015497249507,
+        "max": 0.8097555773732212
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.61442790000001,
+      "simulated_to_wall_ratio": 7.554022149414145,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 208,
+      "lidar_accepted_observations": 208,
+      "lidar_pose_translation_error_m": {
+        "count": 208,
+        "median": 0.012293698318173939,
+        "p95": 0.022327967496483633,
+        "max": 0.02798188918284217
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 208,
+        "median": 0.21079459571390335,
+        "p95": 0.4654409073031683,
+        "max": 0.7822946164733781
+      }
+    },
+    {
+      "id": "13-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/13-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 246.0,
+      "completion_time_ratio": 1.1878319652341864,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.018721630881576,
+      "final_port_speed_mps": 0.000553664735278959,
+      "final_alignment_deg": 0.12397788952852926,
+      "final_relative_rate_radps": 0.0007714807817101338,
+      "minimum_com_range_m": 6.473830831757332,
+      "minimum_port_gap_m": 4.973809321154477,
+      "max_applied_forces_n": [
+        0.0,
+        1.0911727685921548
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.26149046345741933
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2433,
+        "median": 0.01182179556238497,
+        "p95": 0.023384813584323334,
+        "max": 0.03500308254094603
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2433,
+        "median": 0.12507498957518606,
+        "p95": 0.35985605736529563,
+        "max": 0.7567033839029025
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 33.66508470000008,
+      "simulated_to_wall_ratio": 7.307274055365719,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 246,
+      "lidar_accepted_observations": 246,
+      "lidar_pose_translation_error_m": {
+        "count": 246,
+        "median": 0.011896338689037944,
+        "p95": 0.02363288995177482,
+        "max": 0.03143652523156723
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 246,
+        "median": 0.2009780214678492,
+        "p95": 0.4351748258340373,
+        "max": 0.6375664080260526
+      }
+    },
+    {
+      "id": "14-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/14-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 208.2,
+      "completion_time_ratio": 1.0024073182474724,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.003389243758575,
+      "final_port_speed_mps": 0.0004875407256220353,
+      "final_alignment_deg": 0.25805126143358964,
+      "final_relative_rate_radps": 0.0007670446271816238,
+      "minimum_com_range_m": 6.500726712235556,
+      "minimum_port_gap_m": 5.000732587545107,
+      "max_applied_forces_n": [
+        0.0,
+        1.2571018823590836
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.4105008087558764
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2055,
+        "median": 0.012216961678632537,
+        "p95": 0.02488188507146963,
+        "max": 0.04144111993709688
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2055,
+        "median": 0.1429560199669212,
+        "p95": 0.46375182180012225,
+        "max": 1.1455389926518884
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 28.697688899999775,
+      "simulated_to_wall_ratio": 7.254939612924775,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 208,
+      "lidar_accepted_observations": 208,
+      "lidar_pose_translation_error_m": {
+        "count": 208,
+        "median": 0.012316164496881499,
+        "p95": 0.023784925381558374,
+        "max": 0.037320145646871354
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 208,
+        "median": 0.18890600681561248,
+        "p95": 0.5181898865795055,
+        "max": 0.6686564572501338
+      }
+    },
+    {
+      "id": "15-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/15-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 207.3,
+      "completion_time_ratio": 1.0033881897386254,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.0047353906285315,
+      "final_port_speed_mps": 0.001953512175337291,
+      "final_alignment_deg": 0.45051668146251,
+      "final_relative_rate_radps": 0.0008644706617446409,
+      "minimum_com_range_m": 6.496690675943666,
+      "minimum_port_gap_m": 4.9966898642829385,
+      "max_applied_forces_n": [
+        0.0,
+        1.6160149402285409
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.16304822510097236
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2046,
+        "median": 0.011857863101472025,
+        "p95": 0.02122019611321029,
+        "max": 0.032193044380415065
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2046,
+        "median": 0.12205659639387736,
+        "p95": 0.38066097090418904,
+        "max": 0.7395351591308581
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.575850199998968,
+      "simulated_to_wall_ratio": 7.800314888891422,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 207,
+      "lidar_accepted_observations": 207,
+      "lidar_pose_translation_error_m": {
+        "count": 207,
+        "median": 0.012422300792528457,
+        "p95": 0.02137196979947753,
+        "max": 0.030990017580112186
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 207,
+        "median": 0.19144368948908108,
+        "p95": 0.4240021115664101,
+        "max": 0.6092147470427322
+      }
+    },
+    {
+      "id": "16-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/16-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 225.6,
+      "completion_time_ratio": 1.0778786430960343,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.01136884074654,
+      "final_port_speed_mps": 0.0007864338071954102,
+      "final_alignment_deg": 0.29184649966685206,
+      "final_relative_rate_radps": 0.00031304107650963734,
+      "minimum_com_range_m": 6.478546341482254,
+      "minimum_port_gap_m": 4.978361913066479,
+      "max_applied_forces_n": [
+        0.0,
+        1.5043923105150476
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.46455977292610884
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2229,
+        "median": 0.012219799023574347,
+        "p95": 0.021789157451091837,
+        "max": 0.029288184522654085
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2229,
+        "median": 0.13822138686048716,
+        "p95": 0.38959978817974994,
+        "max": 0.6740615601982705
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 28.097220800000287,
+      "simulated_to_wall_ratio": 8.029263876518268,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 225,
+      "lidar_accepted_observations": 225,
+      "lidar_pose_translation_error_m": {
+        "count": 225,
+        "median": 0.01175765607010628,
+        "p95": 0.022654759110261994,
+        "max": 0.028143034577033793
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 225,
+        "median": 0.21829921620736265,
+        "p95": 0.4561808094793405,
+        "max": 0.5950409283551825
+      }
+    },
+    {
+      "id": "17-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/17-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 229.4,
+      "completion_time_ratio": 1.1082125603864734,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.019998181917882,
+      "final_port_speed_mps": 0.0001677019473995274,
+      "final_alignment_deg": 0.2024265104680866,
+      "final_relative_rate_radps": 0.0003120682088600484,
+      "minimum_com_range_m": 6.4668569231289945,
+      "minimum_port_gap_m": 4.966818181462604,
+      "max_applied_forces_n": [
+        0.0,
+        0.8346457206627705
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.47921626245788007
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2267,
+        "median": 0.01244937058633588,
+        "p95": 0.020590138223025762,
+        "max": 0.02790670444705508
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2267,
+        "median": 0.1520301832133954,
+        "p95": 0.3565018039397141,
+        "max": 0.7047538022378957
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 28.388386799999353,
+      "simulated_to_wall_ratio": 8.080769140429116,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 229,
+      "lidar_accepted_observations": 229,
+      "lidar_pose_translation_error_m": {
+        "count": 229,
+        "median": 0.012743570475057704,
+        "p95": 0.01952158910570083,
+        "max": 0.02903110509375377
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 229,
+        "median": 0.2136024027686414,
+        "p95": 0.4388302221837826,
+        "max": 0.724197802082339
+      }
+    },
+    {
+      "id": "18-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/18-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 215.4,
+      "completion_time_ratio": 1.0436046511627908,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.0079508357713465,
+      "final_port_speed_mps": 0.0011703902562258907,
+      "final_alignment_deg": 0.10093245161602446,
+      "final_relative_rate_radps": 0.0013640145244500285,
+      "minimum_com_range_m": 6.486208471949976,
+      "minimum_port_gap_m": 4.986208687264963,
+      "max_applied_forces_n": [
+        0.0,
+        1.4622263772299908
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.2268369548333253
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2127,
+        "median": 0.01249358513170445,
+        "p95": 0.020660531734715205,
+        "max": 0.02888567339119082
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2127,
+        "median": 0.1441766735309316,
+        "p95": 0.3292554074726683,
+        "max": 0.7748266612276071
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.046818700000586,
+      "simulated_to_wall_ratio": 8.269723933694642,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 215,
+      "lidar_accepted_observations": 215,
+      "lidar_pose_translation_error_m": {
+        "count": 215,
+        "median": 0.01253325629422866,
+        "p95": 0.021422582920098205,
+        "max": 0.02757970707262111
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 215,
+        "median": 0.21060474491588824,
+        "p95": 0.4314666762335796,
+        "max": 0.5655898089804277
+      }
+    },
+    {
+      "id": "19-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/19-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 244.3,
+      "completion_time_ratio": 1.162779628748215,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.015510180197812,
+      "final_port_speed_mps": 0.0005478917684359079,
+      "final_alignment_deg": 0.2047853899014785,
+      "final_relative_rate_radps": 0.0007812024310226361,
+      "minimum_com_range_m": 6.472362845571135,
+      "minimum_port_gap_m": 4.972282660411698,
+      "max_applied_forces_n": [
+        0.0,
+        2.0
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2416,
+        "median": 0.012303803876081338,
+        "p95": 0.02205030801631283,
+        "max": 0.03729613217701274
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2416,
+        "median": 0.13746276115268097,
+        "p95": 0.384871168106217,
+        "max": 0.7570943212913525
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 30.032681499998944,
+      "simulated_to_wall_ratio": 8.134471775356078,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 244,
+      "lidar_accepted_observations": 244,
+      "lidar_pose_translation_error_m": {
+        "count": 244,
+        "median": 0.012292818056055688,
+        "p95": 0.02247977179147318,
+        "max": 0.03020317064532771
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 244,
+        "median": 0.22189998650068082,
+        "p95": 0.4631614031956407,
+        "max": 0.7353545466594187
+      }
+    },
+    {
+      "id": "20-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/20-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 207.3,
+      "completion_time_ratio": 1.0019333011116482,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.997898222126666,
+      "final_port_speed_mps": 0.0027531209447069506,
+      "final_alignment_deg": 0.2166017355403166,
+      "final_relative_rate_radps": 0.0004173918479181127,
+      "minimum_com_range_m": 6.46192347538107,
+      "minimum_port_gap_m": 4.961929305826208,
+      "max_applied_forces_n": [
+        0.0,
+        1.8992230800902798
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.2678505433985655
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2046,
+        "median": 0.012834265815637382,
+        "p95": 0.022105613645138644,
+        "max": 0.027969888740203414
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2046,
+        "median": 0.15445930787018303,
+        "p95": 0.3408029512799754,
+        "max": 0.9718003329416505
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 24.885781599999973,
+      "simulated_to_wall_ratio": 8.330057835113374,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 207,
+      "lidar_accepted_observations": 207,
+      "lidar_pose_translation_error_m": {
+        "count": 207,
+        "median": 0.012750518098135476,
+        "p95": 0.02187736105434847,
+        "max": 0.036782038420039354
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 207,
+        "median": 0.2047047212637569,
+        "p95": 0.4392374877933912,
+        "max": 0.609392384775487
+      }
+    },
+    {
+      "id": "21-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/21-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 223.2,
+      "completion_time_ratio": 1.0643776824034334,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.006746267949598,
+      "final_port_speed_mps": 0.0012722867919227649,
+      "final_alignment_deg": 0.36795427057144875,
+      "final_relative_rate_radps": 0.000995195665867786,
+      "minimum_com_range_m": 6.500816274341882,
+      "minimum_port_gap_m": 5.000824065074826,
+      "max_applied_forces_n": [
+        0.0,
+        0.9295324689421979
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.32662989064392933
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2205,
+        "median": 0.012668407737507869,
+        "p95": 0.02188235324620683,
+        "max": 0.02968323196535597
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2205,
+        "median": 0.1463516767569619,
+        "p95": 0.37775996147221325,
+        "max": 0.8763928466111669
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.801432100000966,
+      "simulated_to_wall_ratio": 8.327913193862202,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 223,
+      "lidar_accepted_observations": 223,
+      "lidar_pose_translation_error_m": {
+        "count": 223,
+        "median": 0.013107333119927247,
+        "p95": 0.020863522537281368,
+        "max": 0.03140021872568065
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 223,
+        "median": 0.2210608210676521,
+        "p95": 0.4657054801464378,
+        "max": 0.6277101606169421
+      }
+    },
+    {
+      "id": "22-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/22-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 210.0,
+      "completion_time_ratio": 1.0023866348448687,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.001547247801966,
+      "final_port_speed_mps": 0.0016588699771895126,
+      "final_alignment_deg": 0.426541692890126,
+      "final_relative_rate_radps": 6.0593045204391934e-05,
+      "minimum_com_range_m": 6.490906062089365,
+      "minimum_port_gap_m": 4.990826395492977,
+      "max_applied_forces_n": [
+        0.0,
+        1.2079248243155156
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.4216157473675063
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2073,
+        "median": 0.012701885061534484,
+        "p95": 0.023340253393075685,
+        "max": 0.035150142658970165
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2073,
+        "median": 0.1316613656236254,
+        "p95": 0.3659911281360341,
+        "max": 1.1228149440677986
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 24.866520800000217,
+      "simulated_to_wall_ratio": 8.44508975296609,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 210,
+      "lidar_accepted_observations": 210,
+      "lidar_pose_translation_error_m": {
+        "count": 210,
+        "median": 0.01260285721138411,
+        "p95": 0.023089867852635268,
+        "max": 0.03401465464899429
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 210,
+        "median": 0.19986153089360065,
+        "p95": 0.4043977880557295,
+        "max": 0.6967031632073245
+      }
+    },
+    {
+      "id": "23-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/23-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 248.3,
+      "completion_time_ratio": 1.1717791411042944,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.0142470527537775,
+      "final_port_speed_mps": 0.0018132284403464002,
+      "final_alignment_deg": 0.1092190126924055,
+      "final_relative_rate_radps": 0.0010016275675166677,
+      "minimum_com_range_m": 6.4718772060182,
+      "minimum_port_gap_m": 4.971879006471541,
+      "max_applied_forces_n": [
+        0.0,
+        1.749852166519764
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.22080295055583554
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2456,
+        "median": 0.012768551933224936,
+        "p95": 0.02319969543378134,
+        "max": 0.036887167754010595
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2456,
+        "median": 0.14071749498383385,
+        "p95": 0.3825524186146566,
+        "max": 1.15863561069895
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 29.581943900000624,
+      "simulated_to_wall_ratio": 8.393633658401832,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 248,
+      "lidar_accepted_observations": 247,
+      "lidar_pose_translation_error_m": {
+        "count": 247,
+        "median": 0.012590377076636643,
+        "p95": 0.02168600479538923,
+        "max": 0.027734076047465788
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 247,
+        "median": 0.21066490640401728,
+        "p95": 0.4665976112305822,
+        "max": 0.7126716026604272
+      }
+    },
+    {
+      "id": "24-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/24-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 224.3,
+      "completion_time_ratio": 1.0706443914081145,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.001835812700014,
+      "final_port_speed_mps": 0.0008034373448570797,
+      "final_alignment_deg": 0.27038639040295215,
+      "final_relative_rate_radps": 0.0003550438199825041,
+      "minimum_com_range_m": 6.492883974780086,
+      "minimum_port_gap_m": 4.992862737939327,
+      "max_applied_forces_n": [
+        0.0,
+        2.0
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.49999999999999994
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2216,
+        "median": 0.012564485975201059,
+        "p95": 0.02312313471020136,
+        "max": 0.032172905837235664
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2216,
+        "median": 0.14461681767414908,
+        "p95": 0.36943372396340635,
+        "max": 0.991581062641191
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 28.623899399999573,
+      "simulated_to_wall_ratio": 7.836109150104243,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 224,
+      "lidar_accepted_observations": 224,
+      "lidar_pose_translation_error_m": {
+        "count": 224,
+        "median": 0.0128166065119549,
+        "p95": 0.023130374539447877,
+        "max": 0.030487686023179576
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 224,
+        "median": 0.20557559024313823,
+        "p95": 0.4911573014703199,
+        "max": 0.7251905728435727
+      }
+    },
+    {
+      "id": "25-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/25-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 206.5,
+      "completion_time_ratio": 1.0024271844660195,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.993969089129569,
+      "final_port_speed_mps": 0.0022830499177304664,
+      "final_alignment_deg": 0.20468297660248794,
+      "final_relative_rate_radps": 0.00015796864154784464,
+      "minimum_com_range_m": 6.463443255116943,
+      "minimum_port_gap_m": 4.963419079871841,
+      "max_applied_forces_n": [
+        0.0,
+        1.6353958355130085
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2038,
+        "median": 0.012522969615130608,
+        "p95": 0.02108488328637438,
+        "max": 0.0328643534181894
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2038,
+        "median": 0.12494637177639636,
+        "p95": 0.33272416565116125,
+        "max": 0.5890738673111705
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.434918099999777,
+      "simulated_to_wall_ratio": 7.811637593081922,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 206,
+      "lidar_accepted_observations": 206,
+      "lidar_pose_translation_error_m": {
+        "count": 206,
+        "median": 0.012706559196699602,
+        "p95": 0.021150058935536814,
+        "max": 0.025875511297293832
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 206,
+        "median": 0.21330865271333027,
+        "p95": 0.4274807998186897,
+        "max": 0.6796376551530522
+      }
+    },
+    {
+      "id": "26-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/26-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 232.3,
+      "completion_time_ratio": 1.1173641173641173,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.999525304398367,
+      "final_port_speed_mps": 0.0007214459787128667,
+      "final_alignment_deg": 0.2222656591928143,
+      "final_relative_rate_radps": 0.0004567340662153992,
+      "minimum_com_range_m": 6.488510332626603,
+      "minimum_port_gap_m": 4.988488219546366,
+      "max_applied_forces_n": [
+        0.0,
+        2.0
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.46622615890624564
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2296,
+        "median": 0.012777544719784945,
+        "p95": 0.02326541712949609,
+        "max": 0.04485743371881365
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2296,
+        "median": 0.14825587513726207,
+        "p95": 0.40866294626691607,
+        "max": 1.9056427503027031
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 29.238257299999532,
+      "simulated_to_wall_ratio": 7.945069968311817,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 232,
+      "lidar_accepted_observations": 231,
+      "lidar_pose_translation_error_m": {
+        "count": 231,
+        "median": 0.012451974805125225,
+        "p95": 0.02322025270908118,
+        "max": 0.030294231513691327
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 231,
+        "median": 0.2051275652195014,
+        "p95": 0.497083055847916,
+        "max": 0.7786562812355046
+      }
+    },
+    {
+      "id": "27-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/27-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 209.1,
+      "completion_time_ratio": 1.0023969319271333,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.0041365156122914,
+      "final_port_speed_mps": 0.00034536453707250916,
+      "final_alignment_deg": 0.18625444957556836,
+      "final_relative_rate_radps": 0.0002366164033728015,
+      "minimum_com_range_m": 6.500109399990873,
+      "minimum_port_gap_m": 5.000087341540622,
+      "max_applied_forces_n": [
+        0.0,
+        1.1517462354347763
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.3574187440324842
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2064,
+        "median": 0.013928605564829324,
+        "p95": 0.02355000496676351,
+        "max": 0.0372765491651243
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2064,
+        "median": 0.1497704294447474,
+        "p95": 0.38327789158458647,
+        "max": 1.1303781193457558
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.173838599999726,
+      "simulated_to_wall_ratio": 7.9888931537922065,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 209,
+      "lidar_accepted_observations": 209,
+      "lidar_pose_translation_error_m": {
+        "count": 209,
+        "median": 0.013556648532484528,
+        "p95": 0.022144862902409673,
+        "max": 0.03147046596281793
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 209,
+        "median": 0.21343181712209602,
+        "p95": 0.412274994729796,
+        "max": 0.7633126240758833
+      }
+    },
+    {
+      "id": "28-fault-abort",
+      "category": "fault",
+      "kind": "abort",
+      "expected_outcome": "retreated",
+      "path": "episodes/28-fault-abort",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "time_limit",
+      "failure_reason": null,
+      "abort_reason": "estimated_gap_abort_request",
+      "simulated_seconds": 600.0,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 30.012825304016506,
+      "final_port_speed_mps": 0.0011360745026996613,
+      "final_alignment_deg": 0.13417851158443728,
+      "final_relative_rate_radps": 0.0006312489376560253,
+      "minimum_com_range_m": 20.293006405173685,
+      "minimum_port_gap_m": 18.792946917739773,
+      "max_applied_forces_n": [
+        0.0,
+        1.6578731131545634
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.3303078702127853
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 5973,
+        "median": 0.01750824740946366,
+        "p95": 0.031947467506732906,
+        "max": 0.04341659428601013
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 5973,
+        "median": 0.13419826490127199,
+        "p95": 0.29034316099385077,
+        "max": 0.889781545027441
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 69.18899369999963,
+      "simulated_to_wall_ratio": 8.671899501842345,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 600,
+      "lidar_accepted_observations": 600,
+      "lidar_pose_translation_error_m": {
+        "count": 600,
+        "median": 0.017297517147739805,
+        "p95": 0.03018742641458928,
+        "max": 0.03975373869142379
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 600,
+        "median": 0.19950123685381768,
+        "p95": 0.496032736189438,
+        "max": 0.7075886397189244
+      }
+    },
+    {
+      "id": "29-fault-abort",
+      "category": "fault",
+      "kind": "abort",
+      "expected_outcome": "retreated",
+      "path": "episodes/29-fault-abort",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "retreated",
+      "failure_reason": null,
+      "abort_reason": "estimated_gap_abort_request",
+      "simulated_seconds": 477.7,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 30.01469974286318,
+      "final_port_speed_mps": 0.003721196674014696,
+      "final_alignment_deg": 0.12759102026188313,
+      "final_relative_rate_radps": 0.0005427345902024817,
+      "minimum_com_range_m": 12.225346031875455,
+      "minimum_port_gap_m": 10.725311371356316,
+      "max_applied_forces_n": [
+        0.0,
+        1.5988528733331597
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.42591076289705043
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 4750,
+        "median": 0.015550182522512956,
+        "p95": 0.02920687085609511,
+        "max": 0.04226665880527994
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 4750,
+        "median": 0.13923732517380877,
+        "p95": 0.364277603667671,
+        "max": 0.7827716602876069
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 54.977237900000546,
+      "simulated_to_wall_ratio": 8.689050564324463,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 478,
+      "lidar_accepted_observations": 477,
+      "lidar_pose_translation_error_m": {
+        "count": 477,
+        "median": 0.015396574582743797,
+        "p95": 0.02716524318699643,
+        "max": 0.035809266869645445
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 477,
+        "median": 0.21726599532532925,
+        "p95": 0.5112478567430213,
+        "max": 0.6462457781703376
+      }
+    },
+    {
+      "id": "30-fault-dropped-frame",
+      "category": "fault",
+      "kind": "dropped-frame",
+      "expected_outcome": "success",
+      "path": "episodes/30-fault-dropped-frame",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 227.8,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.006884024995049,
+      "final_port_speed_mps": 0.000799485711545971,
+      "final_alignment_deg": 0.18015225383397276,
+      "final_relative_rate_radps": 0.0002508319588897027,
+      "minimum_com_range_m": 6.490413442753969,
+      "minimum_port_gap_m": 4.990412238746659,
+      "max_applied_forces_n": [
+        0.0,
+        1.5824652795042842
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.34750113653705916
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2251,
+        "median": 0.012442500870375219,
+        "p95": 0.022390182473888517,
+        "max": 0.04202381603378404
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2251,
+        "median": 0.14350795957512902,
+        "p95": 0.335187056558477,
+        "max": 0.8076376237860342
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": {
+        "lost_captures": [
+          58
+        ],
+        "brake_latency_s": null,
+        "reacquisition_s": null,
+        "final_estimate_age_s": null
+      },
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.798649899999873,
+      "simulated_to_wall_ratio": 8.194642575069844,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 228,
+      "lidar_accepted_observations": 228,
+      "lidar_pose_translation_error_m": {
+        "count": 228,
+        "median": 0.012466005651036052,
+        "p95": 0.02317902499458127,
+        "max": 0.0304361162841599
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 228,
+        "median": 0.19870260603075865,
+        "p95": 0.4519112455234617,
+        "max": 0.7008152403851282
+      }
+    },
+    {
+      "id": "31-fault-dropped-frame",
+      "category": "fault",
+      "kind": "dropped-frame",
+      "expected_outcome": "success",
+      "path": "episodes/31-fault-dropped-frame",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 208.3,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.000658659110113,
+      "final_port_speed_mps": 0.002584681657780426,
+      "final_alignment_deg": 0.40911006154722834,
+      "final_relative_rate_radps": 0.0005976773503781009,
+      "minimum_com_range_m": 6.462171709689951,
+      "minimum_port_gap_m": 4.962158657209204,
+      "max_applied_forces_n": [
+        0.0,
+        1.051350196231579
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.2871541121640209
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2056,
+        "median": 0.012514486252783147,
+        "p95": 0.025032942758920606,
+        "max": 0.04015529506341036
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2056,
+        "median": 0.15329881071227447,
+        "p95": 0.39705930202182405,
+        "max": 0.7708277449363231
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": {
+        "lost_captures": [
+          78
+        ],
+        "brake_latency_s": null,
+        "reacquisition_s": null,
+        "final_estimate_age_s": null
+      },
+      "safety_filter_interventions": null,
+      "wall_seconds": 25.14759159999994,
+      "simulated_to_wall_ratio": 8.283099364473554,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 208,
+      "lidar_accepted_observations": 208,
+      "lidar_pose_translation_error_m": {
+        "count": 208,
+        "median": 0.013270856566694918,
+        "p95": 0.02303057687814524,
+        "max": 0.031005306600835753
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 208,
+        "median": 0.21910715227248573,
+        "p95": 0.4910822332311941,
+        "max": 0.671919484805086
+      }
+    },
+    {
+      "id": "32-fault-extended-loss",
+      "category": "fault",
+      "kind": "extended-loss",
+      "expected_outcome": "success",
+      "path": "episodes/32-fault-extended-loss",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.9,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.003273928205544,
+      "final_port_speed_mps": 0.0013207487534282725,
+      "final_alignment_deg": 0.27601474208931115,
+      "final_relative_rate_radps": 0.0009826846771049532,
+      "minimum_com_range_m": 6.488518825064395,
+      "minimum_port_gap_m": 4.988521776436216,
+      "max_applied_forces_n": [
+        0.0,
+        0.8983190525604261
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.21086525291060523
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2092,
+        "median": 0.012286000860594636,
+        "p95": 0.02428585351892918,
+        "max": 0.038046520692522755
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2092,
+        "median": 0.14465030586708116,
+        "p95": 0.33320810976482773,
+        "max": 0.7163452575998007
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": {
+        "lost_captures": [
+          85,
+          86,
+          87
+        ],
+        "brake_latency_s": null,
+        "reacquisition_s": null,
+        "final_estimate_age_s": null
+      },
+      "safety_filter_interventions": null,
+      "wall_seconds": 25.33532820000073,
+      "simulated_to_wall_ratio": 8.363815077792989,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 212,
+      "lidar_accepted_observations": 212,
+      "lidar_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.012351306072044843,
+        "p95": 0.02250322024421362,
+        "max": 0.030204547128655317
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.19381633413371913,
+        "p95": 0.43218974952455214,
+        "max": 0.6422066646936558
+      }
+    },
+    {
+      "id": "33-fault-extended-loss",
+      "category": "fault",
+      "kind": "extended-loss",
+      "expected_outcome": "success",
+      "path": "episodes/33-fault-extended-loss",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 213.8,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.009140421608926,
+      "final_port_speed_mps": 0.001344914499657599,
+      "final_alignment_deg": 0.2564479180278151,
+      "final_relative_rate_radps": 0.00046959150735575354,
+      "minimum_com_range_m": 6.478425963219776,
+      "minimum_port_gap_m": 4.978414482989697,
+      "max_applied_forces_n": [
+        0.0,
+        1.180088852776118
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.18636030042786592
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2111,
+        "median": 0.012445324318040492,
+        "p95": 0.022906052573370774,
+        "max": 0.03623849649318271
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2111,
+        "median": 0.13788236017768424,
+        "p95": 0.30268490852942165,
+        "max": 0.41895155555922203
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": {
+        "lost_captures": [
+          64,
+          65,
+          66,
+          67,
+          68
+        ],
+        "brake_latency_s": null,
+        "reacquisition_s": null,
+        "final_estimate_age_s": null
+      },
+      "safety_filter_interventions": null,
+      "wall_seconds": 25.63378019999982,
+      "simulated_to_wall_ratio": 8.340556809486941,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 214,
+      "lidar_accepted_observations": 214,
+      "lidar_pose_translation_error_m": {
+        "count": 214,
+        "median": 0.012888559244393031,
+        "p95": 0.022794635827489064,
+        "max": 0.03393403591772747
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 214,
+        "median": 0.197354750656919,
+        "p95": 0.4230181839988572,
+        "max": 0.6633247654790762
+      }
+    },
+    {
+      "id": "34-stress-init-errors-2x",
+      "category": "stress",
+      "kind": "init-errors-2x",
+      "expected_outcome": null,
+      "path": "episodes/34-stress-init-errors-2x",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 225.3,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.012507935748524,
+      "final_port_speed_mps": 0.0007658575394083552,
+      "final_alignment_deg": 0.21592665895919588,
+      "final_relative_rate_radps": 0.0008769404143705111,
+      "minimum_com_range_m": 6.465750761230735,
+      "minimum_port_gap_m": 4.965720111526454,
+      "max_applied_forces_n": [
+        0.0,
+        1.9969099000401844
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.49999999999999994
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2226,
+        "median": 0.012453220283095291,
+        "p95": 0.023810769071351854,
+        "max": 0.03906771213104618
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2226,
+        "median": 0.16179020459642884,
+        "p95": 0.41455604091646214,
+        "max": 1.329790483368867
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.10722859999987,
+      "simulated_to_wall_ratio": 8.311436160611457,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 225,
+      "lidar_accepted_observations": 225,
+      "lidar_pose_translation_error_m": {
+        "count": 225,
+        "median": 0.012617161120983874,
+        "p95": 0.022117015811118954,
+        "max": 0.030905056596400995
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 225,
+        "median": 0.21760188229127786,
+        "p95": 0.444637391612782,
+        "max": 0.7163857887450181
+      }
+    },
+    {
+      "id": "35-stress-heavy-degradation",
+      "category": "stress",
+      "kind": "heavy-degradation",
+      "expected_outcome": null,
+      "path": "episodes/35-stress-heavy-degradation",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 221.3,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.015266053788509,
+      "final_port_speed_mps": 0.0011877826582897826,
+      "final_alignment_deg": 0.16733323781257936,
+      "final_relative_rate_radps": 0.0008838388459516697,
+      "minimum_com_range_m": 6.465981523234556,
+      "minimum_port_gap_m": 4.965962441065468,
+      "max_applied_forces_n": [
+        0.0,
+        1.3834502773383346
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.28338951998658235
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2186,
+        "median": 0.012242227840358331,
+        "p95": 0.021680782096373127,
+        "max": 0.02835551573931024
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2186,
+        "median": 0.14811294428585772,
+        "p95": 0.40460900981738607,
+        "max": 0.9062290831528622
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.36286889999974,
+      "simulated_to_wall_ratio": 8.39438229729247,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 221,
+      "lidar_accepted_observations": 221,
+      "lidar_pose_translation_error_m": {
+        "count": 221,
+        "median": 0.012633886203839336,
+        "p95": 0.021992048376859766,
+        "max": 0.028136307588466296
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 221,
+        "median": 0.2136506392877547,
+        "p95": 0.4655678855258502,
+        "max": 0.5901201673219434
+      }
+    },
+    {
+      "id": "36-stress-oblique-sun",
+      "category": "stress",
+      "kind": "oblique-sun",
+      "expected_outcome": null,
+      "path": "episodes/36-stress-oblique-sun",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 226.8,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.020163393400558,
+      "final_port_speed_mps": 0.001030795945340277,
+      "final_alignment_deg": 0.23939159051236275,
+      "final_relative_rate_radps": 0.0002901365723140261,
+      "minimum_com_range_m": 6.468560468648478,
+      "minimum_port_gap_m": 4.968502614248019,
+      "max_applied_forces_n": [
+        0.0,
+        1.7744006436102795
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.35735402662687693
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2241,
+        "median": 0.012555325605069454,
+        "p95": 0.021936405219525924,
+        "max": 0.0499072626313785
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2241,
+        "median": 0.14915993646687084,
+        "p95": 0.29915515270797244,
+        "max": 0.9963648689118354
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.524999399998705,
+      "simulated_to_wall_ratio": 8.239782195962942,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 227,
+      "lidar_accepted_observations": 227,
+      "lidar_pose_translation_error_m": {
+        "count": 227,
+        "median": 0.012459058899869806,
+        "p95": 0.02151373541551401,
+        "max": 0.031137077452826983
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 227,
+        "median": 0.2112686883280506,
+        "p95": 0.4391758939117557,
+        "max": 0.6821234850330072
+      }
+    },
+    {
+      "id": "37-stress-chaser-disturbance-2x",
+      "category": "stress",
+      "kind": "chaser-disturbance-2x",
+      "expected_outcome": null,
+      "path": "episodes/37-stress-chaser-disturbance-2x",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 214.6,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.000811919536859,
+      "final_port_speed_mps": 0.001794603500556278,
+      "final_alignment_deg": 0.1513542105940864,
+      "final_relative_rate_radps": 0.0005096551272756127,
+      "minimum_com_range_m": 6.475694256462753,
+      "minimum_port_gap_m": 4.975676883316048,
+      "max_applied_forces_n": [
+        0.0,
+        1.2937543052030565
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.3793242954224559
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2119,
+        "median": 0.013222437941343883,
+        "p95": 0.022136887163839526,
+        "max": 0.033846470926966875
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2119,
+        "median": 0.13340774443075656,
+        "p95": 0.3431665865935433,
+        "max": 0.6902955293477074
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.44348170000012,
+      "simulated_to_wall_ratio": 7.819707511820523,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 214,
+      "lidar_accepted_observations": 214,
+      "lidar_pose_translation_error_m": {
+        "count": 214,
+        "median": 0.01276588790612478,
+        "p95": 0.021718111489543626,
+        "max": 0.032478400868912925
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 214,
+        "median": 0.2104290381618761,
+        "p95": 0.40587751188950105,
+        "max": 0.644075544060006
+      }
+    },
+    {
+      "id": "38-stress-degraded-dropped-oblique",
+      "category": "stress",
+      "kind": "degraded-dropped-oblique",
+      "expected_outcome": null,
+      "path": "episodes/38-stress-degraded-dropped-oblique",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 214.3,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.006641008452388,
+      "final_port_speed_mps": 0.0020059203553476194,
+      "final_alignment_deg": 0.3776288451765316,
+      "final_relative_rate_radps": 0.00045510168074577786,
+      "minimum_com_range_m": 6.466337894461018,
+      "minimum_port_gap_m": 4.966337523837495,
+      "max_applied_forces_n": [
+        0.0,
+        1.3070990856361966
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.24127112970464054
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2116,
+        "median": 0.012728254120427895,
+        "p95": 0.022900256302281097,
+        "max": 0.03260450005722619
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2116,
+        "median": 0.1298090430646592,
+        "p95": 0.36094824087635513,
+        "max": 0.7726922257100753
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": {
+        "lost_captures": [
+          78
+        ],
+        "brake_latency_s": null,
+        "reacquisition_s": null,
+        "final_estimate_age_s": null
+      },
+      "safety_filter_interventions": null,
+      "wall_seconds": 26.528653100000156,
+      "simulated_to_wall_ratio": 8.078058060173388,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 214,
+      "lidar_accepted_observations": 214,
+      "lidar_pose_translation_error_m": {
+        "count": 214,
+        "median": 0.01279600100879943,
+        "p95": 0.023147631296171395,
+        "max": 0.031176914644775733
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 214,
+        "median": 0.194246364307336,
+        "p95": 0.4155621324090927,
+        "max": 0.5146778444731891
+      }
+    },
+    {
+      "id": "39-stress-combined-moderate",
+      "category": "stress",
+      "kind": "combined-moderate",
+      "expected_outcome": null,
+      "path": "episodes/39-stress-combined-moderate",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 224.3,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.0181989026105605,
+      "final_port_speed_mps": 0.0017301485476439648,
+      "final_alignment_deg": 0.43750252348572694,
+      "final_relative_rate_radps": 0.0004701201595227448,
+      "minimum_com_range_m": 6.468667717963986,
+      "minimum_port_gap_m": 4.968571011138538,
+      "max_applied_forces_n": [
+        0.0,
+        1.422924463945638
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.3543001598516019
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 2216,
+        "median": 0.012080545995058891,
+        "p95": 0.022337384817383583,
+        "max": 0.03401389335382515
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2216,
+        "median": 0.11984518724127347,
+        "p95": 0.34636897309532,
+        "max": 0.8585162086752476
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 27.63363720000052,
+      "simulated_to_wall_ratio": 8.116919187170764,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 224,
+      "lidar_accepted_observations": 224,
+      "lidar_pose_translation_error_m": {
+        "count": 224,
+        "median": 0.011843803816648419,
+        "p95": 0.022395099645296186,
+        "max": 0.030671027131218956
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 224,
+        "median": 0.201088470394587,
+        "p95": 0.44739908745406126,
+        "max": 0.6188318705126016
+      }
+    }
+  ],
+  "scene": "realistic",
+  "sensors": [
+    "lidar"
+  ],
+  "minimum_mesh_clearance_m": 4.656033212057887
+}

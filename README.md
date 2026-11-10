@@ -25,7 +25,7 @@ A chaser spacecraft flies itself to a satellite and docks with it, using only wh
 | M12 | Lidar faults on the tumbling target, a collision-avoidance burn after a navigation loss, passive-safety coasts | fixes a mesh bug that had degraded M11's lidar matching (target error now 0.9 cm median); with M11's settings 6 of 12 lidar faults lose navigation and the burn keeps all six clear, while a more tolerant configuration recovers from all 12; a coasting chaser often hits the target from inside 12 m |
 | M13 | Docking: a wide lidar on the docking axis, a committed final coast, a momentum-conserving capture latch and a detumble | all 28 episodes dock with the satellite tumbling at up to 1°/s: contact within 1.1 cm and 0.13° of the port (envelope 5 cm, 3°) at 0.039 m/s, then the joined stack detumbled in 11–20 s |
 
-28/28 is a fixed-suite result; population claims come from the Monte Carlo campaigns, which M11 does not have. [REFERENCE.md](REFERENCE.md) records every gate, metric and caveat.
+28/28 is a fixed-suite result; population claims come from the Monte Carlo campaigns, which M11–M13 do not have. [REFERENCE.md](REFERENCE.md) records every gate, metric and caveat, and [benchmarks](benchmarks) holds the result files behind them.
 
 ## How it works
 

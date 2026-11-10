@@ -1,0 +1,613 @@
+{
+  "schema_version": 1,
+  "started_at_utc": "2026-11-03T19:45:13.240860+00:00",
+  "metadata": {
+    "platform": "Windows-10-10.0.19045-SP0",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "logical_cpus": 12,
+    "physical_cpus": 6,
+    "python": "3.15.1 (main, Oct 21 2026, 17:51:31) [MSC v.1951 64 bit (AMD64)]",
+    "python_implementation": "CPython",
+    "rpod": "0.1.0",
+    "numpy": "2.5.4",
+    "rerun_sdk": "0.40.0",
+    "psutil": "7.2.2",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "debug_assertions": false
+  },
+  "workloads": {
+    "native_batch": {
+      "description": "RigidBodyBatch.step with zero commands, holding each call's ticks; about 2 million environment ticks per repetition; 1 warmup and 5 measured repetitions",
+      "count_unit": "environment ticks (two rigid bodies each)",
+      "grid": [
+        {
+          "environments": 1,
+          "threads": 1,
+          "ticks_per_call": 2000000,
+          "durations_ns": [
+            1246563100,
+            977545800,
+            921435100,
+            923208000,
+            908911100
+          ],
+          "median_duration_ns": 923208000,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 2166359.043682464
+        },
+        {
+          "environments": 1,
+          "threads": 2,
+          "ticks_per_call": 2000000,
+          "durations_ns": [
+            941702700,
+            911627000,
+            924407800,
+            914431300,
+            913507900
+          ],
+          "median_duration_ns": 914431300,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 2187151.7302612015
+        },
+        {
+          "environments": 1,
+          "threads": 4,
+          "ticks_per_call": 2000000,
+          "durations_ns": [
+            913441100,
+            916817500,
+            913846700,
+            913870100,
+            913341600
+          ],
+          "median_duration_ns": 913846700,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 2188550.880579861
+        },
+        {
+          "environments": 1,
+          "threads": 6,
+          "ticks_per_call": 2000000,
+          "durations_ns": [
+            921566800,
+            915520500,
+            906834600,
+            908984500,
+            916118100
+          ],
+          "median_duration_ns": 915520500,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 2184549.6632789765
+        },
+        {
+          "environments": 1,
+          "threads": 12,
+          "ticks_per_call": 2000000,
+          "durations_ns": [
+            917688300,
+            907565000,
+            906358000,
+            910088900,
+            913259900
+          ],
+          "median_duration_ns": 910088900,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 2197587.5104069505
+        },
+        {
+          "environments": 64,
+          "threads": 1,
+          "ticks_per_call": 31250,
+          "durations_ns": [
+            961520700,
+            936330600,
+            956118000,
+            938248400,
+            946274100
+          ],
+          "median_duration_ns": 946274100,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 2113552.51084226
+        },
+        {
+          "environments": 64,
+          "threads": 2,
+          "ticks_per_call": 31250,
+          "durations_ns": [
+            470277900,
+            469989300,
+            480365200,
+            512637900,
+            516453400
+          ],
+          "median_duration_ns": 480365200,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 4163498.937891421
+        },
+        {
+          "environments": 64,
+          "threads": 4,
+          "ticks_per_call": 31250,
+          "durations_ns": [
+            257957300,
+            284300500,
+            275174100,
+            246150500,
+            266774000
+          ],
+          "median_duration_ns": 266774000,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 7496982.464558016
+        },
+        {
+          "environments": 64,
+          "threads": 6,
+          "ticks_per_call": 31250,
+          "durations_ns": [
+            212888400,
+            200193700,
+            194114200,
+            216419400,
+            209811400
+          ],
+          "median_duration_ns": 209811400,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 9532370.50036366
+        },
+        {
+          "environments": 64,
+          "threads": 12,
+          "ticks_per_call": 31250,
+          "durations_ns": [
+            138066300,
+            138845900,
+            139034000,
+            142009500,
+            141918800
+          ],
+          "median_duration_ns": 139034000,
+          "completed_counts": [
+            2000000,
+            2000000,
+            2000000,
+            2000000,
+            2000000
+          ],
+          "median_count_per_second": 14384970.582735159
+        },
+        {
+          "environments": 1024,
+          "threads": 1,
+          "ticks_per_call": 1953,
+          "durations_ns": [
+            911318100,
+            940949700,
+            905451100,
+            909853100,
+            907260800
+          ],
+          "median_duration_ns": 909853100,
+          "completed_counts": [
+            1999872,
+            1999872,
+            1999872,
+            1999872,
+            1999872
+          ],
+          "median_count_per_second": 2198016.361102688
+        },
+        {
+          "environments": 1024,
+          "threads": 2,
+          "ticks_per_call": 1953,
+          "durations_ns": [
+            456365600,
+            479578700,
+            468797900,
+            475670100,
+            460560300
+          ],
+          "median_duration_ns": 468797900,
+          "completed_counts": [
+            1999872,
+            1999872,
+            1999872,
+            1999872,
+            1999872
+          ],
+          "median_count_per_second": 4265957.676004948
+        },
+        {
+          "environments": 1024,
+          "threads": 4,
+          "ticks_per_call": 1953,
+          "durations_ns": [
+            240414200,
+            268560500,
+            262993200,
+            248823000,
+            260089700
+          ],
+          "median_duration_ns": 260089700,
+          "completed_counts": [
+            1999872,
+            1999872,
+            1999872,
+            1999872,
+            1999872
+          ],
+          "median_count_per_second": 7689162.623510273
+        },
+        {
+          "environments": 1024,
+          "threads": 6,
+          "ticks_per_call": 1953,
+          "durations_ns": [
+            276625000,
+            213497400,
+            195753300,
+            208675400,
+            195028900
+          ],
+          "median_duration_ns": 208675400,
+          "completed_counts": [
+            1999872,
+            1999872,
+            1999872,
+            1999872,
+            1999872
+          ],
+          "median_count_per_second": 9583650.013370048
+        },
+        {
+          "environments": 1024,
+          "threads": 12,
+          "ticks_per_call": 1953,
+          "durations_ns": [
+            130631100,
+            126045600,
+            130026800,
+            126782300,
+            136350700
+          ],
+          "median_duration_ns": 130026800,
+          "completed_counts": [
+            1999872,
+            1999872,
+            1999872,
+            1999872,
+            1999872
+          ],
+          "median_count_per_second": 15380460.028240332
+        },
+        {
+          "environments": 16384,
+          "threads": 1,
+          "ticks_per_call": 122,
+          "durations_ns": [
+            907481700,
+            912002100,
+            1155664500,
+            919912300,
+            907745700
+          ],
+          "median_duration_ns": 912002100,
+          "completed_counts": [
+            1998848,
+            1998848,
+            1998848,
+            1998848,
+            1998848
+          ],
+          "median_count_per_second": 2191714.2515351665
+        },
+        {
+          "environments": 16384,
+          "threads": 2,
+          "ticks_per_call": 122,
+          "durations_ns": [
+            483036500,
+            466190200,
+            490585400,
+            467030500,
+            464820900
+          ],
+          "median_duration_ns": 467030500,
+          "completed_counts": [
+            1998848,
+            1998848,
+            1998848,
+            1998848,
+            1998848
+          ],
+          "median_count_per_second": 4279908.913871792
+        },
+        {
+          "environments": 16384,
+          "threads": 4,
+          "ticks_per_call": 122,
+          "durations_ns": [
+            259931800,
+            260188400,
+            247631400,
+            254230700,
+            269270200
+          ],
+          "median_duration_ns": 259931800,
+          "completed_counts": [
+            1998848,
+            1998848,
+            1998848,
+            1998848,
+            1998848
+          ],
+          "median_count_per_second": 7689894.041437023
+        },
+        {
+          "environments": 16384,
+          "threads": 6,
+          "ticks_per_call": 122,
+          "durations_ns": [
+            190487200,
+            201493000,
+            195925600,
+            208074000,
+            208516000
+          ],
+          "median_duration_ns": 201493000,
+          "completed_counts": [
+            1998848,
+            1998848,
+            1998848,
+            1998848,
+            1998848
+          ],
+          "median_count_per_second": 9920185.812906653
+        },
+        {
+          "environments": 16384,
+          "threads": 12,
+          "ticks_per_call": 122,
+          "durations_ns": [
+            130668700,
+            127747100,
+            127339300,
+            125741600,
+            125467000
+          ],
+          "median_duration_ns": 127339300,
+          "completed_counts": [
+            1998848,
+            1998848,
+            1998848,
+            1998848,
+            1998848
+          ],
+          "median_count_per_second": 15697023.621144455
+        },
+        {
+          "environments": 131072,
+          "threads": 1,
+          "ticks_per_call": 15,
+          "durations_ns": [
+            922705000,
+            938649100,
+            911259400,
+            909910000,
+            907821500
+          ],
+          "median_duration_ns": 911259400,
+          "completed_counts": [
+            1966080,
+            1966080,
+            1966080,
+            1966080,
+            1966080
+          ],
+          "median_count_per_second": 2157541.5298870993
+        },
+        {
+          "environments": 131072,
+          "threads": 2,
+          "ticks_per_call": 15,
+          "durations_ns": [
+            461865400,
+            472325900,
+            492111100,
+            474756300,
+            462365000
+          ],
+          "median_duration_ns": 472325900,
+          "completed_counts": [
+            1966080,
+            1966080,
+            1966080,
+            1966080,
+            1966080
+          ],
+          "median_count_per_second": 4162549.6293978374
+        },
+        {
+          "environments": 131072,
+          "threads": 4,
+          "ticks_per_call": 15,
+          "durations_ns": [
+            274882000,
+            255888100,
+            263230500,
+            254171600,
+            257699300
+          ],
+          "median_duration_ns": 257699300,
+          "completed_counts": [
+            1966080,
+            1966080,
+            1966080,
+            1966080,
+            1966080
+          ],
+          "median_count_per_second": 7629357.161622092
+        },
+        {
+          "environments": 131072,
+          "threads": 6,
+          "ticks_per_call": 15,
+          "durations_ns": [
+            282802900,
+            201898600,
+            198705100,
+            205977600,
+            195625100
+          ],
+          "median_duration_ns": 201898600,
+          "completed_counts": [
+            1966080,
+            1966080,
+            1966080,
+            1966080,
+            1966080
+          ],
+          "median_count_per_second": 9737957.568799388
+        },
+        {
+          "environments": 131072,
+          "threads": 12,
+          "ticks_per_call": 15,
+          "durations_ns": [
+            134433700,
+            140301900,
+            138804100,
+            137498000,
+            136413500
+          ],
+          "median_duration_ns": 137498000,
+          "completed_counts": [
+            1966080,
+            1966080,
+            1966080,
+            1966080,
+            1966080
+          ],
+          "median_count_per_second": 14298971.621405402
+        }
+      ]
+    },
+    "memory_per_environment_bytes": {
+      "value": 632,
+      "scope": "Rust engine state per environment (size of RigidBodyEngine); excludes the Python fleet's per-episode arrays"
+    },
+    "reset_latency": {
+      "description": "RigidBodyBatch.reset of 1024 environments",
+      "count_unit": "environment resets",
+      "durations_ns": [
+        191600,
+        184300,
+        183400,
+        183500,
+        183300
+      ],
+      "median_duration_ns": 183500,
+      "completed_counts": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "median_count_per_second": 5580381.471389646
+    },
+    "closed_loop_fleet": {
+      "description": "run_fleet with truth navigation and the reference autonomy for 60 simulated seconds per episode; Python supervisor and law every tick; 1 warmup and 3 measured runs",
+      "runs": [
+        {
+          "environments": 4096,
+          "simulated_seconds_per_episode": 60.0,
+          "durations_ns": [
+            3673380800,
+            3668149600,
+            3709748900
+          ],
+          "median_duration_ns": 3673380800,
+          "completed_counts": [
+            2457600,
+            2457600,
+            2457600
+          ],
+          "median_count_per_second": 669029.4673506215
+        },
+        {
+          "environments": 16384,
+          "simulated_seconds_per_episode": 60.0,
+          "durations_ns": [
+            15492168800,
+            15028750600,
+            15030025500
+          ],
+          "median_duration_ns": 15030025500,
+          "completed_counts": [
+            9830400,
+            9830400,
+            9830400
+          ],
+          "median_count_per_second": 654050.7865405817
+        }
+      ]
+    }
+  }
+}

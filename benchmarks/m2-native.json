@@ -1,0 +1,25 @@
+{
+  "measured_at_utc": "2026-10-25T16:03:55.333023+00:00",
+  "software": {
+    "rpod": "0.1.0",
+    "python": "3.15.1",
+    "numpy": "2.5.4",
+    "rerun_sdk": "0.40.0",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "native_debug_assertions": false
+  },
+  "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "workload": "RigidBodyEngine zero body wrench, two spacecraft, dt=0.1s, one bulk call per repetition; no Python controller/recording/viewer; reset excluded",
+  "warmup_ticks": 100000,
+  "measured_ticks_per_repetition": 100000,
+  "durations_ns": [
+    42623400,
+    42796100,
+    42753000,
+    43241700,
+    42801700
+  ],
+  "median_ticks_per_second": 2336661.518222455,
+  "notes": "Local unisolated desktop measurement; no energy or per-environment memory claim"
+}

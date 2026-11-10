@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "started_at_utc": "2026-10-24T23:02:46.503469+00:00",
+  "metadata": {
+    "platform": "Windows-10-10.0.19045-SP0",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.15.1 (main, Oct 21 2026, 17:51:31) [MSC v.1951 64 bit (AMD64)]",
+    "python_implementation": "CPython",
+    "rpod": "0.1.0",
+    "numpy": "2.5.4",
+    "rerun_sdk": "0.40.0",
+    "psutil": "7.2.2",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "debug_assertions": false
+  },
+  "scenario": {
+    "schema_version": 1,
+    "scenario": "circular",
+    "body_order": [
+      "target",
+      "chaser"
+    ],
+    "mu_m3_s2": 398600441800000.0,
+    "earth_radius_m": 6378137.0,
+    "dt_ns": 1000000000,
+    "num_steps": 600,
+    "initial_positions_m": [
+      [
+        6778137.0,
+        0.0,
+        0.0
+      ],
+      [
+        6778136.999262334,
+        -99.99999999637234,
+        0.0
+      ]
+    ],
+    "initial_velocities_mps": [
+      [
+        0.0,
+        7668.558175407055,
+        0.0
+      ],
+      [
+        0.11313666535699804,
+        7668.558174572485,
+        0.0
+      ]
+    ],
+    "initial_arc_separation_m": 100.0,
+    "chaser_delta_v_target_lvlh_mps": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "units": {
+      "position": "m",
+      "velocity": "m/s",
+      "time": "ns"
+    },
+    "frames": {
+      "inertial": "Earth-centered, fixed axes; initial target on +X, velocity +Y; no epoch or Earth rotation",
+      "target_lvlh": "+X radial outward, +Y along track, +Z orbit normal; R_NL columns are local axes in inertial coordinates",
+      "prescribed_orientation": "both spacecraft body axes aligned to target LVLH; no rotational dynamics"
+    },
+    "model": "independent point-mass central gravity; fixed-step RK4; no contact or Earth collision detection"
+  },
+  "timing": {
+    "clock": "perf_counter_ns",
+    "warmup_repetitions_per_workload": 1,
+    "measured_repetitions_per_workload": 5,
+    "excluded": [
+      "engine construction",
+      "resets before stepping workloads",
+      "post-run validation",
+      "disk I/O",
+      "Rerun logging and viewing"
+    ]
+  },
+  "workloads": {
+    "native_bulk": {
+      "description": "One Python call to OrbitEngine.step(1000000); native two-spacecraft propagation and the returned snapshot",
+      "count_unit": "physics ticks",
+      "warmup_duration_ns": 121616400,
+      "durations_ns": [
+        122610300,
+        122323100,
+        131969500,
+        125317800,
+        121859500
+      ],
+      "median_duration_ns": 122610300,
+      "completed_counts": [
+        1000000,
+        1000000,
+        1000000,
+        1000000,
+        1000000
+      ],
+      "median_count_per_second": 8155921.647691915
+    },
+    "python_recording": {
+      "description": "Per-tick Python stepping and copied NumPy recording via collect_trajectory for 10000 physics ticks",
+      "count_unit": "physics ticks",
+      "samples_per_repetition": 10001,
+      "recorded_array_bytes_per_repetition": 1040104,
+      "warmup_duration_ns": 22543300,
+      "durations_ns": [
+        24184400,
+        24121400,
+        28831300,
+        22337400,
+        26522100
+      ],
+      "median_duration_ns": 24184400,
+      "completed_counts": [
+        10000,
+        10000,
+        10000,
+        10000,
+        10000
+      ],
+      "median_count_per_second": 413489.6875671921
+    },
+    "python_reset_calls": {
+      "description": "10000 Python calls to OrbitEngine.reset(); the first restores an advanced state and later calls restore the already-initial state",
+      "count_unit": "reset calls",
+      "warmup_duration_ns": 751900,
+      "durations_ns": [
+        737200,
+        742100,
+        742800,
+        758500,
+        806000
+      ],
+      "median_duration_ns": 742800,
+      "completed_counts": [
+        10000,
+        10000,
+        10000,
+        10000,
+        10000
+      ],
+      "median_count_per_second": 13462574.044157242
+    }
+  },
+  "process_memory": {
+    "rss_before_bytes": 32276480,
+    "rss_after_bytes": 32169984,
+    "rss_change_bytes": -106496,
+    "scope": "Process RSS before and after all workloads, including warmups; not peak memory or memory per environment"
+  }
+}

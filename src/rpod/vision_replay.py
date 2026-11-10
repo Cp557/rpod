@@ -3,7 +3,6 @@
 import json
 from pathlib import Path
 
-import numpy as np
 import rerun as rr
 import rerun.blueprint as rrb
 

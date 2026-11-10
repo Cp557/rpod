@@ -1,0 +1,9 @@
+{
+  "artifact_type": "m4_qualified_execution_sources",
+  "archived_at_utc": "2026-10-25T19:51:09.510171+00:00",
+  "files_sha256": {
+    "visual_run.py": "c1fdff0f521d60735b5d774985b8232d67ad21a5c2139a7cdc31ac631c0b44b1",
+    "visual_control.py": "28e79c7214a1214fba69a1f3d9301c7a13a7a619bcdf03f07963489f9abd2f45",
+    "navigation.py": "574979950e0fb99e23576db30fa4e57f866c3ab883c8fb0c4c3dc1d4e2718ec1"
+  }
+}

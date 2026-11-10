@@ -1,0 +1,3028 @@
+{
+  "artifact_type": "m5_evaluation_report",
+  "suite_seed": 5,
+  "calibration_sha256": "4230a501acda16b4610be844ed5e16e9a2a9d8e2137b0a93f26e89b4913cd187",
+  "implementation_sha256": {
+    "visual_control.py": "28e79c7214a1214fba69a1f3d9301c7a13a7a619bcdf03f07963489f9abd2f45",
+    "navigation.py": "574979950e0fb99e23576db30fa4e57f866c3ab883c8fb0c4c3dc1d4e2718ec1",
+    "visual_agent.py": "dfe175283c16cdb78631c4d8a7be87e80432510fd016271cdd84bc7573552804",
+    "visual_env.py": "0ef818bfa680279f0bfa691e3f57921a275ca158bbe9fbe7f11be69efc658c03",
+    "visual_run.py": "65f5ae48a26f649271c592148a316c7afb188bbc84e4ec80ce9f39528bfd23dc",
+    "approach.py": "bf040d5de940abd018e45dca3acd34e96879e26b863c46d8b86fdf278c923f9e",
+    "blender_worker.py": "66e5e47a690c6857de2b650783e261194e52d6648cabb8051eb33515d37f3ef6",
+    "camera.py": "b55b9407b148b0c63dfc5b4c3a3d35a69527fbb1bd0118dc61c3bf67949f9ca4",
+    "frames.py": "99d5e2ed694059488a91e2382023b368d36467da24528369481e3e941ca50cab",
+    "observations.py": "9c835272c010911d410eb24ba515af70e6a58895e9a96451f3f962a8d4c37d61",
+    "perception.py": "9491669c2584448582df01163bb730198cf1d02e5e42227d09189ce25024e18e",
+    "rendering.py": "6a38264f7f272f336cdc8f9e85db65763b7340d651bfa0e4d43d94be4c01ea60",
+    "vision_records.py": "4e236fb5537bba430e78087e4043c4273cfdc14ea911d8f82804cc1d0277c875"
+  },
+  "report_implementation_sha256": "5ddac771ac902b7986ba190a9ff8d519f529a236faa5afbf20c07bca17c1cb9d",
+  "scope": "Fixed 40-episode suite with cooperative markers, simple Blender imagery, and a 30 m M2 handoff; not a population reliability estimate, natural-feature perception, or contact validation",
+  "passed": true,
+  "gates": {
+    "operational_all_succeed": true,
+    "fault_expected_responses": true,
+    "records_valid_and_uniform": true
+  },
+  "failed_episodes": [],
+  "stress_findings": [],
+  "categories": {
+    "operational": {
+      "episodes": 28,
+      "outcomes": {
+        "success": 28
+      },
+      "completion_time_ratio": {
+        "count": 28,
+        "median": 1.0038204393505252,
+        "p95": 1.0047813839486368,
+        "max": 1.0051984877126654
+      },
+      "final_gap_m": {
+        "count": 28,
+        "median": 4.9989500115052605,
+        "p95": 5.002186678856081,
+        "max": 5.002491623884369
+      },
+      "final_port_speed_mps": {
+        "count": 28,
+        "median": 0.000986557886540749,
+        "p95": 0.002517188404477793,
+        "max": 0.002552052020422877
+      },
+      "minimum_com_range_m": 6.459325761706683,
+      "minimum_port_gap_m": 4.959325392674907,
+      "estimated_target_position_error_m": {
+        "count": 58268,
+        "median": 0.03567058581466015,
+        "p95": 0.12100919444384545,
+        "max": 0.18939929134534733
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 58268,
+        "median": 0.0657358534058255,
+        "p95": 0.29828199059604993,
+        "max": 1.9583753759340345
+      },
+      "image_pose_by_range": [
+        {
+          "camera_range_m": [
+            0.0,
+            5.7
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            5.7,
+            8.45
+          ],
+          "translation_m": {
+            "count": 1162,
+            "median": 0.0038401838800061106,
+            "p95": 0.006853928657568616,
+            "max": 0.009951229349966933
+          },
+          "rotation_deg": {
+            "count": 1162,
+            "median": 0.04800703254523368,
+            "p95": 0.12274173813721649,
+            "max": 0.2515522623175344
+          }
+        },
+        {
+          "camera_range_m": [
+            8.45,
+            15.95
+          ],
+          "translation_m": {
+            "count": 1404,
+            "median": 0.015471065321413128,
+            "p95": 0.028960958096038783,
+            "max": 0.04296574339814063
+          },
+          "rotation_deg": {
+            "count": 1404,
+            "median": 0.0977208919825665,
+            "p95": 0.2648083814048875,
+            "max": 0.49677890133431185
+          }
+        },
+        {
+          "camera_range_m": [
+            15.95,
+            25.95
+          ],
+          "translation_m": {
+            "count": 1877,
+            "median": 0.05006045106216956,
+            "p95": 0.08723588168973286,
+            "max": 0.11950258254704807
+          },
+          "rotation_deg": {
+            "count": 1877,
+            "median": 0.16784981702672377,
+            "p95": 0.39712795576046417,
+            "max": 0.8089597896974651
+          }
+        },
+        {
+          "camera_range_m": [
+            25.95,
+            31.95
+          ],
+          "translation_m": {
+            "count": 1455,
+            "median": 0.1063740872524005,
+            "p95": 0.15401931284040143,
+            "max": 0.21125010040209535
+          },
+          "rotation_deg": {
+            "count": 1455,
+            "median": 0.2586557799786594,
+            "p95": 0.7088124956028998,
+            "max": 1.5289661759369655
+          }
+        },
+        {
+          "camera_range_m": [
+            31.95,
+            1000000000.0
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        }
+      ]
+    },
+    "fault": {
+      "episodes": 6,
+      "outcomes": {
+        "retreated": 2,
+        "success": 2,
+        "navigation_lost": 2
+      },
+      "completion_time_ratio": null,
+      "final_gap_m": {
+        "count": 2,
+        "median": 4.9266157187110515,
+        "p95": 4.927092820626533,
+        "max": 4.927145831950475
+      },
+      "final_port_speed_mps": {
+        "count": 2,
+        "median": 0.0024432471625334424,
+        "p95": 0.0024716313335292196,
+        "max": 0.0024747851303065283
+      },
+      "minimum_com_range_m": 5.957374761161092,
+      "minimum_port_gap_m": 4.457374190752236,
+      "estimated_target_position_error_m": {
+        "count": 12238,
+        "median": 0.0718058256780009,
+        "p95": 0.15253179748404794,
+        "max": 0.17095309612497198
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 12238,
+        "median": 0.10423279044755135,
+        "p95": 0.39876949022031793,
+        "max": 1.253599856078266
+      },
+      "image_pose_by_range": [
+        {
+          "camera_range_m": [
+            0.0,
+            5.7
+          ],
+          "translation_m": {
+            "count": 62,
+            "median": 0.0027536290088162633,
+            "p95": 0.003617615065462349,
+            "max": 0.004247681336040543
+          },
+          "rotation_deg": {
+            "count": 62,
+            "median": 0.03467667894955522,
+            "p95": 0.08108273980570185,
+            "max": 0.08966691118342784
+          }
+        },
+        {
+          "camera_range_m": [
+            5.7,
+            8.45
+          ],
+          "translation_m": {
+            "count": 125,
+            "median": 0.003505327277547065,
+            "p95": 0.0068687412218797214,
+            "max": 0.008671137801918203
+          },
+          "rotation_deg": {
+            "count": 125,
+            "median": 0.04489951804296369,
+            "p95": 0.10337387156523195,
+            "max": 0.16273865109903718
+          }
+        },
+        {
+          "camera_range_m": [
+            8.45,
+            15.95
+          ],
+          "translation_m": {
+            "count": 156,
+            "median": 0.01688729376559497,
+            "p95": 0.03206529378993595,
+            "max": 0.040316779620059875
+          },
+          "rotation_deg": {
+            "count": 156,
+            "median": 0.10670110013702572,
+            "p95": 0.2572993629994414,
+            "max": 0.4799919640912069
+          }
+        },
+        {
+          "camera_range_m": [
+            15.95,
+            25.95
+          ],
+          "translation_m": {
+            "count": 319,
+            "median": 0.055118287973087175,
+            "p95": 0.0886850316579687,
+            "max": 0.10762010842874753
+          },
+          "rotation_deg": {
+            "count": 319,
+            "median": 0.1720416495856141,
+            "p95": 0.40056486495534116,
+            "max": 0.9468378980541837
+          }
+        },
+        {
+          "camera_range_m": [
+            25.95,
+            31.95
+          ],
+          "translation_m": {
+            "count": 571,
+            "median": 0.11864677317727373,
+            "p95": 0.16372109309965205,
+            "max": 0.18597245991508837
+          },
+          "rotation_deg": {
+            "count": 571,
+            "median": 0.34797344504963695,
+            "p95": 0.729850513822289,
+            "max": 1.4722155255259919
+          }
+        },
+        {
+          "camera_range_m": [
+            31.95,
+            1000000000.0
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        }
+      ]
+    },
+    "stress": {
+      "episodes": 6,
+      "outcomes": {
+        "success": 6
+      },
+      "completion_time_ratio": null,
+      "final_gap_m": {
+        "count": 6,
+        "median": 4.998018873369771,
+        "p95": 4.999381750217903,
+        "max": 4.999499234000087
+      },
+      "final_port_speed_mps": {
+        "count": 6,
+        "median": 0.0017281395819956679,
+        "p95": 0.0022867985721147068,
+        "max": 0.0023444171097255096
+      },
+      "minimum_com_range_m": 6.256229278894846,
+      "minimum_port_gap_m": 4.756229206898615,
+      "estimated_target_position_error_m": {
+        "count": 13014,
+        "median": 0.03604648801618414,
+        "p95": 0.13497870532561393,
+        "max": 0.19242966173545972
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 13014,
+        "median": 0.07798958707137976,
+        "p95": 0.574686311136753,
+        "max": 2.118315430694233
+      },
+      "image_pose_by_range": [
+        {
+          "camera_range_m": [
+            0.0,
+            5.7
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        },
+        {
+          "camera_range_m": [
+            5.7,
+            8.45
+          ],
+          "translation_m": {
+            "count": 282,
+            "median": 0.003690159733249842,
+            "p95": 0.006801208493243783,
+            "max": 0.010350157295854876
+          },
+          "rotation_deg": {
+            "count": 282,
+            "median": 0.05082089009231713,
+            "p95": 0.13002330609059762,
+            "max": 0.18622624876885405
+          }
+        },
+        {
+          "camera_range_m": [
+            8.45,
+            15.95
+          ],
+          "translation_m": {
+            "count": 311,
+            "median": 0.016525858040712094,
+            "p95": 0.031255987994578606,
+            "max": 0.048721675212490996
+          },
+          "rotation_deg": {
+            "count": 311,
+            "median": 0.11741723295814824,
+            "p95": 0.332385209090177,
+            "max": 0.5872532513762706
+          }
+        },
+        {
+          "camera_range_m": [
+            15.95,
+            25.95
+          ],
+          "translation_m": {
+            "count": 404,
+            "median": 0.05291886626536173,
+            "p95": 0.09506193715348049,
+            "max": 0.1383006770698438
+          },
+          "rotation_deg": {
+            "count": 404,
+            "median": 0.2180280617024159,
+            "p95": 0.561050856920888,
+            "max": 1.1291928686906467
+          }
+        },
+        {
+          "camera_range_m": [
+            25.95,
+            31.95
+          ],
+          "translation_m": {
+            "count": 316,
+            "median": 0.11274388222533671,
+            "p95": 0.17723078774443904,
+            "max": 0.2019040119324634
+          },
+          "rotation_deg": {
+            "count": 316,
+            "median": 0.3204524284779978,
+            "p95": 1.1314792517591457,
+            "max": 1.7262702037894286
+          }
+        },
+        {
+          "camera_range_m": [
+            31.95,
+            1000000000.0
+          ],
+          "translation_m": null,
+          "rotation_deg": null
+        }
+      ]
+    }
+  },
+  "performance": {
+    "total_wall_seconds": 14389.867048,
+    "episode_wall_seconds": {
+      "count": 40,
+      "median": 334.75074194999956,
+      "p95": 694.6057433949992,
+      "max": 695.5576772999993
+    },
+    "simulated_to_wall_ratio": {
+      "count": 40,
+      "median": 0.6321134414013456,
+      "p95": 1.0014254812203787,
+      "max": 1.2296825230489312
+    },
+    "render_seconds": {
+      "count": 8458,
+      "median": 0.9327248000008694,
+      "p95": 2.2529353249997244,
+      "max": 3.2850396999983786
+    },
+    "perception_seconds": {
+      "count": 8449,
+      "median": 0.44363700000030803,
+      "p95": 1.339927659999739,
+      "max": 1.8545038000011118
+    },
+    "autonomy_step_seconds": {
+      "count": 84440,
+      "median": 0.0009853000010480173,
+      "p95": 0.0033462200001395117,
+      "max": 0.07292120000056457
+    },
+    "renderer_startup_seconds": {
+      "count": 40,
+      "median": 0.9539872999987438,
+      "p95": 2.642590935000453,
+      "max": 3.528284599999097
+    },
+    "sampled_peak_blender_rss_mib": {
+      "count": 40,
+      "median": 265.796875,
+      "p95": 266.1576171875,
+      "max": 266.29296875
+    },
+    "scope": "Wall times on an unisolated desktop; renderer timing includes PNG writes; RSS sampled every 0.1 s, not OS high-water memory"
+  },
+  "episodes": [
+    {
+      "id": "00-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/00-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 208.1,
+      "completion_time_ratio": 1.0033751205400192,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.001322243641589,
+      "final_port_speed_mps": 0.0002944749366569452,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 4.176933545763686e-09,
+      "minimum_com_range_m": 6.496356022313144,
+      "minimum_port_gap_m": 4.99635592022116,
+      "max_applied_forces_n": [
+        0.0,
+        0.5513232234464848
+      ],
+      "max_applied_torques_nm": [
+        0.5,
+        0.03901960850049815
+      ],
+      "accepted_observations": 208,
+      "images_delivered": 208,
+      "estimated_target_position_error_m": {
+        "count": 2059,
+        "median": 0.0355729540676956,
+        "p95": 0.11511485278297953,
+        "max": 0.13368957892830646
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2059,
+        "median": 0.06275257990993242,
+        "p95": 0.32902105117704517,
+        "max": 0.8091212329175755
+      },
+      "image_pose_translation_error_m": {
+        "count": 208,
+        "median": 0.036658609576440834,
+        "p95": 0.12001745207173076,
+        "max": 0.17945096800729343
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 208,
+        "median": 0.1278308495504005,
+        "p95": 0.42804271627141505,
+        "max": 1.0999907659772863
+      },
+      "fault_response": null,
+      "wall_seconds": 336.36314870000024,
+      "simulated_to_wall_ratio": 0.6186765726396586,
+      "renderer_startup_seconds": 0.9525963000000957,
+      "sampled_peak_blender_rss_mib": 265.625
+    },
+    {
+      "id": "01-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/01-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 205.4,
+      "completion_time_ratio": 1.0039100684261975,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.995572124995689,
+      "final_port_speed_mps": 0.002315582967239309,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.970136337218311e-09,
+      "minimum_com_range_m": 6.462553540758023,
+      "minimum_port_gap_m": 4.962553211253661,
+      "max_applied_forces_n": [
+        0.0,
+        0.5382547385625784
+      ],
+      "max_applied_torques_nm": [
+        0.4323525498965381,
+        0.16023544465615697
+      ],
+      "accepted_observations": 206,
+      "images_delivered": 206,
+      "estimated_target_position_error_m": {
+        "count": 2032,
+        "median": 0.03062096944896562,
+        "p95": 0.11056305450350623,
+        "max": 0.15310729372158904
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2032,
+        "median": 0.061827713007397096,
+        "p95": 0.2943342020901168,
+        "max": 1.387555625363168
+      },
+      "image_pose_translation_error_m": {
+        "count": 206,
+        "median": 0.03133860900328422,
+        "p95": 0.11222339079681372,
+        "max": 0.1885072749968129
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 206,
+        "median": 0.11948842908643398,
+        "p95": 0.42190928627706425,
+        "max": 0.9608923650042881
+      },
+      "fault_response": null,
+      "wall_seconds": 208.08864970000013,
+      "simulated_to_wall_ratio": 0.9870793063250863,
+      "renderer_startup_seconds": 0.8569499999998698,
+      "sampled_peak_blender_rss_mib": 265.76953125
+    },
+    {
+      "id": "02-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/02-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.6,
+      "completion_time_ratio": 1.0047483380816715,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.997989329431939,
+      "final_port_speed_mps": 0.001628565138468111,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 5.685294471214847e-09,
+      "minimum_com_range_m": 6.473626787508649,
+      "minimum_port_gap_m": 4.973626063239065,
+      "max_applied_forces_n": [
+        0.0,
+        0.5404773216317408
+      ],
+      "max_applied_torques_nm": [
+        0.13699480845482867,
+        0.009245258021595412
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2094,
+        "median": 0.03403750312027561,
+        "p95": 0.12994474292169875,
+        "max": 0.1819234200070505
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2094,
+        "median": 0.07863501274264853,
+        "p95": 0.3903429261322129,
+        "max": 1.532463264623371
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.033714897539809316,
+        "p95": 0.13872927916117087,
+        "max": 0.21125010040209535
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.12758910808848506,
+        "p95": 0.5856065924903001,
+        "max": 1.3710833645925065
+      },
+      "fault_response": null,
+      "wall_seconds": 335.23537480000005,
+      "simulated_to_wall_ratio": 0.6311983039565547,
+      "renderer_startup_seconds": 0.8763976000000184,
+      "sampled_peak_blender_rss_mib": 265.85546875
+    },
+    {
+      "id": "03-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/03-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 208.8,
+      "completion_time_ratio": 1.0038461538461538,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.998969775730679,
+      "final_port_speed_mps": 0.0011010677822991426,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 2.610493761295227e-08,
+      "minimum_com_range_m": 6.482045624875601,
+      "minimum_port_gap_m": 4.982044847570906,
+      "max_applied_forces_n": [
+        0.0,
+        0.6541326106781519
+      ],
+      "max_applied_torques_nm": [
+        0.24436234906429546,
+        0.14642248553482573
+      ],
+      "accepted_observations": 209,
+      "images_delivered": 209,
+      "estimated_target_position_error_m": {
+        "count": 2066,
+        "median": 0.03638244025705001,
+        "p95": 0.12021216139135077,
+        "max": 0.1404117372197255
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2066,
+        "median": 0.07414116264330364,
+        "p95": 0.2607523861693583,
+        "max": 0.6478400151334721
+      },
+      "image_pose_translation_error_m": {
+        "count": 209,
+        "median": 0.03684837428018249,
+        "p95": 0.12520348721727914,
+        "max": 0.1736718073613335
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 209,
+        "median": 0.1263538144769115,
+        "p95": 0.45485706829328065,
+        "max": 0.7643352310386523
+      },
+      "fault_response": null,
+      "wall_seconds": 210.97973039999988,
+      "simulated_to_wall_ratio": 0.9896685316837438,
+      "renderer_startup_seconds": 0.9401732999999695,
+      "sampled_peak_blender_rss_mib": 265.859375
+    },
+    {
+      "id": "04-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/04-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 209.3,
+      "completion_time_ratio": 1.0033557046979866,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.996093119031896,
+      "final_port_speed_mps": 0.0025015681385702946,
+      "final_alignment_deg": 1.2074182697257333e-06,
+      "final_relative_rate_radps": 4.370935617963896e-09,
+      "minimum_com_range_m": 6.460385242714328,
+      "minimum_port_gap_m": 4.960384814394841,
+      "max_applied_forces_n": [
+        0.0,
+        0.6166451261964755
+      ],
+      "max_applied_torques_nm": [
+        0.4852755262924242,
+        0.1744458237904422
+      ],
+      "accepted_observations": 210,
+      "images_delivered": 210,
+      "estimated_target_position_error_m": {
+        "count": 2071,
+        "median": 0.03607327377283437,
+        "p95": 0.11014339624896194,
+        "max": 0.14287733305773895
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2071,
+        "median": 0.06370002901698535,
+        "p95": 0.3973630193419957,
+        "max": 1.0117512740159178
+      },
+      "image_pose_translation_error_m": {
+        "count": 210,
+        "median": 0.03655270499609732,
+        "p95": 0.11630200054327108,
+        "max": 0.1518773223807676
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 210,
+        "median": 0.14264122397932888,
+        "p95": 0.4952010207875716,
+        "max": 1.096363791410246
+      },
+      "fault_response": null,
+      "wall_seconds": 526.2391614999997,
+      "simulated_to_wall_ratio": 0.3977279064587445,
+      "renderer_startup_seconds": 0.9169405000002371,
+      "sampled_peak_blender_rss_mib": 265.94140625
+    },
+    {
+      "id": "05-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/05-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 210.0,
+      "completion_time_ratio": 1.0043041606886658,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.001017308184993,
+      "final_port_speed_mps": 0.0006253424159378638,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 2.7593562153207658e-08,
+      "minimum_com_range_m": 6.491448630810647,
+      "minimum_port_gap_m": 4.991448315827862,
+      "max_applied_forces_n": [
+        0.0,
+        0.6301330753495079
+      ],
+      "max_applied_torques_nm": [
+        0.231391194086435,
+        0.006704514794381915
+      ],
+      "accepted_observations": 210,
+      "images_delivered": 210,
+      "estimated_target_position_error_m": {
+        "count": 2078,
+        "median": 0.036811154519754835,
+        "p95": 0.1175684786567937,
+        "max": 0.13768258536857844
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2078,
+        "median": 0.06428158057571498,
+        "p95": 0.2626632222494793,
+        "max": 1.4044281276034982
+      },
+      "image_pose_translation_error_m": {
+        "count": 210,
+        "median": 0.035703573415279355,
+        "p95": 0.1276545256355314,
+        "max": 0.19419747460810147
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 210,
+        "median": 0.1379121246618112,
+        "p95": 0.40758720314212477,
+        "max": 0.9708394292464037
+      },
+      "fault_response": null,
+      "wall_seconds": 373.3701060000003,
+      "simulated_to_wall_ratio": 0.5624446002112441,
+      "renderer_startup_seconds": 1.5054443999997602,
+      "sampled_peak_blender_rss_mib": 265.79296875
+    },
+    {
+      "id": "06-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/06-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.3,
+      "completion_time_ratio": 1.0038004750593825,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.995345556066994,
+      "final_port_speed_mps": 0.0025255993168895228,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 6.880065912970594e-09,
+      "minimum_com_range_m": 6.459325761706683,
+      "minimum_port_gap_m": 4.959325392674907,
+      "max_applied_forces_n": [
+        0.0,
+        0.604611982567496
+      ],
+      "max_applied_torques_nm": [
+        0.013752015952268118,
+        0.1242613873705389
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2091,
+        "median": 0.03873786110366194,
+        "p95": 0.13279988630770434,
+        "max": 0.16210832339224465
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2091,
+        "median": 0.06962413616455436,
+        "p95": 0.2857471814136824,
+        "max": 1.2948550540916521
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.03812408235699358,
+        "p95": 0.12816341096933992,
+        "max": 0.18218831271835514
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.1388670314656233,
+        "p95": 0.43311424483170674,
+        "max": 1.0579370515922872
+      },
+      "fault_response": null,
+      "wall_seconds": 672.6419699999997,
+      "simulated_to_wall_ratio": 0.3141344272644779,
+      "renderer_startup_seconds": 2.1323733999997785,
+      "sampled_peak_blender_rss_mib": 266.05078125
+    },
+    {
+      "id": "07-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/07-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 214.1,
+      "completion_time_ratio": 1.003750586029067,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.0015623819423745,
+      "final_port_speed_mps": 0.000328753849300811,
+      "final_alignment_deg": 1.2074182697257333e-06,
+      "final_relative_rate_radps": 7.611278410188477e-09,
+      "minimum_com_range_m": 6.496202703857007,
+      "minimum_port_gap_m": 4.996202310349827,
+      "max_applied_forces_n": [
+        0.0,
+        0.6329246301106752
+      ],
+      "max_applied_torques_nm": [
+        0.5,
+        0.08872827353073678
+      ],
+      "accepted_observations": 214,
+      "images_delivered": 214,
+      "estimated_target_position_error_m": {
+        "count": 2119,
+        "median": 0.036962066127984534,
+        "p95": 0.13408860712725848,
+        "max": 0.15309679103133658
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2119,
+        "median": 0.058386620142140175,
+        "p95": 0.2521575978320091,
+        "max": 1.0153293534722818
+      },
+      "image_pose_translation_error_m": {
+        "count": 214,
+        "median": 0.03747576632341655,
+        "p95": 0.1328410503808822,
+        "max": 0.17691812482721825
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 214,
+        "median": 0.12070802929172031,
+        "p95": 0.42844339769355627,
+        "max": 0.9150153761732703
+      },
+      "fault_response": null,
+      "wall_seconds": 403.39003760000014,
+      "simulated_to_wall_ratio": 0.5307518283639435,
+      "renderer_startup_seconds": 2.637274100000468,
+      "sampled_peak_blender_rss_mib": 265.62890625
+    },
+    {
+      "id": "08-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/08-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 210.9,
+      "completion_time_ratio": 1.0033301617507135,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.001702561219269,
+      "final_port_speed_mps": 0.0008668016742570632,
+      "final_alignment_deg": 1.7075472925031877e-06,
+      "final_relative_rate_radps": 9.199761790849557e-09,
+      "minimum_com_range_m": 6.487864492500029,
+      "minimum_port_gap_m": 4.987863552325322,
+      "max_applied_forces_n": [
+        0.0,
+        0.7078749959321263
+      ],
+      "max_applied_torques_nm": [
+        0.1555921278510319,
+        0.13965371209462396
+      ],
+      "accepted_observations": 211,
+      "images_delivered": 211,
+      "estimated_target_position_error_m": {
+        "count": 2087,
+        "median": 0.03333756656430434,
+        "p95": 0.1273007647901147,
+        "max": 0.15199850353307606
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2087,
+        "median": 0.08644649000918686,
+        "p95": 0.3416994391742284,
+        "max": 1.2218811086367403
+      },
+      "image_pose_translation_error_m": {
+        "count": 211,
+        "median": 0.03644933072404465,
+        "p95": 0.12808477468025084,
+        "max": 0.21048895390035569
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 211,
+        "median": 0.14108641778309536,
+        "p95": 0.5348461885316139,
+        "max": 1.1195599610519968
+      },
+      "fault_response": null,
+      "wall_seconds": 695.1523087000005,
+      "simulated_to_wall_ratio": 0.3033867504438022,
+      "renderer_startup_seconds": 2.7436108000001695,
+      "sampled_peak_blender_rss_mib": 263.9921875
+    },
+    {
+      "id": "09-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/09-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 210.1,
+      "completion_time_ratio": 1.004302103250478,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.002146394544212,
+      "final_port_speed_mps": 0.0003101404737821258,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 4.9203458328153035e-09,
+      "minimum_com_range_m": 6.49721006637163,
+      "minimum_port_gap_m": 4.9972098231887925,
+      "max_applied_forces_n": [
+        0.0,
+        0.6519836725436383
+      ],
+      "max_applied_torques_nm": [
+        0.4245545019561206,
+        0.012109126069894604
+      ],
+      "accepted_observations": 210,
+      "images_delivered": 210,
+      "estimated_target_position_error_m": {
+        "count": 2079,
+        "median": 0.0371003799183293,
+        "p95": 0.12288323758687825,
+        "max": 0.17401854230142777
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2079,
+        "median": 0.0760894944647632,
+        "p95": 0.28718469158463383,
+        "max": 1.665370046772557
+      },
+      "image_pose_translation_error_m": {
+        "count": 210,
+        "median": 0.037751901232322825,
+        "p95": 0.12715039618576354,
+        "max": 0.20463652141236188
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 210,
+        "median": 0.13581197264614453,
+        "p95": 0.43544476420506173,
+        "max": 1.2794684920786668
+      },
+      "fault_response": null,
+      "wall_seconds": 400.1812866,
+      "simulated_to_wall_ratio": 0.5250120558735791,
+      "renderer_startup_seconds": 2.268774399999529,
+      "sampled_peak_blender_rss_mib": 264.828125
+    },
+    {
+      "id": "10-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/10-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 208.3,
+      "completion_time_ratio": 1.003855421686747,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.995829524942686,
+      "final_port_speed_mps": 0.002552052020422877,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.6409467721349067e-09,
+      "minimum_com_range_m": 6.459458194712251,
+      "minimum_port_gap_m": 4.959457946822045,
+      "max_applied_forces_n": [
+        0.0,
+        0.7424539563715548
+      ],
+      "max_applied_torques_nm": [
+        0.19949470087332546,
+        0.18650611067692388
+      ],
+      "accepted_observations": 209,
+      "images_delivered": 209,
+      "estimated_target_position_error_m": {
+        "count": 2061,
+        "median": 0.03311758142979491,
+        "p95": 0.11415676016085673,
+        "max": 0.1627583349286969
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2061,
+        "median": 0.07709329554153864,
+        "p95": 0.28328252724534936,
+        "max": 1.0115201682797892
+      },
+      "image_pose_translation_error_m": {
+        "count": 209,
+        "median": 0.034820579983315274,
+        "p95": 0.1267942926464209,
+        "max": 0.16761861766732575
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 209,
+        "median": 0.1331453837020381,
+        "p95": 0.45878243951087816,
+        "max": 0.7438916721350254
+      },
+      "fault_response": null,
+      "wall_seconds": 689.2249557000005,
+      "simulated_to_wall_ratio": 0.30222353134100227,
+      "renderer_startup_seconds": 2.336958400000185,
+      "sampled_peak_blender_rss_mib": 263.2578125
+    },
+    {
+      "id": "11-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/11-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 207.6,
+      "completion_time_ratio": 1.0028985507246377,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.997038857882906,
+      "final_port_speed_mps": 0.0016751569635346448,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.783028171180047e-08,
+      "minimum_com_range_m": 6.472928628099289,
+      "minimum_port_gap_m": 4.972928548616137,
+      "max_applied_forces_n": [
+        0.0,
+        0.5228513850342635
+      ],
+      "max_applied_torques_nm": [
+        0.02349993870385514,
+        0.004242561975814875
+      ],
+      "accepted_observations": 208,
+      "images_delivered": 208,
+      "estimated_target_position_error_m": {
+        "count": 2054,
+        "median": 0.0358696279465162,
+        "p95": 0.11147218451329781,
+        "max": 0.12605139036928836
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2054,
+        "median": 0.05488287338107325,
+        "p95": 0.349942725466205,
+        "max": 1.1124106548732542
+      },
+      "image_pose_translation_error_m": {
+        "count": 208,
+        "median": 0.03484956991104568,
+        "p95": 0.11295399213939694,
+        "max": 0.13365058809026398
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 208,
+        "median": 0.12072528102352065,
+        "p95": 0.44093445535728315,
+        "max": 0.7679596186605251
+      },
+      "fault_response": null,
+      "wall_seconds": 398.9304487999998,
+      "simulated_to_wall_ratio": 0.520391463285066,
+      "renderer_startup_seconds": 2.271480500000507,
+      "sampled_peak_blender_rss_mib": 266.0
+    },
+    {
+      "id": "12-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/12-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 212.2,
+      "completion_time_ratio": 1.0037842951750235,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.002491623884369,
+      "final_port_speed_mps": 0.00011900812195836045,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 4.309716406567362e-09,
+      "minimum_com_range_m": 6.500534479406982,
+      "minimum_port_gap_m": 5.0005342645871425,
+      "max_applied_forces_n": [
+        0.0,
+        0.5959495373502685
+      ],
+      "max_applied_torques_nm": [
+        0.2859918555262008,
+        0.18422886538287983
+      ],
+      "accepted_observations": 213,
+      "images_delivered": 213,
+      "estimated_target_position_error_m": {
+        "count": 2100,
+        "median": 0.031097190954080686,
+        "p95": 0.12904681124269535,
+        "max": 0.16412050976338696
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2100,
+        "median": 0.0614317777398321,
+        "p95": 0.320896010316385,
+        "max": 1.6830111737379454
+      },
+      "image_pose_translation_error_m": {
+        "count": 213,
+        "median": 0.03406095808578165,
+        "p95": 0.1350894718895404,
+        "max": 0.1959063756202255
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 213,
+        "median": 0.11187724057085484,
+        "p95": 0.5126034552237746,
+        "max": 1.1364161862968862
+      },
+      "fault_response": null,
+      "wall_seconds": 694.5769767999991,
+      "simulated_to_wall_ratio": 0.30550969451597904,
+      "renderer_startup_seconds": 2.0722187999999733,
+      "sampled_peak_blender_rss_mib": 263.5546875
+    },
+    {
+      "id": "13-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/13-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 210.2,
+      "completion_time_ratio": 1.0038204393505252,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.002208370408625,
+      "final_port_speed_mps": 0.0001308741634414534,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 4.6217641923415325e-10,
+      "minimum_com_range_m": 6.500227439277245,
+      "minimum_port_gap_m": 5.000226981312515,
+      "max_applied_forces_n": [
+        0.0,
+        0.6920425941649849
+      ],
+      "max_applied_torques_nm": [
+        0.06156576996250445,
+        0.08933367706898321
+      ],
+      "accepted_observations": 211,
+      "images_delivered": 211,
+      "estimated_target_position_error_m": {
+        "count": 2080,
+        "median": 0.037175293403194434,
+        "p95": 0.11591708994065976,
+        "max": 0.14275847269463798
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2080,
+        "median": 0.052860974766202815,
+        "p95": 0.23797020946166722,
+        "max": 0.6252951742443652
+      },
+      "image_pose_translation_error_m": {
+        "count": 211,
+        "median": 0.036167349791232636,
+        "p95": 0.12141162747389751,
+        "max": 0.14818188545744532
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 211,
+        "median": 0.11443994377852405,
+        "p95": 0.3974195971552203,
+        "max": 0.5875878856062655
+      },
+      "fault_response": null,
+      "wall_seconds": 392.9166595000006,
+      "simulated_to_wall_ratio": 0.5349734986230577,
+      "renderer_startup_seconds": 2.5296491000008245,
+      "sampled_peak_blender_rss_mib": 264.765625
+    },
+    {
+      "id": "14-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/14-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 209.2,
+      "completion_time_ratio": 1.0038387715930903,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.00163613543411,
+      "final_port_speed_mps": 5.3947338454847025e-05,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 6.295060063109361e-10,
+      "minimum_com_range_m": 6.500244869394356,
+      "minimum_port_gap_m": 5.00024439074653,
+      "max_applied_forces_n": [
+        0.0,
+        0.5563050318546939
+      ],
+      "max_applied_torques_nm": [
+        0.08581511531422943,
+        0.04460885975303359
+      ],
+      "accepted_observations": 210,
+      "images_delivered": 210,
+      "estimated_target_position_error_m": {
+        "count": 2070,
+        "median": 0.0306533604494591,
+        "p95": 0.11534292237478942,
+        "max": 0.131261391631419
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2070,
+        "median": 0.07294865393730347,
+        "p95": 0.4000288703821911,
+        "max": 1.155757152078696
+      },
+      "image_pose_translation_error_m": {
+        "count": 210,
+        "median": 0.03229734793807159,
+        "p95": 0.12559810661799542,
+        "max": 0.14127269504397916
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 210,
+        "median": 0.14804905219353556,
+        "p95": 0.4617617160292537,
+        "max": 0.850776559502527
+      },
+      "fault_response": null,
+      "wall_seconds": 695.5576772999993,
+      "simulated_to_wall_ratio": 0.3007658556973564,
+      "renderer_startup_seconds": 2.294000899999446,
+      "sampled_peak_blender_rss_mib": 262.02734375
+    },
+    {
+      "id": "15-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/15-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.8,
+      "completion_time_ratio": 1.004267425320057,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.998283028888102,
+      "final_port_speed_mps": 0.001264736818304495,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 2.58169332826156e-09,
+      "minimum_com_range_m": 6.47924951778153,
+      "minimum_port_gap_m": 4.979249495811785,
+      "max_applied_forces_n": [
+        0.0,
+        0.5216568803458363
+      ],
+      "max_applied_torques_nm": [
+        0.2435524690381994,
+        0.12728807950477286
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2096,
+        "median": 0.0385796188687563,
+        "p95": 0.12446585305447082,
+        "max": 0.1548401093364441
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2096,
+        "median": 0.049599922302893604,
+        "p95": 0.19798990915558778,
+        "max": 0.9146287200645788
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.03807491594835133,
+        "p95": 0.1239970177331997,
+        "max": 0.1720966827490542
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.10270913329559403,
+        "p95": 0.3419577659185253,
+        "max": 0.6670391193216247
+      },
+      "fault_response": null,
+      "wall_seconds": 370.2801978999996,
+      "simulated_to_wall_ratio": 0.5719992621836076,
+      "renderer_startup_seconds": 2.5182484999986627,
+      "sampled_peak_blender_rss_mib": 265.8828125
+    },
+    {
+      "id": "16-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/16-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 212.0,
+      "completion_time_ratio": 1.004263382283278,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.999530032635925,
+      "final_port_speed_mps": 0.0006146635943226372,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 2.1090201522273216e-08,
+      "minimum_com_range_m": 6.4903022914573825,
+      "minimum_port_gap_m": 4.990302196657623,
+      "max_applied_forces_n": [
+        0.0,
+        0.5262971502213205
+      ],
+      "max_applied_torques_nm": [
+        0.30695522609541104,
+        0.14178736892494356
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2098,
+        "median": 0.0392700867245112,
+        "p95": 0.12360604234165054,
+        "max": 0.1477759389254184
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2098,
+        "median": 0.06493105342817188,
+        "p95": 0.2511363818975208,
+        "max": 1.708675371398063
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.039365767239802146,
+        "p95": 0.12921281964831396,
+        "max": 0.16245271552333215
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.12427317795189696,
+        "p95": 0.44140407082160243,
+        "max": 1.232701372793741
+      },
+      "fault_response": null,
+      "wall_seconds": 408.4056048000002,
+      "simulated_to_wall_ratio": 0.5190917987127485,
+      "renderer_startup_seconds": 1.4945340000012948,
+      "sampled_peak_blender_rss_mib": 265.6796875
+    },
+    {
+      "id": "17-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/17-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 209.9,
+      "completion_time_ratio": 1.0047869794159885,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.9981884643289565,
+      "final_port_speed_mps": 0.0009242076868574067,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 2.397657003033491e-09,
+      "minimum_com_range_m": 6.4838858461968245,
+      "minimum_port_gap_m": 4.983885280185985,
+      "max_applied_forces_n": [
+        0.0,
+        0.5165205677819884
+      ],
+      "max_applied_torques_nm": [
+        0.4905328187753602,
+        0.153026491419208
+      ],
+      "accepted_observations": 210,
+      "images_delivered": 210,
+      "estimated_target_position_error_m": {
+        "count": 2077,
+        "median": 0.03861234138745223,
+        "p95": 0.11119920580132361,
+        "max": 0.1570051654726656
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2077,
+        "median": 0.057585516840097856,
+        "p95": 0.22857365254267592,
+        "max": 1.3194738475432706
+      },
+      "image_pose_translation_error_m": {
+        "count": 210,
+        "median": 0.03793715701761458,
+        "p95": 0.1239816118813357,
+        "max": 0.14154782955227269
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 210,
+        "median": 0.13774827035633458,
+        "p95": 0.4366651891565303,
+        "max": 0.9342284689781303
+      },
+      "fault_response": null,
+      "wall_seconds": 217.5698443000001,
+      "simulated_to_wall_ratio": 0.9647476683881595,
+      "renderer_startup_seconds": 1.7441752000013366,
+      "sampled_peak_blender_rss_mib": 266.29296875
+    },
+    {
+      "id": "18-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/18-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 212.7,
+      "completion_time_ratio": 1.0051984877126654,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.9989302472798425,
+      "final_port_speed_mps": 0.001302862194006321,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.3055094815062675e-08,
+      "minimum_com_range_m": 6.47984536336233,
+      "minimum_port_gap_m": 4.979844591745338,
+      "max_applied_forces_n": [
+        0.0,
+        0.5948143077576022
+      ],
+      "max_applied_torques_nm": [
+        0.22079532848125866,
+        0.009384145426518851
+      ],
+      "accepted_observations": 213,
+      "images_delivered": 213,
+      "estimated_target_position_error_m": {
+        "count": 2105,
+        "median": 0.04067238658810467,
+        "p95": 0.12717782377565964,
+        "max": 0.17862386911742006
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2105,
+        "median": 0.07085673409068043,
+        "p95": 0.4191302166734059,
+        "max": 1.4525470870445463
+      },
+      "image_pose_translation_error_m": {
+        "count": 213,
+        "median": 0.04131485057123112,
+        "p95": 0.1352818698424983,
+        "max": 0.1973684432398956
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 213,
+        "median": 0.14769368344120204,
+        "p95": 0.5197916348212227,
+        "max": 1.0792875526080459
+      },
+      "fault_response": null,
+      "wall_seconds": 333.7513142000007,
+      "simulated_to_wall_ratio": 0.6373008613009966,
+      "renderer_startup_seconds": 0.8857207999990351,
+      "sampled_peak_blender_rss_mib": 265.546875
+    },
+    {
+      "id": "19-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/19-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 210.2,
+      "completion_time_ratio": 1.0038204393505252,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.00156950051948,
+      "final_port_speed_mps": 0.00017743002216246334,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.2942762699619002e-09,
+      "minimum_com_range_m": 6.498674331124801,
+      "minimum_port_gap_m": 4.998674167499484,
+      "max_applied_forces_n": [
+        0.0,
+        0.5363743725876785
+      ],
+      "max_applied_torques_nm": [
+        0.01146614661254584,
+        0.07978405004243584
+      ],
+      "accepted_observations": 211,
+      "images_delivered": 211,
+      "estimated_target_position_error_m": {
+        "count": 2080,
+        "median": 0.03919452202625688,
+        "p95": 0.11118131026265446,
+        "max": 0.15206552731610937
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2080,
+        "median": 0.06180242208055889,
+        "p95": 0.2660723282925998,
+        "max": 1.0643098156473088
+      },
+      "image_pose_translation_error_m": {
+        "count": 211,
+        "median": 0.03671734512158342,
+        "p95": 0.12273321794671946,
+        "max": 0.20504146529786255
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 211,
+        "median": 0.1233083553334286,
+        "p95": 0.3891561876412035,
+        "max": 1.2151174990355014
+      },
+      "fault_response": null,
+      "wall_seconds": 213.97904600000038,
+      "simulated_to_wall_ratio": 0.9823391772669162,
+      "renderer_startup_seconds": 0.9467449000003398,
+      "sampled_peak_blender_rss_mib": 265.8515625
+    },
+    {
+      "id": "20-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/20-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 207.4,
+      "completion_time_ratio": 1.003386550556362,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.995982024265224,
+      "final_port_speed_mps": 0.0021615933393985746,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.3956120591777472e-08,
+      "minimum_com_range_m": 6.465057344946794,
+      "minimum_port_gap_m": 4.965056830027845,
+      "max_applied_forces_n": [
+        0.0,
+        0.5328776145667605
+      ],
+      "max_applied_torques_nm": [
+        0.13439956590236482,
+        0.20802693468575043
+      ],
+      "accepted_observations": 208,
+      "images_delivered": 208,
+      "estimated_target_position_error_m": {
+        "count": 2052,
+        "median": 0.03216381885961049,
+        "p95": 0.11426646300223128,
+        "max": 0.12863940867215537
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2052,
+        "median": 0.07199679036812473,
+        "p95": 0.257420977473494,
+        "max": 0.8083583543515536
+      },
+      "image_pose_translation_error_m": {
+        "count": 208,
+        "median": 0.03178136544473287,
+        "p95": 0.1176766388574569,
+        "max": 0.1566967079184777
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 208,
+        "median": 0.135365509620524,
+        "p95": 0.4330715540704133,
+        "max": 0.7760918656805298
+      },
+      "fault_response": null,
+      "wall_seconds": 330.4152417000005,
+      "simulated_to_wall_ratio": 0.6276950147121488,
+      "renderer_startup_seconds": 2.045892600001025,
+      "sampled_peak_blender_rss_mib": 265.9296875
+    },
+    {
+      "id": "21-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/21-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 207.8,
+      "completion_time_ratio": 1.0033800096571706,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.998812555227627,
+      "final_port_speed_mps": 0.0010360511905678615,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 7.5223339899304e-09,
+      "minimum_com_range_m": 6.483524001249226,
+      "minimum_port_gap_m": 4.983522444516581,
+      "max_applied_forces_n": [
+        0.0,
+        0.5851925899764279
+      ],
+      "max_applied_torques_nm": [
+        0.30019440642487333,
+        0.08034401519986058
+      ],
+      "accepted_observations": 208,
+      "images_delivered": 208,
+      "estimated_target_position_error_m": {
+        "count": 2056,
+        "median": 0.03936034623644743,
+        "p95": 0.11797836505547571,
+        "max": 0.14030690864227793
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2056,
+        "median": 0.06761740994705526,
+        "p95": 0.31318988883389687,
+        "max": 0.926305982677363
+      },
+      "image_pose_translation_error_m": {
+        "count": 208,
+        "median": 0.03635387028891957,
+        "p95": 0.12081525653784951,
+        "max": 0.15440003905214816
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 208,
+        "median": 0.13664132704226842,
+        "p95": 0.42953375069437366,
+        "max": 0.6393806217223235
+      },
+      "fault_response": null,
+      "wall_seconds": 210.16783609999948,
+      "simulated_to_wall_ratio": 0.9887335943313761,
+      "renderer_startup_seconds": 0.8407391999990068,
+      "sampled_peak_blender_rss_mib": 265.85546875
+    },
+    {
+      "id": "22-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/22-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 210.6,
+      "completion_time_ratio": 1.0047709923664123,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.997873938039483,
+      "final_port_speed_mps": 0.001706086336799675,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 9.20380934295481e-09,
+      "minimum_com_range_m": 6.473399667998177,
+      "minimum_port_gap_m": 4.9733994944077455,
+      "max_applied_forces_n": [
+        0.0,
+        0.602966204449234
+      ],
+      "max_applied_torques_nm": [
+        0.3108595566584434,
+        0.04056000496574058
+      ],
+      "accepted_observations": 211,
+      "images_delivered": 211,
+      "estimated_target_position_error_m": {
+        "count": 2084,
+        "median": 0.03667523089151391,
+        "p95": 0.12459934910495654,
+        "max": 0.1640319807807161
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2084,
+        "median": 0.08515756661970242,
+        "p95": 0.4049175161003626,
+        "max": 1.9583753759340345
+      },
+      "image_pose_translation_error_m": {
+        "count": 211,
+        "median": 0.0343429050856846,
+        "p95": 0.13341544887383067,
+        "max": 0.17819642497834873
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 211,
+        "median": 0.13527151580632477,
+        "p95": 0.452749406417001,
+        "max": 1.5289661759369655
+      },
+      "fault_response": null,
+      "wall_seconds": 330.6303422000001,
+      "simulated_to_wall_ratio": 0.6369651333228422,
+      "renderer_startup_seconds": 0.8803095000002941,
+      "sampled_peak_blender_rss_mib": 265.78125
+    },
+    {
+      "id": "23-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/23-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 212.0,
+      "completion_time_ratio": 1.003787878787879,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.000359017230928,
+      "final_port_speed_mps": 0.0005629944085685065,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.1554973508450345e-09,
+      "minimum_com_range_m": 6.49134372315575,
+      "minimum_port_gap_m": 4.991343501123694,
+      "max_applied_forces_n": [
+        0.0,
+        0.5659325701927408
+      ],
+      "max_applied_torques_nm": [
+        0.36740051456961015,
+        0.11113538511030545
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2098,
+        "median": 0.03483210680769387,
+        "p95": 0.121882515356245,
+        "max": 0.16462257864080296
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2098,
+        "median": 0.05875906457211236,
+        "p95": 0.19771430420283742,
+        "max": 1.1363929428802522
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.03425990481299407,
+        "p95": 0.12081888280021391,
+        "max": 0.17836779777268064
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.12191710161049998,
+        "p95": 0.44637414444080636,
+        "max": 0.8255088800010436
+      },
+      "fault_response": null,
+      "wall_seconds": 217.60963469999842,
+      "simulated_to_wall_ratio": 0.9742215701628653,
+      "renderer_startup_seconds": 0.8355245000002469,
+      "sampled_peak_blender_rss_mib": 265.94140625
+    },
+    {
+      "id": "24-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/24-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.6,
+      "completion_time_ratio": 1.0037950664136623,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.998815984870047,
+      "final_port_speed_mps": 0.001737264295904704,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 6.780846321104298e-09,
+      "minimum_com_range_m": 6.473874936122664,
+      "minimum_port_gap_m": 4.973874788710279,
+      "max_applied_forces_n": [
+        0.0,
+        0.6165743514553742
+      ],
+      "max_applied_torques_nm": [
+        0.34850383466328877,
+        0.16065580778209654
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2094,
+        "median": 0.03545362947659708,
+        "p95": 0.12136723614648687,
+        "max": 0.13659187653559884
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2094,
+        "median": 0.060667234156649215,
+        "p95": 0.3306726693940414,
+        "max": 1.2031827806633097
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.03550769904350587,
+        "p95": 0.12722956518291362,
+        "max": 0.1991132069960072
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.13196903721334496,
+        "p95": 0.5067854144146099,
+        "max": 1.0572132380713386
+      },
+      "fault_response": null,
+      "wall_seconds": 334.2661090999991,
+      "simulated_to_wall_ratio": 0.6330285788461364,
+      "renderer_startup_seconds": 1.00237609999931,
+      "sampled_peak_blender_rss_mib": 265.57421875
+    },
+    {
+      "id": "25-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/25-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.5,
+      "completion_time_ratio": 1.0028449502133712,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.996824166606641,
+      "final_port_speed_mps": 0.001989505334009392,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.776148423369409e-08,
+      "minimum_com_range_m": 6.467968196836672,
+      "minimum_port_gap_m": 4.967967939263069,
+      "max_applied_forces_n": [
+        0.0,
+        0.6729991020550707
+      ],
+      "max_applied_torques_nm": [
+        0.5,
+        0.004872801203568487
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2093,
+        "median": 0.03371244259848816,
+        "p95": 0.12609368109591984,
+        "max": 0.18939929134534733
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2093,
+        "median": 0.0720310196218634,
+        "p95": 0.28048568548144664,
+        "max": 1.6631009288190166
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.03444781153897321,
+        "p95": 0.12820640709122355,
+        "max": 0.18550941454622638
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.14516083674407404,
+        "p95": 0.4277755196565042,
+        "max": 1.2826306511220815
+      },
+      "fault_response": null,
+      "wall_seconds": 216.1285740000003,
+      "simulated_to_wall_ratio": 0.9785841644427807,
+      "renderer_startup_seconds": 0.8291023000001587,
+      "sampled_peak_blender_rss_mib": 265.83203125
+    },
+    {
+      "id": "26-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/26-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.9,
+      "completion_time_ratio": 1.0037896731406917,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.00027160769714,
+      "final_port_speed_mps": 0.0009370645825136364,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.4240531717688115e-08,
+      "minimum_com_range_m": 6.485702523177788,
+      "minimum_port_gap_m": 4.98570250342191,
+      "max_applied_forces_n": [
+        0.0,
+        0.6321608889984267
+      ],
+      "max_applied_torques_nm": [
+        0.10616871082829664,
+        0.029801004607468824
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2097,
+        "median": 0.03782351274781666,
+        "p95": 0.12790543517470146,
+        "max": 0.1485168595963606
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2097,
+        "median": 0.05931567430497622,
+        "p95": 0.4229656074905808,
+        "max": 1.2196541612054217
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.03824564796422587,
+        "p95": 0.13468075888967876,
+        "max": 0.1770440985263541
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.1328429315418913,
+        "p95": 0.6041251649189691,
+        "max": 1.126303028821901
+      },
+      "fault_response": null,
+      "wall_seconds": 370.6077542000003,
+      "simulated_to_wall_ratio": 0.5717635359719083,
+      "renderer_startup_seconds": 0.8932353999989573,
+      "sampled_peak_blender_rss_mib": 266.18359375
+    },
+    {
+      "id": "27-operational-approach",
+      "category": "operational",
+      "kind": "approach",
+      "expected_outcome": "success",
+      "path": "episodes/27-operational-approach",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.9,
+      "completion_time_ratio": 1.004265402843602,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 5.001282469009457,
+      "final_port_speed_mps": 0.0008550499406817485,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.7861628422997592e-08,
+      "minimum_com_range_m": 6.487761710764408,
+      "minimum_port_gap_m": 4.987761344536875,
+      "max_applied_forces_n": [
+        0.0,
+        0.6937345510826564
+      ],
+      "max_applied_torques_nm": [
+        0.46935566045219973,
+        0.04113981049555965
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2097,
+        "median": 0.035950433539545724,
+        "p95": 0.13065069158734988,
+        "max": 0.17603411482978548
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2097,
+        "median": 0.07829323261826059,
+        "p95": 0.29729207676757746,
+        "max": 1.6397604742176957
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.0352142333575611,
+        "p95": 0.13543625431789738,
+        "max": 0.1991449950386938
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.11699348510862431,
+        "p95": 0.44099460282447167,
+        "max": 1.283766448584832
+      },
+      "fault_response": null,
+      "wall_seconds": 239.55202780000036,
+      "simulated_to_wall_ratio": 0.8845677573512892,
+      "renderer_startup_seconds": 0.8850766000014119,
+      "sampled_peak_blender_rss_mib": 266.03515625
+    },
+    {
+      "id": "28-fault-abort",
+      "category": "fault",
+      "kind": "abort",
+      "expected_outcome": "retreated",
+      "path": "episodes/28-fault-abort",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "retreated",
+      "failure_reason": null,
+      "abort_reason": "estimated_gap_abort_request",
+      "simulated_seconds": 323.2,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 29.84184215789836,
+      "final_port_speed_mps": 0.0007957671040606156,
+      "final_alignment_deg": 1.344524082641768e-05,
+      "final_relative_rate_radps": 1.4972886988844873e-09,
+      "minimum_com_range_m": 23.869535521971248,
+      "minimum_port_gap_m": 22.36923112122161,
+      "max_applied_forces_n": [
+        0.0,
+        1.7100036258890654
+      ],
+      "max_applied_torques_nm": [
+        0.29143485792782353,
+        0.18380297965553183
+      ],
+      "accepted_observations": 324,
+      "images_delivered": 324,
+      "estimated_target_position_error_m": {
+        "count": 3210,
+        "median": 0.12054242001018244,
+        "p95": 0.16103487435507735,
+        "max": 0.17095309612497198
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3210,
+        "median": 0.21058899902565076,
+        "p95": 0.4134502727096669,
+        "max": 1.1328969747088489
+      },
+      "image_pose_translation_error_m": {
+        "count": 324,
+        "median": 0.12398765054613735,
+        "p95": 0.1666977146286363,
+        "max": 0.18597245991508837
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 324,
+        "median": 0.370220276166661,
+        "p95": 0.7365474575052305,
+        "max": 1.4722155255259919
+      },
+      "fault_response": null,
+      "wall_seconds": 448.2753813999989,
+      "simulated_to_wall_ratio": 0.720985388469519,
+      "renderer_startup_seconds": 0.8003846000010526,
+      "sampled_peak_blender_rss_mib": 263.44921875
+    },
+    {
+      "id": "29-fault-abort",
+      "category": "fault",
+      "kind": "abort",
+      "expected_outcome": "retreated",
+      "path": "episodes/29-fault-abort",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "retreated",
+      "failure_reason": null,
+      "abort_reason": "estimated_gap_abort_request",
+      "simulated_seconds": 280.0,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 29.813790561800932,
+      "final_port_speed_mps": 0.00046432621786110674,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.7527666496640354e-07,
+      "minimum_com_range_m": 14.456088770708707,
+      "minimum_port_gap_m": 12.956084388514123,
+      "max_applied_forces_n": [
+        0.0,
+        1.714814652465519
+      ],
+      "max_applied_torques_nm": [
+        0.461748215552349,
+        0.13713816496414621
+      ],
+      "accepted_observations": 280,
+      "images_delivered": 280,
+      "estimated_target_position_error_m": {
+        "count": 2778,
+        "median": 0.06440153495345126,
+        "p95": 0.139523645543384,
+        "max": 0.16372859757273156
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2778,
+        "median": 0.09996919066218098,
+        "p95": 0.32449641390945616,
+        "max": 0.7880099208628936
+      },
+      "image_pose_translation_error_m": {
+        "count": 280,
+        "median": 0.06434772690535497,
+        "p95": 0.13680954305143309,
+        "max": 0.17188804868131702
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 280,
+        "median": 0.20123408950201482,
+        "p95": 0.4897972013360604,
+        "max": 0.9367419593483157
+      },
+      "fault_response": null,
+      "wall_seconds": 228.60734840000077,
+      "simulated_to_wall_ratio": 1.2248075224164539,
+      "renderer_startup_seconds": 1.0532297999998264,
+      "sampled_peak_blender_rss_mib": 265.88671875
+    },
+    {
+      "id": "30-fault-dropped-frame",
+      "category": "fault",
+      "kind": "dropped-frame",
+      "expected_outcome": "success",
+      "path": "episodes/30-fault-dropped-frame",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 271.2,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.926085605471629,
+      "final_port_speed_mps": 0.0024117091947603564,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.2347569968175886e-08,
+      "minimum_com_range_m": 5.957374761161092,
+      "minimum_port_gap_m": 4.457374190752236,
+      "max_applied_forces_n": [
+        0.0,
+        1.1955021418757072
+      ],
+      "max_applied_torques_nm": [
+        0.4061331469566708,
+        0.22892280724350816
+      ],
+      "accepted_observations": 271,
+      "images_delivered": 271,
+      "estimated_target_position_error_m": {
+        "count": 2690,
+        "median": 0.016331345788657047,
+        "p95": 0.13101126149831582,
+        "max": 0.1544537613970813
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2690,
+        "median": 0.06468691720507022,
+        "p95": 0.3580735081105361,
+        "max": 1.168741145791635
+      },
+      "image_pose_translation_error_m": {
+        "count": 271,
+        "median": 0.01569403982394209,
+        "p95": 0.12735464715830436,
+        "max": 0.17656863963732816
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 271,
+        "median": 0.10299586248324276,
+        "p95": 0.4838190814966642,
+        "max": 1.1396238377014078
+      },
+      "fault_response": {
+        "lost_captures": [
+          138
+        ],
+        "brake_latency_s": 0.0,
+        "reacquisition_s": 2.0,
+        "final_estimate_age_s": null
+      },
+      "wall_seconds": 482.1573181999993,
+      "simulated_to_wall_ratio": 0.5624720184948142,
+      "renderer_startup_seconds": 0.9005828000008478,
+      "sampled_peak_blender_rss_mib": 265.5546875
+    },
+    {
+      "id": "31-fault-dropped-frame",
+      "category": "fault",
+      "kind": "dropped-frame",
+      "expected_outcome": "success",
+      "path": "episodes/31-fault-dropped-frame",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 265.4,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.927145831950475,
+      "final_port_speed_mps": 0.0024747851303065283,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.1541058748719232e-08,
+      "minimum_com_range_m": 6.069478083866954,
+      "minimum_port_gap_m": 4.56947749453515,
+      "max_applied_forces_n": [
+        0.0,
+        1.201333694108349
+      ],
+      "max_applied_torques_nm": [
+        0.5,
+        0.07737266939330506
+      ],
+      "accepted_observations": 265,
+      "images_delivered": 265,
+      "estimated_target_position_error_m": {
+        "count": 2632,
+        "median": 0.020810483765585933,
+        "p95": 0.11805049778342984,
+        "max": 0.1361515482942078
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2632,
+        "median": 0.06169336741108976,
+        "p95": 0.3475253486034434,
+        "max": 1.0935905553516805
+      },
+      "image_pose_translation_error_m": {
+        "count": 265,
+        "median": 0.021203214222046483,
+        "p95": 0.12014929923668523,
+        "max": 0.1603592354454564
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 265,
+        "median": 0.09994477100571703,
+        "p95": 0.4405174167623572,
+        "max": 0.8762967613688816
+      },
+      "fault_response": {
+        "lost_captures": [
+          133
+        ],
+        "brake_latency_s": 0.0,
+        "reacquisition_s": 2.0,
+        "final_estimate_age_s": null
+      },
+      "wall_seconds": 315.08041409999896,
+      "simulated_to_wall_ratio": 0.8423246514960094,
+      "renderer_startup_seconds": 3.528284599999097,
+      "sampled_peak_blender_rss_mib": 265.80078125
+    },
+    {
+      "id": "32-fault-extended-loss",
+      "category": "fault",
+      "kind": "extended-loss",
+      "expected_outcome": "navigation_lost",
+      "path": "episodes/32-fault-extended-loss",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "navigation_lost",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 55.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 23.617333412626916,
+      "final_port_speed_mps": 0.12599952935798342,
+      "final_alignment_deg": 1.344524082641768e-05,
+      "final_relative_rate_radps": 7.189946279108229e-08,
+      "minimum_com_range_m": 25.117687907240285,
+      "minimum_port_gap_m": 23.617333412626916,
+      "max_applied_forces_n": [
+        0.0,
+        1.2066999442222308
+      ],
+      "max_applied_torques_nm": [
+        0.3453235158217838,
+        0.10197092589525174
+      ],
+      "accepted_observations": 53,
+      "images_delivered": 53,
+      "estimated_target_position_error_m": {
+        "count": 529,
+        "median": 0.09973298608689575,
+        "p95": 0.1216614742007024,
+        "max": 0.15659420967078355
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 529,
+        "median": 0.2079875173581024,
+        "p95": 0.5305645360696435,
+        "max": 1.1539988089606306
+      },
+      "image_pose_translation_error_m": {
+        "count": 53,
+        "median": 0.09760729876384582,
+        "p95": 0.138306923921781,
+        "max": 0.15896315974800185
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 53,
+        "median": 0.29947850909055423,
+        "p95": 0.663130378782049,
+        "max": 1.0230772568718476
+      },
+      "fault_response": {
+        "lost_captures": [
+          53,
+          54,
+          55,
+          56
+        ],
+        "brake_latency_s": 0.0,
+        "reacquisition_s": null,
+        "final_estimate_age_s": 3.1
+      },
+      "wall_seconds": 79.7713672000009,
+      "simulated_to_wall_ratio": 0.6907240271042939,
+      "renderer_startup_seconds": 0.8859169999996084,
+      "sampled_peak_blender_rss_mib": 263.4296875
+    },
+    {
+      "id": "33-fault-extended-loss",
+      "category": "fault",
+      "kind": "extended-loss",
+      "expected_outcome": "navigation_lost",
+      "path": "episodes/33-fault-extended-loss",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "navigation_lost",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 42.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 26.86363737306158,
+      "final_port_speed_mps": 0.1263602675831064,
+      "final_alignment_deg": 1.8070981951380476e-05,
+      "final_relative_rate_radps": 6.879146210698257e-08,
+      "minimum_com_range_m": 28.364643031695483,
+      "minimum_port_gap_m": 26.86363737306158,
+      "max_applied_forces_n": [
+        0.0,
+        1.21141797510671
+      ],
+      "max_applied_torques_nm": [
+        0.35837836612631946,
+        0.10034018837709904
+      ],
+      "accepted_observations": 40,
+      "images_delivered": 42,
+      "estimated_target_position_error_m": {
+        "count": 399,
+        "median": 0.11362320025851753,
+        "p95": 0.13649755040267814,
+        "max": 0.14067912269784194
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 399,
+        "median": 0.15394404318111826,
+        "p95": 0.7314055372828661,
+        "max": 1.253599856078266
+      },
+      "image_pose_translation_error_m": {
+        "count": 40,
+        "median": 0.1161814890155409,
+        "p95": 0.14441064765905717,
+        "max": 0.1641346841144902
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 40,
+        "median": 0.19049867112056984,
+        "p95": 0.667837612469356,
+        "max": 1.0370886911399166
+      },
+      "fault_response": {
+        "lost_captures": [
+          40,
+          41,
+          42,
+          43,
+          44
+        ],
+        "brake_latency_s": 0.0,
+        "reacquisition_s": null,
+        "final_estimate_age_s": 3.1
+      },
+      "wall_seconds": 34.2364791,
+      "simulated_to_wall_ratio": 1.2296825230489312,
+      "renderer_startup_seconds": 0.825414400000227,
+      "sampled_peak_blender_rss_mib": 263.27734375
+    },
+    {
+      "id": "34-stress-init-errors-2x",
+      "category": "stress",
+      "kind": "init-errors-2x",
+      "expected_outcome": null,
+      "path": "episodes/34-stress-init-errors-2x",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 205.5,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.998983682419303,
+      "final_port_speed_mps": 0.0019558395974868734,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 2.1395971975603333e-08,
+      "minimum_com_range_m": 6.469968545643454,
+      "minimum_port_gap_m": 4.969964601706389,
+      "max_applied_forces_n": [
+        0.0,
+        0.8131639746580578
+      ],
+      "max_applied_torques_nm": [
+        0.4630296495248436,
+        2.8081796037099405e-05
+      ],
+      "accepted_observations": 206,
+      "images_delivered": 206,
+      "estimated_target_position_error_m": {
+        "count": 2033,
+        "median": 0.033089708433331755,
+        "p95": 0.11610848011211239,
+        "max": 0.13288431950142618
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2033,
+        "median": 0.055989039217226325,
+        "p95": 0.2346759458713692,
+        "max": 0.4032924087924455
+      },
+      "image_pose_translation_error_m": {
+        "count": 206,
+        "median": 0.034441640927672754,
+        "p95": 0.1217372534357549,
+        "max": 0.15191181004265772
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 206,
+        "median": 0.1192255519955388,
+        "p95": 0.38640056658508065,
+        "max": 0.5512421809064111
+      },
+      "fault_response": null,
+      "wall_seconds": 208.41386889999922,
+      "simulated_to_wall_ratio": 0.9860188339894148,
+      "renderer_startup_seconds": 0.8254098999987036,
+      "sampled_peak_blender_rss_mib": 266.15625
+    },
+    {
+      "id": "35-stress-heavy-degradation",
+      "category": "stress",
+      "kind": "heavy-degradation",
+      "expected_outcome": null,
+      "path": "episodes/35-stress-heavy-degradation",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 233.7,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.993295767632711,
+      "final_port_speed_mps": 0.0015004395665044622,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 2.4586459899992643e-08,
+      "minimum_com_range_m": 6.471411246023261,
+      "minimum_port_gap_m": 4.971411012220498,
+      "max_applied_forces_n": [
+        0.0,
+        0.7236688510433811
+      ],
+      "max_applied_torques_nm": [
+        0.39170584602691605,
+        2.6621492896108804e-05
+      ],
+      "accepted_observations": 231,
+      "images_delivered": 234,
+      "estimated_target_position_error_m": {
+        "count": 2315,
+        "median": 0.041551905865622296,
+        "p95": 0.17305076111609882,
+        "max": 0.19242966173545972
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2315,
+        "median": 0.09040910671335804,
+        "p95": 1.1146739018058278,
+        "max": 2.118315430694233
+      },
+      "image_pose_translation_error_m": {
+        "count": 231,
+        "median": 0.04250481858751902,
+        "p95": 0.17734648278991128,
+        "max": 0.2019040119324634
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 231,
+        "median": 0.21010724372851985,
+        "p95": 1.1568603007500082,
+        "max": 1.7262702037894286
+      },
+      "fault_response": null,
+      "wall_seconds": 481.96639100000175,
+      "simulated_to_wall_ratio": 0.4848885821999135,
+      "renderer_startup_seconds": 0.8673593000003166,
+      "sampled_peak_blender_rss_mib": 263.54296875
+    },
+    {
+      "id": "36-stress-oblique-sun",
+      "category": "stress",
+      "kind": "oblique-sun",
+      "expected_outcome": null,
+      "path": "episodes/36-stress-oblique-sun",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 211.7,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.999029298871353,
+      "final_port_speed_mps": 0.0013475995769825324,
+      "final_alignment_deg": 1.2074182697257333e-06,
+      "final_relative_rate_radps": 7.484717041529699e-09,
+      "minimum_com_range_m": 6.479535229198023,
+      "minimum_port_gap_m": 4.9795352078618285,
+      "max_applied_forces_n": [
+        0.0,
+        0.5278393884991565
+      ],
+      "max_applied_torques_nm": [
+        0.5,
+        2.6068564080671236e-05
+      ],
+      "accepted_observations": 212,
+      "images_delivered": 212,
+      "estimated_target_position_error_m": {
+        "count": 2095,
+        "median": 0.04489858075196671,
+        "p95": 0.12314952049203916,
+        "max": 0.14863960346015775
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2095,
+        "median": 0.2858778876005219,
+        "p95": 0.658956283394869,
+        "max": 0.8768547551419751
+      },
+      "image_pose_translation_error_m": {
+        "count": 212,
+        "median": 0.043970531553297054,
+        "p95": 0.1332581631020263,
+        "max": 0.15664726984222865
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 212,
+        "median": 0.29940467680167326,
+        "p95": 0.7766040092224504,
+        "max": 1.1284547912350813
+      },
+      "fault_response": null,
+      "wall_seconds": 261.30398480000076,
+      "simulated_to_wall_ratio": 0.8101675149042709,
+      "renderer_startup_seconds": 1.155926700001146,
+      "sampled_peak_blender_rss_mib": 265.8125
+    },
+    {
+      "id": "37-stress-chaser-disturbance-2x",
+      "category": "stress",
+      "kind": "chaser-disturbance-2x",
+      "expected_outcome": null,
+      "path": "episodes/37-stress-chaser-disturbance-2x",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 205.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.999499234000087,
+      "final_port_speed_mps": 0.00040768667396033056,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 3.329857367636108e-09,
+      "minimum_com_range_m": 6.49403741040867,
+      "minimum_port_gap_m": 4.9940347200674635,
+      "max_applied_forces_n": [
+        0.0,
+        0.5086350712204434
+      ],
+      "max_applied_torques_nm": [
+        0.25544260011957426,
+        0.3369320699771331
+      ],
+      "accepted_observations": 205,
+      "images_delivered": 205,
+      "estimated_target_position_error_m": {
+        "count": 2029,
+        "median": 0.0358912860684927,
+        "p95": 0.11882975034792405,
+        "max": 0.12981906669002016
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2029,
+        "median": 0.062431084838965235,
+        "p95": 0.2832315264258855,
+        "max": 0.5503387103410327
+      },
+      "image_pose_translation_error_m": {
+        "count": 205,
+        "median": 0.03537247485033281,
+        "p95": 0.11441155431197272,
+        "max": 0.15938008891912608
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 205,
+        "median": 0.13479420276044918,
+        "p95": 0.3854701760736135,
+        "max": 0.653246675894883
+      },
+      "fault_response": null,
+      "wall_seconds": 271.09608819999994,
+      "simulated_to_wall_ratio": 0.7565583161372966,
+      "renderer_startup_seconds": 1.0710710999992443,
+      "sampled_peak_blender_rss_mib": 265.68359375
+    },
+    {
+      "id": "38-stress-degraded-dropped-oblique",
+      "category": "stress",
+      "kind": "degraded-dropped-oblique",
+      "expected_outcome": null,
+      "path": "episodes/38-stress-degraded-dropped-oblique",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 249.2,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.9251481972026205,
+      "final_port_speed_mps": 0.0023444171097255096,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 5.666077256591807e-09,
+      "minimum_com_range_m": 6.256229278894846,
+      "minimum_port_gap_m": 4.756229206898615,
+      "max_applied_forces_n": [
+        0.0,
+        1.195533366464313
+      ],
+      "max_applied_torques_nm": [
+        0.47647469423647126,
+        2.540445226591698e-05
+      ],
+      "accepted_observations": 249,
+      "images_delivered": 249,
+      "estimated_target_position_error_m": {
+        "count": 2470,
+        "median": 0.023632277901700006,
+        "p95": 0.11421755680458313,
+        "max": 0.13584861505874576
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2470,
+        "median": 0.06651344079944674,
+        "p95": 0.31808406362513914,
+        "max": 1.0952211792162223
+      },
+      "image_pose_translation_error_m": {
+        "count": 249,
+        "median": 0.02497664411711038,
+        "p95": 0.11132019506913075,
+        "max": 0.14337343083590007
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 249,
+        "median": 0.11429959553113787,
+        "p95": 0.40490313938642986,
+        "max": 0.7981783796255136
+      },
+      "fault_response": {
+        "lost_captures": [
+          113
+        ],
+        "brake_latency_s": 0.0,
+        "reacquisition_s": 2.0,
+        "final_estimate_age_s": null
+      },
+      "wall_seconds": 423.06812210000135,
+      "simulated_to_wall_ratio": 0.589030435011353,
+      "renderer_startup_seconds": 0.9553782999973919,
+      "sampled_peak_blender_rss_mib": 266.0390625
+    },
+    {
+      "id": "39-stress-combined-moderate",
+      "category": "stress",
+      "kind": "combined-moderate",
+      "expected_outcome": null,
+      "path": "episodes/39-stress-combined-moderate",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 209.4,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 4.997054064320239,
+      "final_port_speed_mps": 0.002113942959282299,
+      "final_alignment_deg": 0.0,
+      "final_relative_rate_radps": 1.3154190044692095e-08,
+      "minimum_com_range_m": 6.466353993940234,
+      "minimum_port_gap_m": 4.966352667536731,
+      "max_applied_forces_n": [
+        0.0,
+        0.7092140339242744
+      ],
+      "max_applied_torques_nm": [
+        0.011324875010205957,
+        2.732503268824856e-05
+      ],
+      "accepted_observations": 210,
+      "images_delivered": 210,
+      "estimated_target_position_error_m": {
+        "count": 2072,
+        "median": 0.03513694392627255,
+        "p95": 0.13728023088570596,
+        "max": 0.17638040152889747
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 2072,
+        "median": 0.07863518106009368,
+        "p95": 0.472247500807733,
+        "max": 1.4628038084899115
+      },
+      "image_pose_translation_error_m": {
+        "count": 210,
+        "median": 0.03528020024060613,
+        "p95": 0.14967736952411254,
+        "max": 0.197931190072514
+      },
+      "image_pose_rotation_error_deg": {
+        "count": 210,
+        "median": 0.1548098231091024,
+        "p95": 0.6297843608822086,
+        "max": 1.2773154237990827
+      },
+      "fault_response": null,
+      "wall_seconds": 329.6782654999988,
+      "simulated_to_wall_ratio": 0.6351647103045097,
+      "renderer_startup_seconds": 0.8472108999994816,
+      "sampled_peak_blender_rss_mib": 265.84375
+    }
+  ]
+}

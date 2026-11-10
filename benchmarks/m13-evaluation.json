@@ -1,0 +1,2581 @@
+{
+  "artifact_type": "m13_evaluation_report",
+  "passed": true,
+  "gates": {
+    "records_valid_and_uniform": true,
+    "every_episode_docked": true,
+    "no_false_completion_or_violation": true
+  },
+  "scope": "28 M11 operational episodes flown to contact, capture and detumble against the unmarked QuikSCAT tumbling at 0.2-1.0 deg/s, docking lidar only; capture is a momentum-conserving latch inside a stated envelope, not a contact-dynamics model; not a population estimate",
+  "capture_envelope": {
+    "lateral_m": 0.05,
+    "alignment_deg": 3.0,
+    "closing_mps": [
+      0.01,
+      0.06
+    ],
+    "lateral_speed_mps": 0.02,
+    "relative_rate_radps": 0.0035
+  },
+  "contact_gap_m": 0.063,
+  "docked": 28,
+  "contact": {
+    "lateral_m": {
+      "count": 28,
+      "median": 0.005998951360180505,
+      "p95": 0.010200462558849854,
+      "max": 0.011169999234382699
+    },
+    "alignment_deg": {
+      "count": 28,
+      "median": 0.06194005495205411,
+      "p95": 0.09643800134766863,
+      "max": 0.12699028629062678
+    },
+    "closing_mps": {
+      "count": 28,
+      "median": 0.03860692805683259,
+      "p95": 0.03922920335117575,
+      "max": 0.039317611531925874
+    },
+    "lateral_speed_mps": {
+      "count": 28,
+      "median": 0.00021626211663417394,
+      "p95": 0.0003481132675079949,
+      "max": 0.0004089054105384589
+    },
+    "relative_rate_radps": {
+      "count": 28,
+      "median": 8.96361588284085e-06,
+      "p95": 1.455849575967606e-05,
+      "max": 2.1572024425505007e-05
+    }
+  },
+  "port_estimate_error_at_contact_m": {
+    "lateral": {
+      "count": 28,
+      "median": 0.006419715712098142,
+      "p95": 0.010855687234150585,
+      "max": 0.012047676836604546
+    },
+    "axial": {
+      "count": 28,
+      "median": 0.009119525955137854,
+      "p95": 0.011921474024161584,
+      "max": 0.014850787337120544
+    }
+  },
+  "latch_time_s": {
+    "count": 28,
+    "median": 342.3,
+    "p95": 345.45,
+    "max": 357.7
+  },
+  "detumble_s": {
+    "count": 28,
+    "median": 14.4,
+    "p95": 19.5,
+    "max": 20.2
+  },
+  "delta_v_mps": {
+    "count": 28,
+    "median": 0.8688685591709311,
+    "p95": 1.7941932009792383,
+    "max": 1.9808969868812154
+  },
+  "minimum_outer_clearance_m": 0.06259700214075892,
+  "episodes": [
+    {
+      "id": "00-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/00-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 356.6,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.06128386908205541,
+      "final_port_speed_mps": 7.267436645901702e-05,
+      "final_alignment_deg": 0.06025387889411887,
+      "final_relative_rate_radps": 9.583083854271089e-21,
+      "minimum_com_range_m": 1.5667190021047488,
+      "minimum_port_gap_m": 0.06670062478839044,
+      "max_applied_forces_n": [
+        0.0,
+        1.1077711346637482
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3375,
+        "median": 0.00812591085002491,
+        "p95": 0.013138141756550916,
+        "max": 0.024470514261807883
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3375,
+        "median": 0.0433088542462384,
+        "p95": 0.10339193327615567,
+        "max": 0.43521587993608785
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 67.5891672000007,
+      "simulated_to_wall_ratio": 5.275993399131515,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 356,
+      "lidar_accepted_observations": 310,
+      "lidar_pose_translation_error_m": {
+        "count": 310,
+        "median": 0.008314109874255012,
+        "p95": 0.012266435587379188,
+        "max": 0.01867092219058064
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 310,
+        "median": 0.07819890107578768,
+        "p95": 0.2267723783143738,
+        "max": 0.5806959448938944
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3402,
+        "lateral_m": 0.008187610367685751,
+        "alignment_deg": 0.060253878906216515,
+        "closing_mps": 0.0380250147757091,
+        "lateral_speed_mps": 0.0002764748798668947,
+        "relative_rate_radps": 6.1457315925121395e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 206.7,
+      "latch_time_s": 340.2,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.00839678149714423,
+        "axial": 0.007689260523169587
+      },
+      "detumble_s": 16.4,
+      "final_stack_rate_radps": 5.661650727285693e-05,
+      "minimum_outer_clearance_m": 0.06612324890984711,
+      "delta_v_mps": 1.2034256985075422,
+      "coast_after_episode": null
+    },
+    {
+      "id": "01-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/01-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 360.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.025321149676077348,
+      "final_port_speed_mps": 6.12484510302994e-05,
+      "final_alignment_deg": 0.02663033251195636,
+      "final_relative_rate_radps": 1.5526370387657474e-20,
+      "minimum_com_range_m": 1.5651065144276617,
+      "minimum_port_gap_m": 0.06508212751707017,
+      "max_applied_forces_n": [
+        0.0,
+        1.6333239859668807
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3372,
+        "median": 0.008112049661657229,
+        "p95": 0.01215907636510406,
+        "max": 0.018525877099216513
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3372,
+        "median": 0.03460756228793699,
+        "p95": 0.08537030866509142,
+        "max": 0.5632007045484783
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 71.70712490000005,
+      "simulated_to_wall_ratio": 5.021816179384983,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 360,
+      "lidar_accepted_observations": 310,
+      "lidar_pose_translation_error_m": {
+        "count": 310,
+        "median": 0.008149237881079695,
+        "p95": 0.012333671153170292,
+        "max": 0.02003712935420201
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 310,
+        "median": 0.07246403677935048,
+        "p95": 0.2112500827532379,
+        "max": 0.4901167115307523
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3399,
+        "lateral_m": 0.008847285110734356,
+        "alignment_deg": 0.02663033251195636,
+        "closing_mps": 0.03866940046701772,
+        "lateral_speed_mps": 0.00023106885845644438,
+        "relative_rate_radps": 1.1238516892068998e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 206.6,
+      "latch_time_s": 339.9,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.00918536602202264,
+        "axial": 0.004052578431918939
+      },
+      "detumble_s": 20.2,
+      "final_stack_rate_radps": 9.052659515186246e-05,
+      "minimum_outer_clearance_m": 0.06495210286062347,
+      "delta_v_mps": 1.8326188285567928,
+      "coast_after_episode": null
+    },
+    {
+      "id": "02-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/02-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 362.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.019676020276476414,
+      "final_port_speed_mps": 6.011941846039815e-05,
+      "final_alignment_deg": 0.06610974164492424,
+      "final_relative_rate_radps": 1.5526370387657474e-20,
+      "minimum_com_range_m": 1.5632915955565685,
+      "minimum_port_gap_m": 0.0632908786101099,
+      "max_applied_forces_n": [
+        0.0,
+        1.2367111091510836
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3418,
+        "median": 0.008180255084296317,
+        "p95": 0.014457706112956619,
+        "max": 0.02536507161399635
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3418,
+        "median": 0.04475358253582462,
+        "p95": 0.16232926533673359,
+        "max": 1.1102722348203382
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 70.60797110000021,
+      "simulated_to_wall_ratio": 5.128316171090192,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 362,
+      "lidar_accepted_observations": 314,
+      "lidar_pose_translation_error_m": {
+        "count": 314,
+        "median": 0.008379528939481691,
+        "p95": 0.013612091839831303,
+        "max": 0.02086898686606904
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 314,
+        "median": 0.07884146578450113,
+        "p95": 0.2551913114060592,
+        "max": 0.6531865914940669
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3445,
+        "lateral_m": 0.0023044429909670535,
+        "alignment_deg": 0.06610974164492424,
+        "closing_mps": 0.03920413599718871,
+        "lateral_speed_mps": 0.00011198037476752843,
+        "relative_rate_radps": 5.749121829458791e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 210.9,
+      "latch_time_s": 344.5,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.0025174080663754824,
+        "axial": 0.009631833385654771
+      },
+      "detumble_s": 17.6,
+      "final_stack_rate_radps": 9.175316719470677e-05,
+      "minimum_outer_clearance_m": 0.06259700214075892,
+      "delta_v_mps": 1.394332633947656,
+      "coast_after_episode": null
+    },
+    {
+      "id": "03-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/03-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 357.5,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.03991648176177287,
+      "final_port_speed_mps": 6.894520111818005e-05,
+      "final_alignment_deg": 0.07282371382326579,
+      "final_relative_rate_radps": 6.166492935852455e-21,
+      "minimum_com_range_m": 1.5654951606530974,
+      "minimum_port_gap_m": 0.06546382584922852,
+      "max_applied_forces_n": [
+        0.0,
+        0.7576443004501635
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3404,
+        "median": 0.008115884810668137,
+        "p95": 0.014688483172591665,
+        "max": 0.02198835192125292
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3404,
+        "median": 0.048083288147357156,
+        "p95": 0.21670019542218122,
+        "max": 1.08369659094602
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 70.00032769999962,
+      "simulated_to_wall_ratio": 5.107118948530322,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 357,
+      "lidar_accepted_observations": 313,
+      "lidar_pose_translation_error_m": {
+        "count": 313,
+        "median": 0.008256385168715798,
+        "p95": 0.012567168715739898,
+        "max": 0.018481785263554464
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 313,
+        "median": 0.07295259931274277,
+        "p95": 0.2471836586124126,
+        "max": 0.6275999494185075
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3431,
+        "lateral_m": 0.010398800829672563,
+        "alignment_deg": 0.07282371381325628,
+        "closing_mps": 0.03787683733734617,
+        "lateral_speed_mps": 0.00029867799781030656,
+        "relative_rate_radps": 1.3649559271918496e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 209.5,
+      "latch_time_s": 343.1,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.010997837518780149,
+        "axial": 0.011923133791069442
+      },
+      "detumble_s": 14.4,
+      "final_stack_rate_radps": 5.74805334270237e-05,
+      "minimum_outer_clearance_m": 0.06480095196908553,
+      "delta_v_mps": 0.886153722713421,
+      "coast_after_episode": null
+    },
+    {
+      "id": "04-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/04-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 356.3,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.018585702663269255,
+      "final_port_speed_mps": 7.198020693510517e-05,
+      "final_alignment_deg": 0.07944040089684257,
+      "final_relative_rate_radps": 2.0609201093946104e-20,
+      "minimum_com_range_m": 1.5657633947961256,
+      "minimum_port_gap_m": 0.0657546018502014,
+      "max_applied_forces_n": [
+        0.0,
+        1.0596899870870138
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3382,
+        "median": 0.008077401517156937,
+        "p95": 0.013280181309180105,
+        "max": 0.02129417349652268
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3382,
+        "median": 0.04964614089727558,
+        "p95": 0.1627168676623608,
+        "max": 0.467855237409494
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 69.6883114000002,
+      "simulated_to_wall_ratio": 5.112765582091561,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 356,
+      "lidar_accepted_observations": 311,
+      "lidar_pose_translation_error_m": {
+        "count": 311,
+        "median": 0.008290318225903334,
+        "p95": 0.012426534741605735,
+        "max": 0.017781306629933526
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 311,
+        "median": 0.07010830005284946,
+        "p95": 0.28834086206246895,
+        "max": 0.6413127446368725
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3409,
+        "lateral_m": 0.00607042799127294,
+        "alignment_deg": 0.07944040088766677,
+        "closing_mps": 0.03833066248777767,
+        "lateral_speed_mps": 0.00021356103890249868,
+        "relative_rate_radps": 1.045350556370383e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 207.2,
+      "latch_time_s": 340.9,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.006386457373406244,
+        "axial": 0.010882170743460054
+      },
+      "detumble_s": 15.4,
+      "final_stack_rate_radps": 7.071098275620171e-05,
+      "minimum_outer_clearance_m": 0.06500760813835438,
+      "delta_v_mps": 1.1733498049616724,
+      "coast_after_episode": null
+    },
+    {
+      "id": "05-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/05-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 358.8,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.04798151061186329,
+      "final_port_speed_mps": 5.8618001128141167e-05,
+      "final_alignment_deg": 0.05243359254990196,
+      "final_relative_rate_radps": 3.405030306758868e-20,
+      "minimum_com_range_m": 1.5668167294513526,
+      "minimum_port_gap_m": 0.06681345599200117,
+      "max_applied_forces_n": [
+        0.0,
+        0.8428045495663757
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3421,
+        "median": 0.008232408186169937,
+        "p95": 0.013576805147211532,
+        "max": 0.02605142618654304
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3421,
+        "median": 0.04935367010294587,
+        "p95": 0.18959485253402697,
+        "max": 1.011324339475056
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 70.36629580000044,
+      "simulated_to_wall_ratio": 5.099032085187547,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 359,
+      "lidar_accepted_observations": 315,
+      "lidar_pose_translation_error_m": {
+        "count": 315,
+        "median": 0.008453614462759117,
+        "p95": 0.012476256051574047,
+        "max": 0.02590140640972428
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 315,
+        "median": 0.07042759310916882,
+        "p95": 0.3206008947037128,
+        "max": 0.7320960506458543
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3448,
+        "lateral_m": 0.003651882088768762,
+        "alignment_deg": 0.052433592563803914,
+        "closing_mps": 0.03868614414043696,
+        "lateral_speed_mps": 0.00011345913541817589,
+        "relative_rate_radps": 5.711311602218408e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 211.2,
+      "latch_time_s": 344.8,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.003601566305873566,
+        "axial": 0.008219125625186896
+      },
+      "detumble_s": 14.0,
+      "final_stack_rate_radps": 7.472998986245052e-05,
+      "minimum_outer_clearance_m": 0.06633572770321994,
+      "delta_v_mps": 0.8369584687257052,
+      "coast_after_episode": null
+    },
+    {
+      "id": "06-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/06-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 355.7,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.016893896218105442,
+      "final_port_speed_mps": 3.012509769015988e-05,
+      "final_alignment_deg": 0.047992761148405005,
+      "final_relative_rate_radps": 3.488295176864171e-20,
+      "minimum_com_range_m": 1.5637727503543635,
+      "minimum_port_gap_m": 0.06377172446765916,
+      "max_applied_forces_n": [
+        0.0,
+        0.6737658934619144
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3398,
+        "median": 0.007712145926015362,
+        "p95": 0.011890268919166655,
+        "max": 0.01979377293897725
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3398,
+        "median": 0.0397007630516745,
+        "p95": 0.17979271946248,
+        "max": 0.4837179091329668
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 69.00254629999927,
+      "simulated_to_wall_ratio": 5.15488223367206,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 356,
+      "lidar_accepted_observations": 312,
+      "lidar_pose_translation_error_m": {
+        "count": 312,
+        "median": 0.008205707922586306,
+        "p95": 0.012082547882050959,
+        "max": 0.016395109388507006
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 312,
+        "median": 0.07079222328015955,
+        "p95": 0.20453662868300926,
+        "max": 0.3726874403740794
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3425,
+        "lateral_m": 0.002260406992062917,
+        "alignment_deg": 0.047992761148405005,
+        "closing_mps": 0.039317611531925874,
+        "lateral_speed_mps": 6.572329361381984e-05,
+        "relative_rate_radps": 3.1121895646666893e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 208.9,
+      "latch_time_s": 342.5,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.0021478510557212337,
+        "axial": 0.007086967654080324
+      },
+      "detumble_s": 13.2,
+      "final_stack_rate_radps": 8.803151057532144e-05,
+      "minimum_outer_clearance_m": 0.06337138629765704,
+      "delta_v_mps": 0.6976731900013345,
+      "coast_after_episode": null
+    },
+    {
+      "id": "07-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/07-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 358.5,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.0421729856372145,
+      "final_port_speed_mps": 6.73710849052964e-05,
+      "final_alignment_deg": 0.053311830139438014,
+      "final_relative_rate_radps": 3.030437198788175e-20,
+      "minimum_com_range_m": 1.5632567645278164,
+      "minimum_port_gap_m": 0.06323031303466037,
+      "max_applied_forces_n": [
+        0.0,
+        0.6892641881123492
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3421,
+        "median": 0.008201719519665107,
+        "p95": 0.015004992388103752,
+        "max": 0.02377838173207385
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3421,
+        "median": 0.04211619780823688,
+        "p95": 0.16745110331597948,
+        "max": 0.8863111172331773
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 70.09147550000034,
+      "simulated_to_wall_ratio": 5.114744659641218,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 358,
+      "lidar_accepted_observations": 315,
+      "lidar_pose_translation_error_m": {
+        "count": 315,
+        "median": 0.008574069933783974,
+        "p95": 0.014369858139780483,
+        "max": 0.018755148088376992
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 315,
+        "median": 0.07850398993294083,
+        "p95": 0.2825053838451399,
+        "max": 0.5764559558009693
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3448,
+        "lateral_m": 0.00948741348851674,
+        "alignment_deg": 0.053311830139438014,
+        "closing_mps": 0.03856955617107489,
+        "lateral_speed_mps": 0.00030212733733416404,
+        "relative_rate_radps": 1.120747790615108e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 211.1,
+      "latch_time_s": 344.8,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.010085822645857083,
+        "axial": 0.009464933592757525
+      },
+      "detumble_s": 13.7,
+      "final_stack_rate_radps": 5.9049460052443254e-05,
+      "minimum_outer_clearance_m": 0.06275855527290308,
+      "delta_v_mps": 0.7290508402694871,
+      "coast_after_episode": null
+    },
+    {
+      "id": "08-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/08-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 355.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.05186243872109464,
+      "final_port_speed_mps": 5.6767109591949875e-05,
+      "final_alignment_deg": 0.06114747945355235,
+      "final_relative_rate_radps": 3.02213948699224e-20,
+      "minimum_com_range_m": 1.5664502085410288,
+      "minimum_port_gap_m": 0.06644217000663452,
+      "max_applied_forces_n": [
+        0.0,
+        0.6098669194863672
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3392,
+        "median": 0.008126259280069822,
+        "p95": 0.01265155938337054,
+        "max": 0.018196649948501134
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3392,
+        "median": 0.04497989033870271,
+        "p95": 0.1555394342748954,
+        "max": 0.7613264617355304
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 70.21428610000021,
+      "simulated_to_wall_ratio": 5.057375353703112,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 355,
+      "lidar_accepted_observations": 312,
+      "lidar_pose_translation_error_m": {
+        "count": 312,
+        "median": 0.008173995060445284,
+        "p95": 0.012362865988467552,
+        "max": 0.016849264211045958
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 312,
+        "median": 0.0786728998811824,
+        "p95": 0.22052432888093665,
+        "max": 0.6248040757066633
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3419,
+        "lateral_m": 0.005563894838874175,
+        "alignment_deg": 0.061147479489314885,
+        "closing_mps": 0.038427334956068385,
+        "lateral_speed_mps": 0.00021844503699974466,
+        "relative_rate_radps": 7.925460983504852e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 208.4,
+      "latch_time_s": 341.9,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.005841858270897442,
+        "axial": 0.008942961759570253
+      },
+      "detumble_s": 13.2,
+      "final_stack_rate_radps": 6.024272136632877e-05,
+      "minimum_outer_clearance_m": 0.06577275112494396,
+      "delta_v_mps": 0.6198594394187271,
+      "coast_after_episode": null
+    },
+    {
+      "id": "09-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/09-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 359.2,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.01624811772044704,
+      "final_port_speed_mps": 2.9941322415007202e-05,
+      "final_alignment_deg": 0.061639689969782335,
+      "final_relative_rate_radps": 6.108041446665529e-20,
+      "minimum_com_range_m": 1.5644436370430561,
+      "minimum_port_gap_m": 0.06442155616034442,
+      "max_applied_forces_n": [
+        0.0,
+        0.8757043879866471
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3421,
+        "median": 0.008031234259805132,
+        "p95": 0.013372669151432178,
+        "max": 0.022885738819154882
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3421,
+        "median": 0.04766698399150879,
+        "p95": 0.1874577904511765,
+        "max": 0.9595536660983662
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 71.86069109999971,
+      "simulated_to_wall_ratio": 4.998560332520952,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 359,
+      "lidar_accepted_observations": 315,
+      "lidar_pose_translation_error_m": {
+        "count": 315,
+        "median": 0.00822505255111477,
+        "p95": 0.01252047850831474,
+        "max": 0.021253143685634388
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 315,
+        "median": 0.0769147065404263,
+        "p95": 0.25761899718258907,
+        "max": 0.5755100691116202
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3448,
+        "lateral_m": 0.008883073872437018,
+        "alignment_deg": 0.06163968999343364,
+        "closing_mps": 0.038687134757400786,
+        "lateral_speed_mps": 0.0003573274383424257,
+        "relative_rate_radps": 5.720497204871697e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 211.3,
+      "latch_time_s": 344.8,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.009466005413346046,
+        "axial": 0.008013905705538046
+      },
+      "detumble_s": 14.4,
+      "final_stack_rate_radps": 8.804552625698248e-05,
+      "minimum_outer_clearance_m": 0.06377612021181278,
+      "delta_v_mps": 0.8515833956284411,
+      "coast_after_episode": null
+    },
+    {
+      "id": "10-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/10-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 358.5,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.04642142980852615,
+      "final_port_speed_mps": 6.170743708073048e-05,
+      "final_alignment_deg": 0.04946282320661866,
+      "final_relative_rate_radps": 2.7210727439261967e-20,
+      "minimum_com_range_m": 1.5631218459951595,
+      "minimum_port_gap_m": 0.06311683036841775,
+      "max_applied_forces_n": [
+        0.0,
+        1.0866417172261769
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3380,
+        "median": 0.0077943075773243935,
+        "p95": 0.013038333127088745,
+        "max": 0.028435737244684917
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3380,
+        "median": 0.04246890311690475,
+        "p95": 0.14611622709960395,
+        "max": 0.5561713006504722
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 72.22996630000034,
+      "simulated_to_wall_ratio": 4.963313959070729,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 358,
+      "lidar_accepted_observations": 311,
+      "lidar_pose_translation_error_m": {
+        "count": 311,
+        "median": 0.008239862241114825,
+        "p95": 0.012118450343922945,
+        "max": 0.022414546009742978
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 311,
+        "median": 0.08689571882752603,
+        "p95": 0.22568762218123897,
+        "max": 0.3949846273884206
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3407,
+        "lateral_m": 0.004171872599470197,
+        "alignment_deg": 0.04946282320661866,
+        "closing_mps": 0.0388756569693126,
+        "lateral_speed_mps": 0.0001700130791528447,
+        "relative_rate_radps": 1.2070796468260823e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 207.3,
+      "latch_time_s": 340.7,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.004418554397243112,
+        "axial": 0.006858791953309518
+      },
+      "detumble_s": 17.8,
+      "final_stack_rate_radps": 9.18182978650376e-05,
+      "minimum_outer_clearance_m": 0.06289802147489465,
+      "delta_v_mps": 1.2735296043654911,
+      "coast_after_episode": null
+    },
+    {
+      "id": "11-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/11-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 369.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.048767590417722495,
+      "final_port_speed_mps": 7.121242725800881e-05,
+      "final_alignment_deg": 0.06598529595168298,
+      "final_relative_rate_radps": 3.492406309907713e-21,
+      "minimum_com_range_m": 1.5663527236823829,
+      "minimum_port_gap_m": 0.06632911454510015,
+      "max_applied_forces_n": [
+        0.0,
+        1.2058148338372865
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.4999999999999999
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3550,
+        "median": 0.008353624560777265,
+        "p95": 0.013405068692910105,
+        "max": 0.02248296412852035
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3550,
+        "median": 0.04774914573897483,
+        "p95": 0.22470893575109588,
+        "max": 0.7110652437752348
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 73.81833910000023,
+      "simulated_to_wall_ratio": 5.000112499144524,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 369,
+      "lidar_accepted_observations": 327,
+      "lidar_pose_translation_error_m": {
+        "count": 327,
+        "median": 0.008336932517407471,
+        "p95": 0.012740108854317356,
+        "max": 0.019339854865312662
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 327,
+        "median": 0.08979780173120243,
+        "p95": 0.2565648340740298,
+        "max": 0.5057782293081975
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3577,
+        "lateral_m": 0.00916432152246292,
+        "alignment_deg": 0.0659852959295893,
+        "closing_mps": 0.038928775325802016,
+        "lateral_speed_mps": 0.00032606978466550766,
+        "relative_rate_radps": 9.184573525800852e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 224.6,
+      "latch_time_s": 357.7,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.009676958902605299,
+        "axial": 0.007151184903512714
+      },
+      "detumble_s": 11.4,
+      "final_stack_rate_radps": 2.604150028339752e-05,
+      "minimum_outer_clearance_m": 0.06574501628226415,
+      "delta_v_mps": 0.5406128975731402,
+      "coast_after_episode": null
+    },
+    {
+      "id": "12-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/12-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 356.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.03220035583406211,
+      "final_port_speed_mps": 5.7771192068953935e-05,
+      "final_alignment_deg": 0.10285846513330735,
+      "final_relative_rate_radps": 1.5526370387657474e-20,
+      "minimum_com_range_m": 1.5653649211162723,
+      "minimum_port_gap_m": 0.0653552230075756,
+      "max_applied_forces_n": [
+        0.0,
+        0.9231703105906971
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3394,
+        "median": 0.007908391525046098,
+        "p95": 0.012106751370429384,
+        "max": 0.018236065174098353
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3394,
+        "median": 0.04370239798770511,
+        "p95": 0.11081415685654138,
+        "max": 0.67243413397219
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 70.70007299999997,
+      "simulated_to_wall_ratio": 5.0367699054568185,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 356,
+      "lidar_accepted_observations": 312,
+      "lidar_pose_translation_error_m": {
+        "count": 312,
+        "median": 0.008129872942001504,
+        "p95": 0.011880032584168917,
+        "max": 0.015632849924901614
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 312,
+        "median": 0.08178633215963221,
+        "p95": 0.19282268153169063,
+        "max": 0.5205531269287954
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3421,
+        "lateral_m": 0.00592747472908807,
+        "alignment_deg": 0.10285846516165426,
+        "closing_mps": 0.03818066700013707,
+        "lateral_speed_mps": 0.0002773811314110002,
+        "relative_rate_radps": 1.504792309923783e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 208.6,
+      "latch_time_s": 342.1,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.006462534542843763,
+        "axial": 0.006472672042260541
+      },
+      "detumble_s": 14.0,
+      "final_stack_rate_radps": 6.311278592623687e-05,
+      "minimum_outer_clearance_m": 0.0646534122366591,
+      "delta_v_mps": 0.9173372110145936,
+      "coast_after_episode": null
+    },
+    {
+      "id": "13-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/13-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 354.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.007080329617862979,
+      "final_port_speed_mps": 6.757186446588692e-05,
+      "final_alignment_deg": 0.054878869260111124,
+      "final_relative_rate_radps": 5.679543821953874e-20,
+      "minimum_com_range_m": 1.5650139269188954,
+      "minimum_port_gap_m": 0.06500098050864948,
+      "max_applied_forces_n": [
+        0.0,
+        0.665605276024824
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3383,
+        "median": 0.007855011056180198,
+        "p95": 0.012306385460029495,
+        "max": 0.019820098586423245
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3383,
+        "median": 0.04479293936564275,
+        "p95": 0.14653959549791123,
+        "max": 0.4156775405672497
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 72.23745159999999,
+      "simulated_to_wall_ratio": 4.9018894237957875,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 354,
+      "lidar_accepted_observations": 311,
+      "lidar_pose_translation_error_m": {
+        "count": 311,
+        "median": 0.008094052544135706,
+        "p95": 0.011725517117846777,
+        "max": 0.01817086947598501
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 311,
+        "median": 0.08482763208804252,
+        "p95": 0.21900941839480123,
+        "max": 0.4768268309746818
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3410,
+        "lateral_m": 0.006757434648976551,
+        "alignment_deg": 0.05487886928667616,
+        "closing_mps": 0.03835018377451779,
+        "lateral_speed_mps": 0.00021407919626860323,
+        "relative_rate_radps": 2.833731930319553e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 207.5,
+      "latch_time_s": 341.0,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.007000925492771278,
+        "axial": 0.00624951992626839
+      },
+      "detumble_s": 13.1,
+      "final_stack_rate_radps": 7.882164427747073e-05,
+      "minimum_outer_clearance_m": 0.064568829483993,
+      "delta_v_mps": 0.6233233367268478,
+      "coast_after_episode": null
+    },
+    {
+      "id": "14-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/14-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 355.9,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.05303422543450553,
+      "final_port_speed_mps": 7.39716219956729e-05,
+      "final_alignment_deg": 0.08451428282735617,
+      "final_relative_rate_radps": 4.129014124020582e-20,
+      "minimum_com_range_m": 1.566154331042827,
+      "minimum_port_gap_m": 0.06614743265716179,
+      "max_applied_forces_n": [
+        0.0,
+        0.7803313169604655
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3392,
+        "median": 0.008051936189267098,
+        "p95": 0.01293850313282975,
+        "max": 0.02369728675552555
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3392,
+        "median": 0.045856803706794055,
+        "p95": 0.16847454383557656,
+        "max": 0.7734899399863927
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 75.24345830000038,
+      "simulated_to_wall_ratio": 4.729979297083932,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 356,
+      "lidar_accepted_observations": 312,
+      "lidar_pose_translation_error_m": {
+        "count": 312,
+        "median": 0.00826199221801122,
+        "p95": 0.012425674345869386,
+        "max": 0.018897593965912965
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 312,
+        "median": 0.07776728168199117,
+        "p95": 0.23322014498931412,
+        "max": 0.4885455564182839
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3419,
+        "lateral_m": 0.00533891945501333,
+        "alignment_deg": 0.0845142828359811,
+        "closing_mps": 0.038391317160077564,
+        "lateral_speed_mps": 0.00015834287894672287,
+        "relative_rate_radps": 1.1424749551694661e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 208.2,
+      "latch_time_s": 341.9,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.0054692014150770005,
+        "axial": 0.010071837333006692
+      },
+      "detumble_s": 14.0,
+      "final_stack_rate_radps": 8.009962940456184e-05,
+      "minimum_outer_clearance_m": 0.06554860439900789,
+      "delta_v_mps": 0.7310743566702659,
+      "coast_after_episode": null
+    },
+    {
+      "id": "15-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/15-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 352.9,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.01698383601031883,
+      "final_port_speed_mps": 2.3181018511094174e-05,
+      "final_alignment_deg": 0.08023602198743175,
+      "final_relative_rate_radps": 3.196357137050946e-20,
+      "minimum_com_range_m": 1.5650278333385121,
+      "minimum_port_gap_m": 0.0650185955348865,
+      "max_applied_forces_n": [
+        0.0,
+        0.6827726941399812
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.44708259690149044
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3381,
+        "median": 0.008326624647658352,
+        "p95": 0.01318105329982993,
+        "max": 0.02027761396605743
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3381,
+        "median": 0.045380315951806534,
+        "p95": 0.144904768639892,
+        "max": 0.5494752624652762
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 73.39906390000033,
+      "simulated_to_wall_ratio": 4.807963225263945,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 353,
+      "lidar_accepted_observations": 311,
+      "lidar_pose_translation_error_m": {
+        "count": 311,
+        "median": 0.008474538044683556,
+        "p95": 0.012488726121973801,
+        "max": 0.017786961655310594
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 311,
+        "median": 0.08408578546290008,
+        "p95": 0.22917870641058236,
+        "max": 0.4689390117446686
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3408,
+        "lateral_m": 0.006159307379950871,
+        "alignment_deg": 0.08023602197834692,
+        "closing_mps": 0.0386442999425903,
+        "lateral_speed_mps": 0.00023134735596033867,
+        "relative_rate_radps": 9.938783325340795e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 207.1,
+      "latch_time_s": 340.8,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.006452974050790041,
+        "axial": 0.009431595107234785
+      },
+      "detumble_s": 12.1,
+      "final_stack_rate_radps": 6.606774476380818e-05,
+      "minimum_outer_clearance_m": 0.06425110137487144,
+      "delta_v_mps": 0.6097304788216232,
+      "coast_after_episode": null
+    },
+    {
+      "id": "16-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/16-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 362.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.046107927657002,
+      "final_port_speed_mps": 6.744490467403164e-05,
+      "final_alignment_deg": 0.055434923962868025,
+      "final_relative_rate_radps": 1.437462578140663e-20,
+      "minimum_com_range_m": 1.5638609743062,
+      "minimum_port_gap_m": 0.06385791247577034,
+      "max_applied_forces_n": [
+        0.0,
+        1.3208013836712407
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3407,
+        "median": 0.007931830507233612,
+        "p95": 0.011773324651742774,
+        "max": 0.020795269866649643
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3407,
+        "median": 0.042889815085910506,
+        "p95": 0.1158025325290534,
+        "max": 0.7414418658297567
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 75.96794109999973,
+      "simulated_to_wall_ratio": 4.766484319001786,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 362,
+      "lidar_accepted_observations": 313,
+      "lidar_pose_translation_error_m": {
+        "count": 313,
+        "median": 0.008124215168746372,
+        "p95": 0.011494842545677602,
+        "max": 0.02103294145988693
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 313,
+        "median": 0.062086161928499445,
+        "p95": 0.252653310679374,
+        "max": 0.5327883720730306
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3434,
+        "lateral_m": 0.0029220055198157144,
+        "alignment_deg": 0.05543492393656946,
+        "closing_mps": 0.037534936607170666,
+        "lateral_speed_mps": 8.529361229838944e-05,
+        "relative_rate_radps": 5.490839181052412e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 209.8,
+      "latch_time_s": 343.4,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.002970118726193083,
+        "axial": 0.009296090150705455
+      },
+      "detumble_s": 18.7,
+      "final_stack_rate_radps": 6.384479103804779e-05,
+      "minimum_outer_clearance_m": 0.06326464930394282,
+      "delta_v_mps": 1.4939566408640585,
+      "coast_after_episode": null
+    },
+    {
+      "id": "17-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/17-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 356.2,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.02749238341251148,
+      "final_port_speed_mps": 3.6060463538064714e-05,
+      "final_alignment_deg": 0.07541603597037337,
+      "final_relative_rate_radps": 5.868416401317029e-20,
+      "minimum_com_range_m": 1.5636889967026533,
+      "minimum_port_gap_m": 0.06368409710137304,
+      "max_applied_forces_n": [
+        0.0,
+        0.6384418381612079
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3383,
+        "median": 0.008134620824626269,
+        "p95": 0.012794982519073681,
+        "max": 0.027315196312996216
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3383,
+        "median": 0.0488628877776974,
+        "p95": 0.11265247320313052,
+        "max": 0.31213992338499646
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 74.0454406000008,
+      "simulated_to_wall_ratio": 4.810559530926691,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 356,
+      "lidar_accepted_observations": 311,
+      "lidar_pose_translation_error_m": {
+        "count": 311,
+        "median": 0.008282181993581389,
+        "p95": 0.012814336566272691,
+        "max": 0.021347376111460894
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 311,
+        "median": 0.08084348444719176,
+        "p95": 0.2024879092109893,
+        "max": 0.45493988879760067
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3410,
+        "lateral_m": 0.0043790773998200585,
+        "alignment_deg": 0.07541603598003882,
+        "closing_mps": 0.03817435878862373,
+        "lateral_speed_mps": 0.00011189515273778016,
+        "relative_rate_radps": 8.175878448844821e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 207.4,
+      "latch_time_s": 341.0,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.0044719521997828755,
+        "axial": 0.010129078903763827
+      },
+      "detumble_s": 15.2,
+      "final_stack_rate_radps": 7.027775225071303e-05,
+      "minimum_outer_clearance_m": 0.06322963187204844,
+      "delta_v_mps": 0.7362090122489249,
+      "coast_after_episode": null
+    },
+    {
+      "id": "18-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/18-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 353.7,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.015087726958087466,
+      "final_port_speed_mps": 6.829820633926141e-05,
+      "final_alignment_deg": 0.06224041991067458,
+      "final_relative_rate_radps": 2.1428426932230842e-20,
+      "minimum_com_range_m": 1.5664248994037904,
+      "minimum_port_gap_m": 0.06641329866159326,
+      "max_applied_forces_n": [
+        0.0,
+        0.6253563719384593
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3378,
+        "median": 0.007918700486834499,
+        "p95": 0.013768681797385055,
+        "max": 0.022440798474521986
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3378,
+        "median": 0.04639110183004401,
+        "p95": 0.23612045698705592,
+        "max": 0.3796844230625261
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 74.80227079999986,
+      "simulated_to_wall_ratio": 4.728466077529837,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 354,
+      "lidar_accepted_observations": 310,
+      "lidar_pose_translation_error_m": {
+        "count": 310,
+        "median": 0.008130042331035741,
+        "p95": 0.012997077482588094,
+        "max": 0.01890249938355874
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 310,
+        "median": 0.07646001223284435,
+        "p95": 0.30830259174777025,
+        "max": 0.6723378815241873
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3405,
+        "lateral_m": 0.006553906359207966,
+        "alignment_deg": 0.06224041991067458,
+        "closing_mps": 0.039242701157168776,
+        "lateral_speed_mps": 0.0002707737445269963,
+        "relative_rate_radps": 6.668902397097493e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 206.9,
+      "latch_time_s": 340.5,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.007056568547028821,
+        "axial": 0.009775737324803212
+      },
+      "detumble_s": 13.2,
+      "final_stack_rate_radps": 7.882291378371762e-05,
+      "minimum_outer_clearance_m": 0.0658101994989202,
+      "delta_v_mps": 0.6382665560645846,
+      "coast_after_episode": null
+    },
+    {
+      "id": "19-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/19-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 363.7,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.04930291950214882,
+      "final_port_speed_mps": 7.177554959313273e-05,
+      "final_alignment_deg": 0.036225232223698736,
+      "final_relative_rate_radps": 1.0164395367051604e-20,
+      "minimum_com_range_m": 1.5639014368455213,
+      "minimum_port_gap_m": 0.06389874180336597,
+      "max_applied_forces_n": [
+        0.0,
+        1.5123626788913846
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3415,
+        "median": 0.007987819421413548,
+        "p95": 0.01445770218397522,
+        "max": 0.026485769446269916
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3415,
+        "median": 0.037666524022076674,
+        "p95": 0.21136585115649212,
+        "max": 0.8052988633134687
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 75.74163549999957,
+      "simulated_to_wall_ratio": 4.801850364057719,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 364,
+      "lidar_accepted_observations": 314,
+      "lidar_pose_translation_error_m": {
+        "count": 314,
+        "median": 0.008313433239903752,
+        "p95": 0.01395597431012001,
+        "max": 0.023600497295004547
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 314,
+        "median": 0.07814670649242605,
+        "p95": 0.2832854983263388,
+        "max": 0.5914434337978973
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3442,
+        "lateral_m": 0.0032230035294452653,
+        "alignment_deg": 0.036225232243820876,
+        "closing_mps": 0.03787863558113501,
+        "lateral_speed_mps": 0.00011429790689790856,
+        "relative_rate_radps": 3.5973350163575036e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 210.7,
+      "latch_time_s": 344.2,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.00331443674379934,
+        "axial": 0.008310113618211046
+      },
+      "detumble_s": 19.5,
+      "final_stack_rate_radps": 9.019766018379881e-05,
+      "minimum_outer_clearance_m": 0.06350652712961136,
+      "delta_v_mps": 1.722831321192352,
+      "coast_after_episode": null
+    },
+    {
+      "id": "20-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/20-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 353.8,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.003229474827201484,
+      "final_port_speed_mps": 4.798056393840857e-05,
+      "final_alignment_deg": 0.02205595636768606,
+      "final_relative_rate_radps": 3.105274077531495e-20,
+      "minimum_com_range_m": 1.564441086751296,
+      "minimum_port_gap_m": 0.06441155296902658,
+      "max_applied_forces_n": [
+        0.0,
+        0.6349895754365964
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.48534257629537386
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3383,
+        "median": 0.007987243365553882,
+        "p95": 0.01404835503954699,
+        "max": 0.0237502118954033
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3383,
+        "median": 0.03601605917330018,
+        "p95": 0.11295366746254303,
+        "max": 0.8415866987130763
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 77.49326829999973,
+      "simulated_to_wall_ratio": 4.565557857623631,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 354,
+      "lidar_accepted_observations": 311,
+      "lidar_pose_translation_error_m": {
+        "count": 311,
+        "median": 0.008258430713356205,
+        "p95": 0.012742199897937453,
+        "max": 0.018632104032485265
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 311,
+        "median": 0.08291170584309396,
+        "p95": 0.1893142650736755,
+        "max": 0.6782023068244835
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3410,
+        "lateral_m": 0.009832120055893397,
+        "alignment_deg": 0.02205595636768606,
+        "closing_mps": 0.038111801273082266,
+        "lateral_speed_mps": 0.0003310012359583379,
+        "relative_rate_radps": 5.369801916774869e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 207.4,
+      "latch_time_s": 341.0,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.010591693848409967,
+        "axial": 0.01100495921914986
+      },
+      "detumble_s": 12.8,
+      "final_stack_rate_radps": 7.821515433889486e-05,
+      "minimum_outer_clearance_m": 0.06414900664668521,
+      "delta_v_mps": 0.6418876616390752,
+      "coast_after_episode": null
+    },
+    {
+      "id": "21-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/21-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 354.6,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.06248105507782675,
+      "final_port_speed_mps": 6.898264669880193e-05,
+      "final_alignment_deg": 0.04692934320824198,
+      "final_relative_rate_radps": 1.4768524075723653e-20,
+      "minimum_com_range_m": 1.565989142262316,
+      "minimum_port_gap_m": 0.06596946071226163,
+      "max_applied_forces_n": [
+        0.0,
+        0.618830261228906
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.3729380617732694
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3410,
+        "median": 0.007859404734357861,
+        "p95": 0.015857598939612007,
+        "max": 0.039202670516020235
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3410,
+        "median": 0.04192480301708176,
+        "p95": 0.2489535105150965,
+        "max": 1.2288629002011955
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 76.04779539999981,
+      "simulated_to_wall_ratio": 4.66285706422991,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 354,
+      "lidar_accepted_observations": 314,
+      "lidar_pose_translation_error_m": {
+        "count": 314,
+        "median": 0.008065364369060486,
+        "p95": 0.014463928717397096,
+        "max": 0.029294642623437974
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 314,
+        "median": 0.06925261746134112,
+        "p95": 0.2512488416228828,
+        "max": 0.8917998367598614
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3437,
+        "lateral_m": 0.008219624327989531,
+        "alignment_deg": 0.04692934320824198,
+        "closing_mps": 0.03888691590851073,
+        "lateral_speed_mps": 0.0002825057353432668,
+        "relative_rate_radps": 1.0099711992992854e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 210.1,
+      "latch_time_s": 343.7,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.008704157657672866,
+        "axial": 0.007141112008534928
+      },
+      "detumble_s": 10.9,
+      "final_stack_rate_radps": 3.9418584355695276e-05,
+      "minimum_outer_clearance_m": 0.06552059733601778,
+      "delta_v_mps": 0.4206112557975601,
+      "coast_after_episode": null
+    },
+    {
+      "id": "22-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/22-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 359.4,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.014254390925002164,
+      "final_port_speed_mps": 4.463059036627893e-05,
+      "final_alignment_deg": 0.07063862710857642,
+      "final_relative_rate_radps": 1.6940658945086007e-20,
+      "minimum_com_range_m": 1.565049156319874,
+      "minimum_port_gap_m": 0.06504116683631131,
+      "max_applied_forces_n": [
+        0.0,
+        0.8737742783678507
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3410,
+        "median": 0.008059086380043531,
+        "p95": 0.012531814051175007,
+        "max": 0.01997397045861672
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3410,
+        "median": 0.04770543261235356,
+        "p95": 0.1734729060313861,
+        "max": 1.0722698740532117
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 77.57222219999949,
+      "simulated_to_wall_ratio": 4.633101770288106,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 359,
+      "lidar_accepted_observations": 313,
+      "lidar_pose_translation_error_m": {
+        "count": 313,
+        "median": 0.008307447076440582,
+        "p95": 0.012141117037678537,
+        "max": 0.016088229148540235
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 313,
+        "median": 0.06996678300560208,
+        "p95": 0.25833234045344394,
+        "max": 0.6837292570836894
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3437,
+        "lateral_m": 0.005558592235907837,
+        "alignment_deg": 0.07063862708793814,
+        "closing_mps": 0.03875094992827904,
+        "lateral_speed_mps": 0.00018969753552266697,
+        "relative_rate_radps": 1.3239333153395557e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 210.0,
+      "latch_time_s": 343.7,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.005808154265704046,
+        "axial": 0.010747112121726854
+      },
+      "detumble_s": 15.7,
+      "final_stack_rate_radps": 9.214616120844009e-05,
+      "minimum_outer_clearance_m": 0.06442592295102578,
+      "delta_v_mps": 0.9398099088797698,
+      "coast_after_episode": null
+    },
+    {
+      "id": "23-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/23-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 357.5,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.04127458577460985,
+      "final_port_speed_mps": 4.963586431064067e-05,
+      "final_alignment_deg": 0.07295089985330575,
+      "final_relative_rate_radps": 4.936102214745663e-20,
+      "minimum_com_range_m": 1.565969562751702,
+      "minimum_port_gap_m": 0.06593144178077638,
+      "max_applied_forces_n": [
+        0.0,
+        0.6564006286951796
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.36495543748480747
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3431,
+        "median": 0.008145300837151726,
+        "p95": 0.014358790578172211,
+        "max": 0.02108167548584419
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3431,
+        "median": 0.04910041727819969,
+        "p95": 0.09992700674680507,
+        "max": 1.0499566609989437
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 77.7301795000003,
+      "simulated_to_wall_ratio": 4.599243206430503,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 357,
+      "lidar_accepted_observations": 316,
+      "lidar_pose_translation_error_m": {
+        "count": 316,
+        "median": 0.00835902836587179,
+        "p95": 0.013708756765754978,
+        "max": 0.01907217687694083
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 316,
+        "median": 0.08119638777661384,
+        "p95": 0.30037071286407563,
+        "max": 0.7160700573859953
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3458,
+        "lateral_m": 0.011169999234382699,
+        "alignment_deg": 0.0729508998632978,
+        "closing_mps": 0.038692187753731754,
+        "lateral_speed_mps": 0.0004089054105384589,
+        "relative_rate_radps": 1.265868038150024e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 212.3,
+      "latch_time_s": 345.8,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.012047676836604546,
+        "axial": 0.008421154094872325
+      },
+      "detumble_s": 11.7,
+      "final_stack_rate_radps": 7.593971127452095e-05,
+      "minimum_outer_clearance_m": 0.06548798827341473,
+      "delta_v_mps": 0.5732473350766139,
+      "coast_after_episode": null
+    },
+    {
+      "id": "24-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/24-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 361.1,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.015489807061063288,
+      "final_port_speed_mps": 6.514059070106921e-05,
+      "final_alignment_deg": 0.06626830283763521,
+      "final_relative_rate_radps": 1.3868143770225795e-20,
+      "minimum_com_range_m": 1.5662456809445653,
+      "minimum_port_gap_m": 0.06623857561485275,
+      "max_applied_forces_n": [
+        0.0,
+        1.381711907425215
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3410,
+        "median": 0.008044374260762356,
+        "p95": 0.013116489347696976,
+        "max": 0.025349104020873918
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3410,
+        "median": 0.04849822050147911,
+        "p95": 0.19128813198770073,
+        "max": 1.188441409904154
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 78.51894020000054,
+      "simulated_to_wall_ratio": 4.598890396128876,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 361,
+      "lidar_accepted_observations": 313,
+      "lidar_pose_translation_error_m": {
+        "count": 313,
+        "median": 0.00822150076928836,
+        "p95": 0.012291595259909634,
+        "max": 0.02232049991665095
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 313,
+        "median": 0.07776593499395047,
+        "p95": 0.25360322943465435,
+        "max": 0.7505639458340602
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3437,
+        "lateral_m": 0.005041716754881779,
+        "alignment_deg": 0.06626830282663555,
+        "closing_mps": 0.038666079072812956,
+        "lateral_speed_mps": 0.00015746321125528894,
+        "relative_rate_radps": 5.377189628169114e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 210.1,
+      "latch_time_s": 343.7,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.005632794241126832,
+        "axial": 0.011918391599904134
+      },
+      "detumble_s": 17.4,
+      "final_stack_rate_radps": 8.503168822305695e-05,
+      "minimum_outer_clearance_m": 0.06569015114538157,
+      "delta_v_mps": 1.5264526801219616,
+      "coast_after_episode": null
+    },
+    {
+      "id": "25-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/25-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 359.5,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.05305904342092349,
+      "final_port_speed_mps": 7.561440642537008e-05,
+      "final_alignment_deg": 0.051757834055028575,
+      "final_relative_rate_radps": 3.4718019630641874e-20,
+      "minimum_com_range_m": 1.5652469517250969,
+      "minimum_port_gap_m": 0.06522630345399728,
+      "max_applied_forces_n": [
+        0.0,
+        1.4557830813123303
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3373,
+        "median": 0.007949310228492315,
+        "p95": 0.012298525256895645,
+        "max": 0.026171394947924642
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3373,
+        "median": 0.03843514205681569,
+        "p95": 0.1064299459631747,
+        "max": 0.4800659649995574
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 78.44851560000006,
+      "simulated_to_wall_ratio": 4.582623358140377,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 359,
+      "lidar_accepted_observations": 310,
+      "lidar_pose_translation_error_m": {
+        "count": 310,
+        "median": 0.008134281594834664,
+        "p95": 0.01203332834796282,
+        "max": 0.02256127098563065
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 310,
+        "median": 0.06591152869470068,
+        "p95": 0.18197122916849987,
+        "max": 0.3244097839018802
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3400,
+        "lateral_m": 0.008169783479260931,
+        "alignment_deg": 0.051757834055028575,
+        "closing_mps": 0.038158133673831335,
+        "lateral_speed_mps": 0.00031078537417142507,
+        "relative_rate_radps": 9.904584555074302e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 206.5,
+      "latch_time_s": 340.0,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.008813286002763977,
+        "axial": 0.010222554186175098
+      },
+      "detumble_s": 19.5,
+      "final_stack_rate_radps": 9.341726303466292e-05,
+      "minimum_outer_clearance_m": 0.06508981673806802,
+      "delta_v_mps": 1.7054571940150933,
+      "coast_after_episode": null
+    },
+    {
+      "id": "26-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/26-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 361.5,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": 0.05244266513250695,
+      "final_port_speed_mps": 6.647847735097558e-05,
+      "final_alignment_deg": 0.08200100173316525,
+      "final_relative_rate_radps": 1.7462031549538565e-20,
+      "minimum_com_range_m": 1.5645253660758105,
+      "minimum_port_gap_m": 0.06452513332877868,
+      "max_applied_forces_n": [
+        0.0,
+        1.8066293246724332
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3393,
+        "median": 0.008100199933718388,
+        "p95": 0.014076451984441157,
+        "max": 0.026914246920561363
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3393,
+        "median": 0.04701996461373696,
+        "p95": 0.10785876238866919,
+        "max": 0.5187283820606797
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 79.4662343,
+      "simulated_to_wall_ratio": 4.549101932215253,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 361,
+      "lidar_accepted_observations": 312,
+      "lidar_pose_translation_error_m": {
+        "count": 312,
+        "median": 0.008361627903849669,
+        "p95": 0.012701811189090126,
+        "max": 0.023230356306272654
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 312,
+        "median": 0.08560217090803213,
+        "p95": 0.26868417514492104,
+        "max": 0.6193286383390291
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3420,
+        "lateral_m": 0.0014319528479396972,
+        "alignment_deg": 0.08200100172427598,
+        "closing_mps": 0.03802800769107265,
+        "lateral_speed_mps": 0.00010366390004847444,
+        "relative_rate_radps": 8.742658239880849e-06
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 208.5,
+      "latch_time_s": 342.0,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.0013346649371208268,
+        "axial": 0.014850787337120544
+      },
+      "detumble_s": 19.5,
+      "final_stack_rate_radps": 5.3957214398512e-05,
+      "minimum_outer_clearance_m": 0.0637671979134804,
+      "delta_v_mps": 1.9808969868812154,
+      "coast_after_episode": null
+    },
+    {
+      "id": "27-dock",
+      "category": "docking",
+      "kind": "dock",
+      "expected_outcome": "success",
+      "path": "episodes/27-dock",
+      "record_valid": true,
+      "uniform_implementation": true,
+      "outcome": "success",
+      "failure_reason": null,
+      "abort_reason": null,
+      "simulated_seconds": 357.4,
+      "completion_time_ratio": null,
+      "dwell_satisfied": true,
+      "false_completion": false,
+      "boundary_violation": false,
+      "actuator_bounds": true,
+      "final_gap_m": -0.0406151566893862,
+      "final_port_speed_mps": 6.76290380628385e-05,
+      "final_alignment_deg": 0.12699028628488673,
+      "final_relative_rate_radps": 1.3969625239630852e-20,
+      "minimum_com_range_m": 1.5642499586144132,
+      "minimum_port_gap_m": 0.06424744596338998,
+      "max_applied_forces_n": [
+        0.0,
+        0.8177283157298972
+      ],
+      "max_applied_torques_nm": [
+        0.0,
+        0.5
+      ],
+      "accepted_observations": 0,
+      "images_delivered": 0,
+      "estimated_target_position_error_m": {
+        "count": 3400,
+        "median": 0.00779095370852128,
+        "p95": 0.013887613714709214,
+        "max": 0.02510914963981271
+      },
+      "estimated_target_attitude_error_deg": {
+        "count": 3400,
+        "median": 0.04519513804591527,
+        "p95": 0.20496459561078192,
+        "max": 0.7254416006556059
+      },
+      "image_pose_translation_error_m": null,
+      "image_pose_rotation_error_deg": null,
+      "fault_response": null,
+      "safety_filter_interventions": null,
+      "wall_seconds": 78.09821120000015,
+      "simulated_to_wall_ratio": 4.576289194188346,
+      "renderer_startup_seconds": 0.0,
+      "sampled_peak_blender_rss_mib": null,
+      "lidar_scans_delivered": 357,
+      "lidar_accepted_observations": 313,
+      "lidar_pose_translation_error_m": {
+        "count": 313,
+        "median": 0.008216805071886069,
+        "p95": 0.013024499779362347,
+        "max": 0.020979688015335257
+      },
+      "lidar_pose_rotation_error_deg": {
+        "count": 313,
+        "median": 0.07231123446710683,
+        "p95": 0.2795236552565601,
+        "max": 0.7226438183715205
+      },
+      "latched": true,
+      "contact": {
+        "tick": 3427,
+        "lateral_m": 0.003844068031157729,
+        "alignment_deg": 0.12699028629062678,
+        "closing_mps": 0.038915973517834435,
+        "lateral_speed_mps": 0.00017458587772247253,
+        "relative_rate_radps": 2.1572024425505007e-05
+      },
+      "capture_inside_envelope": true,
+      "terminal_start_s": 209.1,
+      "latch_time_s": 342.7,
+      "port_estimate_error_at_contact_m": {
+        "lateral": 0.004001152813781712,
+        "axial": 0.00655046464183591
+      },
+      "detumble_s": 14.7,
+      "final_stack_rate_radps": 6.526601735106477e-05,
+      "minimum_outer_clearance_m": 0.06319882904256247,
+      "delta_v_mps": 0.9104975176707609,
+      "coast_after_episode": null
+    }
+  ]
+}

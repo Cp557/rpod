@@ -1,0 +1,108 @@
+{
+  "artifact_type": "m12_passive_safety_map",
+  "run": "runs/m11-lidar-normals",
+  "every_s": 10.0,
+  "drift_s": 6000.0,
+  "clearance_margin_m": 0.5,
+  "model": "both bodies coast with zero wrench from the recorded state; central gravity, torque-free tumble",
+  "samples": 597,
+  "passively_safe": 542,
+  "by_gap": [
+    {
+      "gap_m": [
+        0.0,
+        6.0
+      ],
+      "samples": 86,
+      "minimum_clearance_m": 6.500135508319839e-07,
+      "passively_safe": 74
+    },
+    {
+      "gap_m": [
+        6.0,
+        8.0
+      ],
+      "samples": 35,
+      "minimum_clearance_m": 2.2084325774568834e-06,
+      "passively_safe": 17
+    },
+    {
+      "gap_m": [
+        8.0,
+        12.0
+      ],
+      "samples": 83,
+      "minimum_clearance_m": 2.7946637870535085e-06,
+      "passively_safe": 67
+    },
+    {
+      "gap_m": [
+        12.0,
+        18.0
+      ],
+      "samples": 112,
+      "minimum_clearance_m": 1.9941584901826525e-05,
+      "passively_safe": 104
+    },
+    {
+      "gap_m": [
+        18.0,
+        25.0
+      ],
+      "samples": 124,
+      "minimum_clearance_m": 0.4368615247907783,
+      "passively_safe": 123
+    },
+    {
+      "gap_m": [
+        25.0,
+        1000000000.0
+      ],
+      "samples": 157,
+      "minimum_clearance_m": 0.6704825034953292,
+      "passively_safe": 157
+    }
+  ],
+  "worst": [
+    {
+      "episode": "21-operational-approach",
+      "time_s": 210.0,
+      "gap_m": 5.010203963840126,
+      "minimum_clearance_m": 6.500135508319839e-07,
+      "time_of_minimum_s": 3246.5,
+      "minimum_com_range_m": 2.167501667879758
+    },
+    {
+      "episode": "11-operational-approach",
+      "time_s": 170.0,
+      "gap_m": 7.19056046828716,
+      "minimum_clearance_m": 2.2084325774568834e-06,
+      "time_of_minimum_s": 56.5,
+      "minimum_com_range_m": 0.7594636680357734
+    },
+    {
+      "episode": "21-operational-approach",
+      "time_s": 180.0,
+      "gap_m": 6.012660438961382,
+      "minimum_clearance_m": 2.3915997912071774e-06,
+      "time_of_minimum_s": 68.10000000000001,
+      "minimum_com_range_m": 0.6809923388173702
+    },
+    {
+      "episode": "11-operational-approach",
+      "time_s": 160.0,
+      "gap_m": 8.68976909334429,
+      "minimum_clearance_m": 2.7946637870535085e-06,
+      "time_of_minimum_s": 70.4,
+      "minimum_com_range_m": 1.0346486549252756
+    },
+    {
+      "episode": "21-operational-approach",
+      "time_s": 150.0,
+      "gap_m": 10.268883524265814,
+      "minimum_clearance_m": 4.174956723186547e-06,
+      "time_of_minimum_s": 83.0,
+      "minimum_com_range_m": 1.1332526727395749
+    }
+  ]
+}

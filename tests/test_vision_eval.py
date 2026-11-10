@@ -11,10 +11,9 @@ from unittest.mock import patch
 
 import numpy as np
 
-from rpod.camera import CameraModel
 from rpod.cli import main
 from rpod.scenarios import make_scenario
-from rpod.vision_eval import _qualify, evaluate_saved_dataset
+from rpod.vision_eval import _qualify
 
 
 def complete_records():
@@ -60,25 +59,6 @@ class VisionEvaluationContracts(unittest.TestCase):
         for broken in (missing_negatives, duplicate, wrong_partition, wrong_light):
             with self.subTest(rows=len(broken)), self.assertRaisesRegex(ValueError, "M3"):
                 _qualify(broken)
-
-        # Incomplete observation streams must fail before reading or estimating any image.
-        with tempfile.TemporaryDirectory() as temporary:
-            directory = Path(temporary)
-            (directory / "truth").mkdir()
-            (directory / "dataset.json").write_text(
-                json.dumps({"camera": CameraModel().to_dict()}), encoding="utf-8"
-            )
-            for path, rows in (
-                (directory / "truth" / "poses.jsonl", records),
-                (directory / "observations.jsonl", duplicate),
-            ):
-                path.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
-            with (
-                patch("rpod.vision_eval.read_rgb", side_effect=AssertionError("image read")),
-                patch("rpod.vision_eval.estimate_pose", side_effect=AssertionError("estimation")),
-                self.assertRaisesRegex(ValueError, "M3"),
-            ):
-                evaluate_saved_dataset(directory)
 
         rejected = next(row for row in records if row["capture_id"] == 3)
         rejected["pose"] = {"valid": False, "reason": "insufficient_markers"}

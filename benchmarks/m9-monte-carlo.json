@@ -1,0 +1,70 @@
+{
+  "artifact_type": "monte_carlo_report",
+  "campaign": {
+    "seed": 9,
+    "episodes": 100000,
+    "batch_size": 16384,
+    "controller": "reference",
+    "model": "models/m9-surrogate.json",
+    "model_sha256": "a98576a2bb520adfcf6c6611ee3f8664b9a3dea8b97b968c2e5b09b8117c5f9a",
+    "implementation_sha256": {
+      "fleet.py": "ebc95cca535713a96cee6eabbe9e88b8238ef290277286081191480e16e7d0dd",
+      "surrogate.py": "9c71f3c514f91ed63819be26e6767eb3d669962df52bd7c9f1021bbc46b89558",
+      "monte_carlo.py": "4d982e7769b6d35a455ae3ce83be764f99fdf0f0347eeffd2eba0364413a575d"
+    }
+  },
+  "episodes": 100000,
+  "scope": "M5 operational distribution with a noisy-state navigation surrogate fitted to rendered realistic-scene records; reference autonomy in the batched engine; not image-based navigation",
+  "outcomes": {
+    "success": 99932,
+    "navigation_lost": 68
+  },
+  "success_fraction": 0.99932,
+  "success_fraction_95_interval": [
+    0.9991380164509098,
+    0.999471915905124
+  ],
+  "completion_time_s": {
+    "min": 202.6,
+    "p01": 204.0,
+    "median": 210.2,
+    "p99": 228.6,
+    "max": 239.6
+  },
+  "delta_v_mps": {
+    "min": 0.31928847705895397,
+    "p01": 0.3328327677441436,
+    "median": 0.36525455768551807,
+    "p99": 0.46414438429811106,
+    "max": 0.5148604454746518
+  },
+  "minimum_port_gap_m": {
+    "min": 4.919755234125603,
+    "p01": 4.9465868995666185,
+    "median": 4.978055208046244,
+    "p99": 5.006552891022358,
+    "max": 30.337997938412627
+  },
+  "minimum_com_range_m": {
+    "min": 6.419760320126675,
+    "p01": 6.446594225602909,
+    "median": 6.47806136413848,
+    "p99": 6.506557065382083,
+    "max": 31.838919113831395
+  },
+  "final_port_speed_mps": {
+    "min": 1.132397074181813e-05,
+    "p01": 0.00013038907677049956,
+    "median": 0.001360597320961299,
+    "p99": 0.002842082074869385,
+    "max": 0.003443794046405053
+  },
+  "episodes_with_brakes": 13319,
+  "maximum_brakes": 3,
+  "abort_reasons": {},
+  "performance": {
+    "wall_seconds": 556.351323500001,
+    "episodes_per_second": 179.74253996719364,
+    "env_ticks_per_second": 379808.4988288873
+  }
+}

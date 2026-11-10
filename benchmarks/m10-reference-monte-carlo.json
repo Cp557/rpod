@@ -1,0 +1,91 @@
+{
+  "artifact_type": "monte_carlo_report",
+  "campaign": {
+    "seed": 9,
+    "episodes": 100000,
+    "batch_size": 16384,
+    "controller": "reference",
+    "scenario": "operational",
+    "model": "models/m9-surrogate.json",
+    "model_sha256": "a98576a2bb520adfcf6c6611ee3f8664b9a3dea8b97b968c2e5b09b8117c5f9a",
+    "implementation_sha256": {
+      "fleet.py": "ac015e350ae572510da260ed7fde8634e62cd40e252e7888ac58bae395f306d7",
+      "surrogate.py": "b8d1a7f467213a8a4f1d6749515456eaa5dc72a7e566b844bc764d5b0d2f9bea",
+      "monte_carlo.py": "5428ffc11c55903efbe2ef4a50e18606f1223ee1790711e52f191655bcab7cb1"
+    }
+  },
+  "episodes": 100000,
+  "scope": "M5 operational distribution with a noisy-state navigation surrogate fitted to rendered realistic-scene records; reference controller in the batched engine; not image-based navigation",
+  "outcomes": {
+    "success": 99932,
+    "navigation_lost": 68
+  },
+  "success_fraction": 0.99932,
+  "success_fraction_95_interval": [
+    0.9991380164509098,
+    0.999471915905124
+  ],
+  "completion_time_s": {
+    "min": 202.6,
+    "p01": 204.0,
+    "median": 210.2,
+    "p99": 228.6,
+    "max": 239.6
+  },
+  "delta_v_mps": {
+    "min": 0.31928847705895397,
+    "p01": 0.3328327677441436,
+    "median": 0.36525455768551807,
+    "p99": 0.46414438429811106,
+    "max": 0.5148604454746518
+  },
+  "minimum_port_gap_m": {
+    "min": 4.919755234125603,
+    "p01": 4.9465868995666185,
+    "median": 4.978055208046244,
+    "p99": 5.006552891022358,
+    "max": 30.337997938412627
+  },
+  "minimum_com_range_m": {
+    "min": 6.419760320126675,
+    "p01": 6.446594225602909,
+    "median": 6.47806136413848,
+    "p99": 6.506557065382083,
+    "max": 31.838919113831395
+  },
+  "final_port_speed_mps": {
+    "min": 1.132397074181813e-05,
+    "p01": 0.00013038907677049956,
+    "median": 0.001360597320961299,
+    "p99": 0.002842082074869385,
+    "max": 0.003443794046405053
+  },
+  "episodes_with_brakes": 13319,
+  "safety_filter_interventions": {
+    "episodes_with_any": 0,
+    "per_episode": {
+      "min": 0.0,
+      "p01": 0.0,
+      "median": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    }
+  },
+  "true_state_outside_safe_set": {
+    "episodes_with_any": 0,
+    "ticks_per_episode": {
+      "min": 0.0,
+      "p01": 0.0,
+      "median": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    }
+  },
+  "maximum_brakes": 3,
+  "abort_reasons": {},
+  "performance": {
+    "wall_seconds": 600.7277059000007,
+    "episodes_per_second": 166.4647710066603,
+    "env_ticks_per_second": 351751.648749783
+  }
+}
