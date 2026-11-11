@@ -634,7 +634,7 @@ Runtime, on an unisolated desktop:
   - paints and metals get plausible roughness, where several imported materials were mirror-smooth (roughness 0);
   - `QS_solar` cells get a glossy coat;
   - the target's 2 m docking face is white thermal paint (albedo 0.55) over 0.5 m panels with shallow seams, its roughness varying across each panel.
-- **Earth:** clouds move from the surface texture to their own shell 8 km up, white where the cloud map is dense and transparent elsewhere, so they shade the ground and hide its city lights. The cloudless surface has a darker ocean at roughness 0.15, which shows sun glint, and land at 0.85.
+- **Earth:** clouds move from the surface texture to their own shell 8 km up, white where the cloud map is dense and transparent elsewhere, so they can shadow the ground and hide its city lights. The cloudless surface has a darker, smoother ocean (roughness 0.15, for sun glint) and land at 0.85.
 - **Presentation extras**, passed as scene options that the docking camera leaves off:
   - **City lights:** Black Marble 2016 (13500×6750) on the night side, at strength 0.05, hidden under the cloud shell.
   - **Stars:** NASA SVS Deep Star Maps 2020 (8K EXR, celestial coordinates), shown at strength 0.15 on a 5×10⁷ m sphere around the camera. Only camera rays see it. Each render turns the sphere to inertial axes.
@@ -712,6 +712,7 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 - City lights, stars and plumes are brighter than a camera exposed for the sunlit spacecraft would record. Real cold-gas and monopropellant plumes are nearly invisible.
 - The atmosphere uses single scattering in a uniform 60 km shell, with no airglow. Clouds are a single textured shell, with no volume.
 - Plumes are uniform cones; real pulses are brief flashes, and a stuck-on thruster's plume shows only for the tick or two before its isolation.
+- The coated solar cells can blow out to white where the deployed arrays glint toward the camera (seen on a cooperative-target M4 record; the M11–M14 target's wings are stowed).
 
 ## Batched engine and Monte Carlo (M9)
 
@@ -1206,7 +1207,7 @@ M14 replaces the chaser's ideal body wrench with 16 thrusters and fails one of t
 - Duty cycles u in [0, 1] with B·u = s·w, where B is the nominal 6×n wrench matrix, w the bounded request and s ≤ 1 its scale.
 - The objective is Σu − 1000·s: the largest scale first, then the least total on-time. A request beyond the remaining authority is scaled along its own direction.
 - With all thrusters healthy, every request inside M13's bounds is met exactly (s = 1).
-- After the loss of any single thruster, every axis keeps at least 0.72 N or N·m, so six-axis control survives. A full-bound request in some directions is then scaled down (to s ≥ 0.53 over random full-bound requests).
+- After the loss of any single thruster, every axis keeps at least 0.72 N or N·m, so six-axis control survives. A request beyond what remains is scaled down along its own direction: with thruster 0 lost, +X authority halves to 1 N and a 2 N request along +X is delivered at s = 0.5.
 - Solutions are cached per request; the controller holds its wrench for 10 ticks between updates.
 
 **Pulse modulation.** Each thruster accumulates its commanded on-time (duty × 0.1 s) and fires once that reaches 10 ms, for at most the tick; a thruster commanded off drops what it had accumulated (under 10 ms). Impulse is conserved otherwise. The engine applies the tick's impulse-equivalent average force and torque from the actual on-times and the true (erroneous) hardware.
@@ -1220,7 +1221,8 @@ M14 replaces the chaser's ideal body wrench with 16 thrusters and fails one of t
 - **Why the onset matters:** thrusters sharing a pod and pushing ±y have exactly opposite wrenches. Without an onset, a thruster stuck on was blamed on its opposite nozzle stuck off, whose prediction starts only when the controller commands it.
 - **Decision:** the likeliest hypothesis is declared when its statistic exceeds 50. Its thruster's valve closes and allocation drops it; the window restarts. A thruster stuck off is undetectable, and harmless, until it is commanded.
 - **Latch:** monitoring stops at the latch. Contact and the stack's inertia break the free-flyer model the residual assumes.
-- On the engine with docking-like requests, every one of the 32 single faults (16 thrusters, stuck on or off) is isolated correctly within 0.1 s of its onset or first command, and the statistic without a fault peaks at 3.8.
+- A unit test flies the engine on hold-like requests and fails each of the 16 thrusters stuck on and stuck off: every one of the 32 faults is isolated, the right thruster and kind and nothing else, within 0.2 s of its onset or first command. Without a fault the statistic stays under 10.
+- The collision-avoidance burn after a navigation loss (M12) is still timed for an ideal 2 N. The healthy thruster set meets a 2 N request in any direction, but no M14 episode loses navigation, so the burn is not exercised on thrusters, nor after an isolation.
 - Every single thruster loss leaves six-axis control, so the response to an isolation is to continue; no abort path depends on it.
 
 **Environment** (`ThrusterDockingEnv`, a `DockingEnv`). It wraps the engine at reset and again at the latch, starts the episode's fault from the first tick whose true port gap is at most its trigger (as M12 places lidar faults), and records each isolation as a `safety_detection` event (`thruster_NN_stuck_on_isolated`). Each episode also writes `thrusters.npz`: per-step commanded and actual on-times (s), allocation scale, the largest detection statistic, whether monitoring ran, and the nominal and hardware wrench matrices.
@@ -1257,7 +1259,7 @@ M14 replaces the chaser's ideal body wrench with 16 thrusters and fails one of t
 | Lateral speed | 0.2 mm/s | 0.4 mm/s | 0.5 mm/s | 2 cm/s |
 | Relative rate | 0.00017 rad/s | 0.00032 rad/s | 0.00047 rad/s | 0.0035 rad/s |
 
-- **Against M13's ideal wrench** (same episodes): nominal contact lateral offset median 0.47 cm (M13 0.60 cm). The relative rate at contact rises from under 1e-5 to a median 1.7e-4 rad/s, the pulsed attitude control's limit cycle, still a twentieth of the envelope.
+- **Against M13's ideal wrench** (same episodes): nominal contact lateral offset median 0.47 cm (M13 0.60 cm). The relative rate at contact rises from under 1e-5 to a median 1.7e-4 rad/s on thrusters, still a twentieth of the envelope.
 - **Faults:** all 12 triggered and all were exercised. Each was isolated, the right thruster and kind and nothing else, 0.1 s after its onset (stuck on) or first command (stuck off), and every episode docked. The failed thrusters were 10, 2, 6 (closing, stuck on), 1, 0, 5 (lateral, stuck on), 10, 2, 14 (closing, stuck off) and 8, 8, 5 (lateral, stuck off).
 - **No false alarm:** no isolation in the 28 nominal episodes, and before any fault no hypothesis ever gained evidence over no fault (largest statistic 0, threshold 50).
 - **Allocation never saturated:** every request was met at full scale, nominal and after every isolation.

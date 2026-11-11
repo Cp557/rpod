@@ -40,7 +40,7 @@ The suite flies M13's 28 docking episodes on thrusters, then 12 of them again wi
 - **No false alarms:** across the 28 healthy episodes nothing was isolated, and no failure hypothesis ever looked more likely than "no failure".
 - **The thrusters could always do what was asked,** even after losing one.
 - **A docking used 27–146 g of propellant** (median 62 g), more the faster the target tumbles: keeping station on a rotating docking axis takes constant thrust.
-- **Pulsing leaves a small wobble:** the relative rotation at contact rose from essentially zero with M13's ideal actuators to about 0.01°/s, still a twentieth of the limit.
+- **A small wobble remains:** on thrusters the relative rotation at contact rose from essentially zero with M13's ideal actuators to about 0.01°/s, still a twentieth of the limit.
 
 ## Limitations
 
@@ -49,6 +49,7 @@ The suite flies M13's 28 docking episodes on thrusters, then 12 of them again wi
 - Mass is constant; the propellant used is reported, not subtracted.
 - Thrusters fire on the 0.1 s tick, as impulse-equivalent averages; there is no plume impingement on the target and no valve dynamics.
 - Fault detection stops at capture, so a failure while detumbling the stack goes unnoticed.
+- The collision-avoidance burn after a navigation loss is still timed for an ideal 2 N. A healthy thruster set can deliver it, but no M14 episode loses navigation, so it is untested on thrusters.
 
 ## Reproduce
 

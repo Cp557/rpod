@@ -117,9 +117,10 @@ class M14(unittest.TestCase):
         self.assertLess(records["statistic"].max(), 10.0)
 
     def test_each_fault_isolates_its_thruster_and_not_the_opposite_nozzle(self):
-        # Thrusters 14 and 15 share a pod and push +Y and -Y: exactly opposite wrenches.
+        # Every thruster, both ways; each pod's +Y and -Y nozzles (e.g. 14 and 15) have
+        # exactly opposite wrenches.
         for kind in ("stuck_on", "stuck_off"):
-            for thruster in (0, 14, 15):
+            for thruster in range(COUNT):
                 with self.subTest(kind=kind, thruster=thruster):
                     thrusters = Thrusters([4, thruster, 6], [4, thruster, 7], 100.0,
                                           [20, 25, 30], DT_S, {"kind": kind,
