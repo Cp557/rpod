@@ -140,6 +140,13 @@ def main(argv=None) -> int:
     m13.add_argument("--output", required=True, type=Path)
     m13.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
     m13.add_argument("--label", default="m13", help="evidence name in benchmarks/")
+    m14 = commands.add_parser("m14-suite", help="run or resume the M14 thruster suite")
+    m14.add_argument("--output", required=True, type=Path)
+    m14.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
+    m14.add_argument("--seed", type=int, default=11,
+                     help="11 is the suite; any other seed gives development episodes")
+    m14.add_argument("--episodes", nargs="+", help="run only these episode ids")
+    m14.add_argument("--label", default="m14", help="evidence name in benchmarks/")
     passive = commands.add_parser(
         "passive-safety", help="coast from every 10 s of a tumbling suite's operational episodes"
     )
@@ -370,6 +377,19 @@ def main(argv=None) -> int:
             shutil.copyfile(args.output / "report.json", evidence)
             print(f"M13 passed: {report['passed']}; docked {report['docked']} of "
                   f"{len(report['episodes'])}; report: {evidence.resolve()}")
+            return 0 if report["passed"] else 1
+        elif args.command == "m14-suite":
+            import shutil
+
+            from .m14_suite import run_m14_suite
+
+            report = run_m14_suite(args.output, args.calibration, args.seed, args.episodes)
+            if args.seed == 11 and args.episodes is None:
+                evidence = Path("benchmarks") / f"{args.label}-evaluation.json"
+                evidence.parent.mkdir(exist_ok=True)
+                shutil.copyfile(args.output / "report.json", evidence)
+            print(f"M14 passed: {report['passed']}; docked {report['docked']} of "
+                  f"{len(report['episodes'])}; report: {(args.output / 'report.json').resolve()}")
             return 0 if report["passed"] else 1
         elif args.command == "passive-safety":
             from .lidar_faults import passive_safety_map

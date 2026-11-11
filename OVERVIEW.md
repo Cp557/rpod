@@ -41,7 +41,7 @@ The longer-term goal is to explore whether these capabilities solve a specific p
 | Abort and retreat | Respond to an unsafe condition or fault and execute a defined retreat maneuver. | Built: aborts retreat to 30 m, lost tracking brakes, and a navigation loss triggers a collision-avoidance burn (M12). |
 | Docking contact | Physical contact, capture, and latching with a specified docking mechanism. | Partly: capture inside a stated envelope by a momentum-conserving latch, then a detumble (M13); no contact dynamics. |
 
-Seeded variation, disturbances, sensor degradation and faults, and batch evaluation exist. Actuator faults do not.
+Seeded variation, disturbances, sensor degradation and faults, actuator faults (a thruster stuck on or off, M14), and batch evaluation exist.
 
 ## Why a custom Rust core
 
@@ -122,7 +122,7 @@ Verification should include analytical motion cases, frame and port-kinematics c
 - Target users, useful applications, and product scope for potential commercialization.
 - Physical parameters and task thresholds beyond the current fixed suites.
 - Targets of unknown shape or inertia, and the inspection and synchronization that precede a tumbling-target approach.
-- When ideal force/torque actuation should give way to individual thruster models.
+- Whether other suites should move from ideal force/torque actuation to M14's thrusters, and propellant mass depletion.
 - Camera, illumination, noise, latency, and sensor models beyond the calibrated pinhole baseline, and perception validated on real imagery.
 - Controller and navigation alternatives beyond the reference law and the evolution-strategies policy.
 - The accuracy and operating limits required of collision, dwell, and retreat checks.

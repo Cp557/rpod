@@ -13,7 +13,9 @@ dependencies = [
     "matplotlib>=3.11.2,<4",
     "numpy>=2.5.4,<3",
     "opencv-python-headless==4.14.0.94",
+    "pillow>=13.0.0,<14",
     "rerun-sdk>=0.40.0,<0.41",
+    "scipy>=1.18.1,<2",
 ]
 
 [dependency-groups]

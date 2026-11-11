@@ -24,8 +24,9 @@ A chaser spacecraft flies itself to a satellite and docks with it, using only wh
 | M11 | Unmarked, tumbling target: lidar shape matching and a keypoint network | lidar-only and camera-plus-lidar suites both pass every gate: 28/28 operational successes at the oracle's pace, both aborts retreated, target position error 1.2 cm median; the surrogate does not validate, so no population estimate |
 | M12 | Lidar faults on the tumbling target, a collision-avoidance burn after a navigation loss, passive-safety coasts | fixes a mesh bug that had degraded M11's lidar matching (target error now 0.9 cm median); with M11's settings 6 of 12 lidar faults lose navigation and the burn keeps all six clear, while a more tolerant configuration recovers from all 12; a coasting chaser often hits the target from inside 12 m |
 | M13 | Docking: a wide lidar on the docking axis, a committed final coast, a momentum-conserving capture latch and a detumble | all 28 episodes dock with the satellite tumbling at up to 1°/s: contact within 1.1 cm and 0.13° of the port (envelope 5 cm, 3°) at 0.039 m/s, then the joined stack detumbled in 11–20 s |
+| M14 | 16 thrusters with hardware errors: least-propellant allocation by linear program, pulse modulation, and IMU likelihood-ratio detection of a stuck thruster | all 40 episodes dock, 28 nominal and 12 with a thruster stuck on or off mid-approach, at the hold or 1 m from contact: every failure isolated in 0.1 s with no false alarms, contact within 1.25 cm and 0.11°, 27–146 g of propellant |
 
-28/28 is a fixed-suite result; population claims come from the Monte Carlo campaigns, which M11–M13 do not have. [REFERENCE.md](REFERENCE.md) records every gate, metric and caveat, and [benchmarks](benchmarks) holds the result files behind them.
+28/28 is a fixed-suite result; population claims come from the Monte Carlo campaigns, which M11–M14 do not have. [REFERENCE.md](REFERENCE.md) records every gate, metric and caveat, and [benchmarks](benchmarks) holds the result files behind them.
 
 ## How it works
 
@@ -40,10 +41,12 @@ flowchart LR
         perception[Perception: markers, ICP, keypoints]
         nav[Navigation filter]
         control[Supervisor and controllers]
+        thrusters[Thruster driver M14: allocation, pulses, fault isolation]
     end
     blender[Blender renderer]
     env -- state --> blender -- images --> perception
-    env -- scans --> perception --> nav --> control -- force and torque --> env
+    env -- scans --> perception --> nav --> control -- force and torque --> thrusters
+    thrusters -- firings --> env
     env <-- PyO3 --> engine
     perception <-- PyO3 --> mesh
 ```
@@ -73,11 +76,11 @@ Rendered experiments need Blender 5.2.3, at `.tools/blender-5.2.3-windows-x64/bl
 
 - [OVERVIEW.md](OVERVIEW.md): purpose, direction and open decisions.
 - [REFERENCE.md](REFERENCE.md): the canonical specification of implemented behavior, interfaces and results.
-- Milestone write-ups: [M9, batched engine and Monte Carlo](docs/m9-batched-engine.md), [M10, learned control](docs/m10-learned-control.md), [M11, tumbling target](docs/m11-tumbling-target.md), [M12, lidar faults](docs/m12-lidar-faults.md), [M13, docking](docs/m13-docking.md).
+- Milestone write-ups: [M9, batched engine and Monte Carlo](docs/m9-batched-engine.md), [M10, learned control](docs/m10-learned-control.md), [M11, tumbling target](docs/m11-tumbling-target.md), [M12, lidar faults](docs/m12-lidar-faults.md), [M13, docking](docs/m13-docking.md), [M14, thrusters](docs/m14-thrusters.md).
 
 ## Limitations
 
-- Actuation is ideal bounded force and torque: no individual thrusters, plume effects or fuel depletion.
+- M14 flies the docking on 16 thrusters; the other suites use ideal bounded force and torque. There are no plume effects on the target, and propellant use is reported but mass stays constant.
 - There is no contact-dynamics model. M13 captures at contact with an envelope check and a momentum-conserving latch; the other suites end at a 5 m pre-contact hold.
 - Perception is trained and tested on renders only; transfer to real imagery is untested.
 - Reproducibility covers the same code, dependencies, build and platform. GPU rendering is not bitwise repeatable, so rendered reruns reproduce outcomes, not every pixel.
