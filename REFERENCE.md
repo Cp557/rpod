@@ -622,9 +622,10 @@ Runtime, on an unisolated desktop:
 `rpod showcase RUN_DIR --output OUT_DIR` renders a saved schema-3 visual run as a realistic outside-view movie. It is presentation-only. It reads the validated record (`load_visual_run`), never constructs an engine or autonomy, and is not part of any suite or its frozen hashes.
 
 **Renderer.** `showcase_worker.py` runs inside Blender and `showcase.py` drives it through a `BlenderRenderer` subclass that launches that worker. The worker subclasses the realistic `SceneRenderer`, so the target, Earth, atmosphere and Sun are exactly the docking camera's (see Realistic scene). It adds the following. All of it is visual only.
-- **Chaser (1 m):** NASA 3D Resources' IBEX model (glTF), scaled 0.72× to about 1.1 m across.
+- **Chaser (1 m):** NASA 3D Resources' IBEX model (glTF), scaled 0.72×: its hull is about 0.85 m across, and 1.1 m across the thruster pods on the diagonal.
   - It is turned so its solar deck faces aft (−Y) and its base sits at y = 0.45 m.
   - On the base are a docking ring on an adapter, with guide petals, and the camera and lidar heads at their mounts.
+  - The thruster pods sit at `thrusters.layout`'s corners, (±0.36, 0.1, ±0.36) m, about 0.13 m beyond the hull's diagonal faces. Each stands on an outrigger arm rooted inside the hull and braced from 0.2 m further forward, so the plumes leave from where the physics fires them. Without the mounts the pods floated beside the hull.
 - **Thruster plumes:** one transparent 0.5 m cone per nozzle, in `thrusters.layout` order: four corner pods, each with nozzles along both ±Y directions and its two outward lateral axes.
   - **M14 runs** (with `thrusters.npz`): each nozzle's throttle is its recorded actual on-time over the tick, so a 10 ms pulse shows at 0.1 and a stuck-on thruster at full.
   - **Other runs:** for each body axis, the recorded `applied_forces_body_n` of the chaser, divided by its force limit, sets the throttle of the nozzles whose exhaust opposes that force (`plume_throttles`, mapped per nozzle by `nozzle_throttles`). Torques do not fire plumes.
@@ -651,12 +652,17 @@ Runtime, on an unisolated desktop:
 
 `showcase.json` records the asset URLs, hashes and credits.
 
-**Camera rules.** Every shot uses a 50° horizontal field of view at 1920×1080 and cuts to the next; within a shot the camera moves with its frame.
-- **Wide shot** (`chase_camera`), establishing both spacecraft over Earth for the first 30 s of the run, LVLH +radial up, from the normal side the Sun shines from:
+**Camera rules.** Every shot uses a 50° horizontal field of view at 1920×1080. The wide shot moves into the close shot without a cut; the later shots cut. Within a shot the camera moves with its frame.
+- **Wide shot** (`chase_camera`), establishing both spacecraft over Earth for the first 36 s of the run, LVLH +radial up, from the normal side the Sun shines from:
   - **Aim:** the midpoint of the two centers of mass.
   - **Direction from that midpoint**, in target LVLH: `normalize(0.25, −0.2, ±0.95)` (radial, along-track, normal). That is slightly above and behind the chaser, looking across the approach.
   - **Distance:** `max(1.5 × separation, 12 m)`.
-- **Close shot** (`close_camera`), until the contact window or the end of the run, retreats included. In the wide shot the 1.1 m chaser is only 50–110 px across beside the 7 m target; here, 5.7 m from the camera, it stays about 400 px across at every gap:
+- **Opening move** (`opening_camera`), over the next 90 s, in two phases that each take 60% of it, each eased by smootherstep:
+  - **Swing:** the camera circles the wide shot's aim at the wide shot's distance, from its direction to the close shot's, with LVLH +radial up.
+  - **Push-in:** the aim slides to the point on the close shot's line of sight nearest the wide shot's aim, the distance to it shrinks geometrically to the close shot's, and up turns from LVLH +radial to the close shot's.
+  - Circling far out keeps both spacecraft across the image, and the roll waits until both are near the line of sight. On M14 episode 00 both centers of mass stay at least 240 px inside the frame, and the camera moves at most 0.7 m and 1.8° per frame relative to the target, most of it the horizon rolling 95° during the push-in to meet the close shot's tumbling up.
+  - It replaced a cut after 1.7 s of the wide shot that jumped 42 m and turned 80° in one frame (M14 episode 00).
+- **Close shot** (`close_camera`), from the end of the opening move until the contact window or the end of the run, retreats included. In the wide shot the 1.1 m chaser is only 50–110 px across beside the 7 m target; here, 5.7 m from the camera, it stays about 400 px across at every gap:
   - **Position:** over the chaser's shoulder, at `(1.2, −5.0, ±2.4)` m from its center of mass in target LVLH (target body axes for M11 runs), on the normal side the Sun lights on average over the shot.
   - **Aim:** midway between the directions to the chaser and to the target's docking port. Between 30 m and 5 m of port gap, the chaser's center stays near the lower-left third of the frame and the port near the upper-right third.
 - **Contact shot** (`contact_camera`, docking runs), from 12 s before the latch to 6 s after: a three-quarter view from the chaser's side at `(2.4, −3.6, ±2.0)` m from the midpoint of the two ports in the target's body axes, looking at that midpoint, body +x up, so the chaser is seen closing on the docking ring against the face. A side view along the face showed the target's unlit flank whenever the Sun lit the face.
@@ -664,13 +670,14 @@ Runtime, on an unisolated desktop:
 
 **M11 runs** (scenario `visual-m11-*`) are filmed as the docking camera saw them, around a tumbling target:
 - `m11_showcase_worker.py` combines the two workers (`UnmarkedShowcaseRenderer(ShowcaseRenderer, UnmarkedRenderer)`): the showcase chaser and image settings, with the cooperative aids removed and the wings stowed.
-- The close shot's offset and up are in the target's body axes instead of LVLH, so the camera rides with the tumble while Earth and the stars sweep past. Its normal side is held for the whole shot so the camera never jumps. The wide shot is unchanged.
+- The close shot's offset and up are in the target's body axes instead of LVLH, so the camera rides with the tumble while Earth and the stars sweep past. Its normal side is held for the whole shot so the camera never jumps, and is chosen over the full frame schedule, so a partial render (stills, a preview) films the same side as the full movie. The wide shot is unchanged.
 - The port gap comes from `tumble_metrics` (the port frame), and the panel also shows the target's tumble rate (the stack's, once latched).
 
 Each frame places the target, chaser and Earth from recorded truth, with the Sun along `sunlight_direction_inertial`. Fast tests check:
 - the wide shot keeps both centers of mass inside the image with a 10% margin, at 30 m and 6.5 m separation;
 - the wide shot is on the sunlit normal side for both signs of the Sun's normal component, and Earth's center is below the image;
 - the close shot keeps the chaser and the port inside the image with a 10% margin at 30 m and 1 m gaps, the chaser nearer, with Earth's center below the image;
+- the opening move starts exactly on the wide shot and ends exactly on the close shot, keeps both centers of mass inside the image with a 5% margin for a target frame turned 80° from LVLH about along-track, and moves the camera less than 3 m and 5° per 1/120 of the move, while the two shots are over 30 m apart;
 - plumes fire against the applied force, nozzle by nozzle;
 - a docking run's schedule films from the contact window on tick by tick and ends on the last tick.
 
@@ -684,7 +691,7 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
   - Run `00` (694 frames, to 5 m) took 28 min, against 39 min before.
   - M11 fused run `16` (694 frames, to 5 m, the target tumbling at 0.99°/s) took 29 min.
   - M13 docking run `16-dock` (1,208 frames, to contact and through the detumble) took 56 min.
-  - M14 episode `00-stuck_on-closing-at-12m` (1,032 frames on the docking schedule, with the cloud shell, restyled materials and finishing) took 65 min at a median 3.9 s per frame. On the same reference frames the upgraded scene costs about 1 s more per frame than the earlier one (3.6 s against 2.5 s).
+  - M14 episode `00-stuck_on-closing-at-12m` (1,032 frames on the docking schedule, with the cloud shell, restyled materials, finishing, pod mounts and the opening move) took 62 min at a median 3.8 s per frame. On the same reference frames the upgraded scene costs about 1 s more per frame than the earlier one (3.6 s against 2.5 s).
   - A run `29` frame splits into:
     - about 0.9 s of GPU sampling, two thirds of it Earth's surface and the atmosphere shell;
     - about 0.8 s for the CPU denoiser on all 12 threads (1.0 s on the base worker's 6);
@@ -703,7 +710,7 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 
 **Outputs:**
 - `showcase.mp4`.
-- The README's `docs/showcase.gif` is cut from M14 episode 00's movie (`runs/m14-showcase`), from 20 s to the end, sped up 1.4×, at 10 fps and 640×360 with a palette pass: `ffmpeg -ss 20 -t 14.4 -i showcase.mp4 -vf "setpts=PTS/1.4,fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 showcase.gif` (103 frames, 9.6 MB).
+- The README's `docs/showcase.gif` is cut from M14 episode 00's movie (`runs/m14-showcase`), from 20 s to the end, sped up 1.4×, at 10 fps and 640×360 with a palette pass: `ffmpeg -ss 20 -t 14.4 -i showcase.mp4 -vf "setpts=PTS/1.4,fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 showcase.gif` (103 frames, 9.9 MB).
 - Clean renders are deleted once encoded; with `stills=True`, `frames/` keeps each clean PNG and the finished JPEG.
 - `showcase.json`: source manifest hash, the shots and when each began, camera rules, schedule, codec, lens settings, asset URLs, hashes and credits, render settings, and timing.
 - The marker assets.
@@ -712,7 +719,7 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 - City lights, stars and plumes are brighter than a camera exposed for the sunlit spacecraft would record. Real cold-gas and monopropellant plumes are nearly invisible.
 - The atmosphere uses single scattering in a uniform 60 km shell, with no airglow. Clouds are a single textured shell, with no volume.
 - Plumes are uniform cones; real pulses are brief flashes, and a stuck-on thruster's plume shows only for the tick or two before its isolation.
-- The coated solar cells can blow out to white where the deployed arrays glint toward the camera (seen on a cooperative-target M4 record; the M11–M14 target's wings are stowed).
+- The coated solar cells can blow out to white where the deployed arrays glint toward the camera (seen on a cooperative-target M4 record, whose wings track the Sun).
 
 ## Batched engine and Monte Carlo (M9)
 

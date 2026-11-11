@@ -24,10 +24,14 @@ from mathutils import Matrix, Vector  # noqa: E402
 PLUME_LENGTH_M = 0.5
 # Clouds on their own shell this far above the surface, so they cast shadows on the ground.
 CLOUD_ALTITUDE_M = 8_000.0
-# NASA's 1.5 m IBEX model scaled to the 1 m chaser, turned so its solar deck faces -Y and
-# its base sits at y = 0.45, just behind the docking ring.
+# NASA's IBEX model (hull 1.18 m across) scaled to the 1 m chaser, turned so its solar deck
+# faces -Y and its base sits at y = 0.45, just behind the docking ring.
 CHASER_MODEL_SCALE = 0.72
 CHASER_MODEL_OFFSET = (0.0, 0.234, 0.0)
+# The thruster pods sit at `thrusters.layout`'s corners, (±0.36, 0.1, ±0.36) m, about 0.13 m
+# beyond the hull's diagonal faces (0.38 m out). Each stands on an outrigger arm rooted inside
+# the hull at ARM_ROOT_M along x and z, braced from BRACE_ROOT_Y_M to just inboard of the pod.
+POD_M, ARM_ROOT_M, BRACE_ROOT_Y_M = 0.36, 0.25, 0.3
 
 
 def _plume_material(glow):
@@ -209,13 +213,16 @@ class ShowcaseRenderer(blender_worker.SceneRenderer):
 
     def _build_chaser(self, path, plume):
         """NASA's IBEX model as the servicer, its solar deck aft and its base forward, with a
-        docking ring, camera and lidar heads at their mounts, and corner thruster pods firing
-        along each body axis."""
+        docking ring, camera and lidar heads at their mounts, and corner thruster pods on
+        outriggers, firing along each body axis."""
         chaser, m = self.chaser, _hardware_materials()
         _import_model(path, chaser, CHASER_MODEL_SCALE, (math.pi / 2, 0, 0), CHASER_MODEL_OFFSET)
         for x in (-1, 1):
             for z in (-1, 1):
-                pod = (0.36 * x, 0.1, 0.36 * z)
+                pod = (POD_M * x, 0.1, POD_M * z)
+                _strut(m["aluminum"], chaser, (ARM_ROOT_M * x, 0.1, ARM_ROOT_M * z), pod, 0.014)
+                _strut(m["aluminum"], chaser, (ARM_ROOT_M * x, BRACE_ROOT_Y_M, ARM_ROOT_M * z),
+                       ((POD_M - 0.025) * x, 0.1, (POD_M - 0.025) * z), 0.008)
                 for direction in ((x, 0, 0), (0, 0, z), (0, -1, 0), (0, 1, 0)):
                     _thruster((m["nozzle"], m["aluminum"]), chaser, pod, direction, 0.6)
                     self._plume(plume, pod, direction)

@@ -39,12 +39,15 @@ VIEW = CameraModel(width=1920, height=1080, hfov_deg=50.0, camera_id="showcase")
 OFFSET_LVLH = np.array([0.25, -0.2, -0.95]) / np.linalg.norm([0.25, -0.2, -0.95])
 DISTANCE_PER_SEPARATION = 1.5
 MIN_DISTANCE_M = 12.0
-# Close shot, after the wide shot's first ESTABLISHING_S of the run: over the chaser's
-# shoulder at this offset from its center of mass, aimed midway between the chaser and the
-# target's docking port. The offset is in target LVLH, or in the target's body axes when it
-# tumbles (the two coincide for a target holding LVLH), with the normal sign toward the Sun.
+# Close shot, once the opening move ends: over the chaser's shoulder at this offset from its
+# center of mass, aimed midway between the chaser and the target's docking port. The offset
+# is in target LVLH, or in the target's body axes when it tumbles (the two coincide for a
+# target holding LVLH), with the normal sign toward the Sun.
 CLOSE_OFFSET_M = np.array([1.2, -5.0, -2.4])
-ESTABLISHING_S = 30.0
+# The wide shot holds for the run's first ESTABLISHING_S, then over MOVE_S the camera moves
+# into the close shot in two eased phases that each take PHASE_FRACTION of it, so the movie
+# opens without a cut (see `opening_camera`).
+ESTABLISHING_S, MOVE_S, PHASE_FRACTION = 36.0, 90.0, 0.6
 # Docking runs: from CONTACT_WINDOW_S[0] around the latch, a camera beside the docking
 # interface at this offset (target body axes) from the midpoint of the two ports; from
 # CONTACT_WINDOW_S[1], the same view pulled back to ORBIT_RADIUS_M from the pair's midpoint,
@@ -110,6 +113,44 @@ def close_camera(chaser_n, port_n, frame_nl, side):
     rays = [point - position for point in (np.asarray(chaser_n), np.asarray(port_n))]
     aim = position + sum(ray / np.linalg.norm(ray) for ray in rays)
     return position, _look(position, aim, frame_nl[:, 0])
+
+
+def _ease(fraction):
+    """Smootherstep: 0 to 1 as `fraction` goes from 0 to 1, starting and ending at rest."""
+    fraction = float(np.clip(fraction, 0.0, 1.0))
+    return fraction ** 3 * (fraction * (6 * fraction - 15) + 10)
+
+
+def _slerp(start, end, fraction):
+    """The unit vector `fraction` of the way along the great circle from `start` to `end`."""
+    start, end = start / np.linalg.norm(start), end / np.linalg.norm(end)
+    angle = np.arccos(np.clip(start @ end, -1.0, 1.0))
+    if angle < 1e-9:
+        return start
+    return (np.sin((1 - fraction) * angle) * start + np.sin(fraction * angle) * end) / np.sin(angle)
+
+
+def opening_camera(target_n, chaser_n, port_n, basis_nl, frame_nl, sunlight_n, side, fraction):
+    """The wide shot (`fraction` 0 or less) moving into the close shot (`fraction` 1 or more).
+
+    First the camera circles the wide shot's look-at point at the wide shot's distance, from
+    its direction to the close shot's. Then it pushes in: its aim slides to the nearest point
+    on the close shot's line of sight, its distance shrinks geometrically, and its up turns
+    from LVLH radial to the close shot's. Circling far out keeps both spacecraft in frame,
+    and the roll waits until both are near the line of sight.
+    """
+    wide_n, _ = chase_camera(target_n, chaser_n, basis_nl, sunlight_n)
+    close_n, close_nc = close_camera(chaser_n, port_n, frame_nl, side)
+    middle = (np.asarray(target_n) + np.asarray(chaser_n)) / 2
+    forward = close_nc[:, 2]
+    close_aim = close_n + forward * ((middle - close_n) @ forward)
+    swing = _ease(fraction / PHASE_FRACTION)
+    push = _ease((fraction - 1 + PHASE_FRACTION) / PHASE_FRACTION)
+    aim = middle + push * (close_aim - middle)
+    start, end = wide_n - middle, close_n - close_aim
+    distance = np.linalg.norm(start) ** (1 - push) * np.linalg.norm(end) ** push
+    position = aim + distance * _slerp(start, end, swing)
+    return position, _look(position, aim, _slerp(basis_nl[:, 0], frame_nl[:, 0], push))
 
 
 def contact_camera(port_n, chaser_port_n, frame_nb, side):
@@ -377,10 +418,12 @@ def render_showcase(run_dir, output, ticks=None, stills=False):
         captures, sensor = read_jsonl(run_dir / "lidar.jsonl"), "Docking lidar (depth)"
     capture_times = np.array([row["capture_time_ns"] for row in captures])
     count = len(trajectory["tick"])
-    ticks = frame_ticks(count, dt_s, terminal_s, latch_tick) if ticks is None else list(ticks)
-    close_ticks = [index for index in ticks if index * dt_s >= ESTABLISHING_S]
+    schedule = frame_ticks(count, dt_s, terminal_s, latch_tick)
+    ticks = schedule if ticks is None else list(ticks)
+    close_ticks = [index for index in schedule if index * dt_s >= ESTABLISHING_S]
     # The close shot rides in the tumbling target's body axes, on the side the Sun lights for
-    # most of the shot, so the camera never jumps.
+    # most of the shot, so the camera never jumps. The side comes from the full schedule, so a
+    # partial render (stills, a preview) films the same side as the full movie.
     shot_frames = rotations[:, 0] if tumbling else basis
     side = _sun_side(shot_frames[close_ticks], sunlight_n) if close_ticks else 1.0
 
@@ -407,14 +450,15 @@ def render_showcase(run_dir, output, ticks=None, stills=False):
                     chaser_port_n = positions[index, 1] + rotations[index, 1] @ ports[1]
                     position_nc, rotation_nc = contact_camera(port_n, chaser_port_n,
                                                               rotations[index, 0], side)
-                elif seconds >= ESTABLISHING_S:
+                elif seconds >= ESTABLISHING_S + MOVE_S:
                     shot = "close"
                     position_nc, rotation_nc = close_camera(positions[index, 1], port_n,
                                                             shot_frames[index], side)
                 else:
-                    shot = "wide"
-                    position_nc, rotation_nc = chase_camera(
-                        positions[index, 0], positions[index, 1], basis[index], sunlight_n)
+                    shot = "wide" if seconds < ESTABLISHING_S else "move"
+                    position_nc, rotation_nc = opening_camera(
+                        positions[index, 0], positions[index, 1], port_n, basis[index],
+                        shot_frames[index], sunlight_n, side, (seconds - ESTABLISHING_S) / MOVE_S)
                 if not shots or shots[-1][0] != shot:
                     shots.append((shot, seconds))
 
@@ -488,8 +532,19 @@ def render_showcase(run_dir, output, ticks=None, stills=False):
             "up": "target LVLH +radial",
             "distance_m": f"max({DISTANCE_PER_SEPARATION} * separation, {MIN_DISTANCE_M})",
         },
+        "opening_move": {
+            "from_s": ESTABLISHING_S, "duration_s": MOVE_S, "easing": "smootherstep",
+            "phases": [
+                {"fraction": [0.0, PHASE_FRACTION],
+                 "path": "circle the wide shot's look-at point at its distance, to the close "
+                         "shot's direction"},
+                {"fraction": [1 - PHASE_FRACTION, 1.0],
+                 "path": "push in to the close shot, distance geometric, up turning from LVLH "
+                         "radial to the close shot's"},
+            ],
+        },
         "close_shot": {
-            "from_s": ESTABLISHING_S, "offset_from_chaser_m": CLOSE_OFFSET_M,
+            "from_s": ESTABLISHING_S + MOVE_S, "offset_from_chaser_m": CLOSE_OFFSET_M,
             "frame": "target body axes" if tumbling else "target LVLH", "normal_side": side,
             "look_at": "midway between the directions to the chaser and the target docking port",
         },
