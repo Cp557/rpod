@@ -10,7 +10,7 @@ The Rust `rpod-core` crate owns state and time. `rpod-python` exposes it through
 
 ## Environment and commands
 
-Verified on Windows x86_64 with CPython 3.15.1, uv 0.13.5, Rust/Cargo 1.99.1, Visual Studio Build Tools 2022/MSVC 14.44.35207, and Windows SDK 10.0.26100.0. Dependencies include nalgebra 0.35.0, rayon 1.12.0, parry3d-f64 0.31.1, PyO3 0.30.1 with the `numpy` crate 0.30.0, maturin 1.15.0, NumPy 2.5.4, SciPy 1.18.1 (M14 thruster allocation), Matplotlib 3.11.2, Rerun 0.40.0, and development dependency psutil 7.2.2.
+Verified on Windows x86_64 with CPython 3.15.1, uv 0.13.5, Rust/Cargo 1.99.1, Visual Studio Build Tools 2022/MSVC 14.44.35207, and Windows SDK 10.0.26100.0. Dependencies include nalgebra 0.35.0, rayon 1.12.0, parry3d-f64 0.31.1, PyO3 0.30.1 with the `numpy` crate 0.30.0, maturin 1.15.0, NumPy 2.5.4, SciPy 1.18.1 (M14 thruster allocation), Pillow 13.0.0 (showcase overlay), Matplotlib 3.11.2, Rerun 0.40.0, and development dependency psutil 7.2.2.
 
 From the repository root in PowerShell:
 
@@ -625,11 +625,18 @@ Runtime, on an unisolated desktop:
 - **Chaser (1 m):** NASA 3D Resources' IBEX model (glTF), scaled 0.72× to about 1.1 m across.
   - It is turned so its solar deck faces aft (−Y) and its base sits at y = 0.45 m.
   - On the base are a docking ring on an adapter, with guide petals, and the camera and lidar heads at their mounts.
-- **Thruster plumes:** four corner pods on the hull, each with nozzles along both ±Y directions and its two outward lateral axes. For each body axis, the recorded `applied_forces_body_n` of the chaser, divided by its 2 N force limit, sets the throttle of the nozzles whose exhaust opposes that force (`plume_throttles`).
-  - Each fired nozzle shows a faint transparent 0.5 m cone. It glows 0.6 × throttle, brightest at the nozzle.
-  - Torques do not fire plumes.
+- **Thruster plumes:** one transparent 0.5 m cone per nozzle, in `thrusters.layout` order: four corner pods, each with nozzles along both ±Y directions and its two outward lateral axes.
+  - **M14 runs** (with `thrusters.npz`): each nozzle's throttle is its recorded actual on-time over the tick, so a 10 ms pulse shows at 0.1 and a stuck-on thruster at full.
+  - **Other runs:** for each body axis, the recorded `applied_forces_body_n` of the chaser, divided by its force limit, sets the throttle of the nozzles whose exhaust opposes that force (`plume_throttles`, mapped per nozzle by `nozzle_throttles`). Torques do not fire plumes.
+  - A fired cone glows 0.6 × throttle, brightest at the nozzle.
+- **Materials,** restyled in place by name, so the wing drive's `QS_solar` lookup and M11's cooperative-aid lookups still work:
+  - QuikSCAT's and IBEX's foils (`Shiny_Gold`, `Shiny`, `Boxes`, `foil_gold`, `foil_silver`) are half metallic at roughness 0.4, and black Kapton (`black_krinkle`) dielectric, all with a crinkle normal (Voronoi facets plus fine noise). Fully metallic foil reflected the black sky and darkened the chaser;
+  - paints and metals get plausible roughness, where several imported materials were mirror-smooth (roughness 0);
+  - `QS_solar` cells get a glossy coat;
+  - the target's 2 m docking face is white thermal paint (albedo 0.55) over 0.5 m panels with shallow seams, its roughness varying across each panel.
+- **Earth:** clouds move from the surface texture to their own shell 8 km up, white where the cloud map is dense and transparent elsewhere, so they shade the ground and hide its city lights. The cloudless surface has a darker ocean at roughness 0.15, which shows sun glint, and land at 0.85.
 - **Presentation extras**, passed as scene options that the docking camera leaves off:
-  - **City lights:** Black Marble 2016 (13500×6750) on the night side, at strength 0.05, dimmed under clouds.
+  - **City lights:** Black Marble 2016 (13500×6750) on the night side, at strength 0.05, hidden under the cloud shell.
   - **Stars:** NASA SVS Deep Star Maps 2020 (8K EXR, celestial coordinates), shown at strength 0.15 on a 5×10⁷ m sphere around the camera. Only camera rays see it. Each render turns the sphere to inertial axes.
 - **Atmosphere model**, shared with the docking camera: a transparent shell 60 km above the surface, seen only by camera rays.
   - Each front face emits the light scattered along its ray's path L through the shell.
@@ -644,36 +651,40 @@ Runtime, on an unisolated desktop:
 
 `showcase.json` records the asset URLs, hashes and credits.
 
-**Camera rules.** Both shots use LVLH +radial as up and a 50° horizontal field of view at 1920×1080. Both take their normal side from the Sun: the sign of the toward-Sun normal component, so the camera sees the lit sides. In every suite episode the Sun is on the −along-track side.
-- **Wide shot** (`chase_camera`), establishing both spacecraft over Earth for the first 30 s of the run (3 s of movie):
+**Camera rules.** Every shot uses a 50° horizontal field of view at 1920×1080 and cuts to the next; within a shot the camera moves with its frame.
+- **Wide shot** (`chase_camera`), establishing both spacecraft over Earth for the first 30 s of the run, LVLH +radial up, from the normal side the Sun shines from:
   - **Aim:** the midpoint of the two centers of mass.
   - **Direction from that midpoint**, in target LVLH: `normalize(0.25, −0.2, ±0.95)` (radial, along-track, normal). That is slightly above and behind the chaser, looking across the approach.
   - **Distance:** `max(1.5 × separation, 12 m)`.
-- **Close shot** (`close_camera`), for the rest of the run, retreats included. In the wide shot the 1.1 m chaser is only 50–110 px across beside the 7 m target; here, 5.7 m from the camera, it stays about 400 px across at every gap:
-  - **Position:** over the chaser's shoulder, at LVLH `(1.2, −5.0, ±2.4)` m from its center of mass.
+- **Close shot** (`close_camera`), until the contact window or the end of the run, retreats included. In the wide shot the 1.1 m chaser is only 50–110 px across beside the 7 m target; here, 5.7 m from the camera, it stays about 400 px across at every gap:
+  - **Position:** over the chaser's shoulder, at `(1.2, −5.0, ±2.4)` m from its center of mass in target LVLH (target body axes for M11 runs), on the normal side the Sun lights on average over the shot.
   - **Aim:** midway between the directions to the chaser and to the target's docking port. Between 30 m and 5 m of port gap, the chaser's center stays near the lower-left third of the frame and the port near the upper-right third.
+- **Contact shot** (`contact_camera`, docking runs), from 12 s before the latch to 6 s after: a three-quarter view from the chaser's side at `(2.4, −3.6, ±2.0)` m from the midpoint of the two ports in the target's body axes, looking at that midpoint, body +x up, so the chaser is seen closing on the docking ring against the face. A side view along the face showed the target's unlit flank whenever the Sun lit the face.
+- **Detumble shot** (`orbit_camera`, docking runs), from 6 s after the latch: the contact view's direction pulled back to 9 m from the pair's midpoint, in the target's body axes frozen at the latch and carried with LVLH, turning at 2°/s of mission time about their +x, so the stack's tumble is seen to slow and stop.
 
 **M11 runs** (scenario `visual-m11-*`) are filmed as the docking camera saw them, around a tumbling target:
 - `m11_showcase_worker.py` combines the two workers (`UnmarkedShowcaseRenderer(ShowcaseRenderer, UnmarkedRenderer)`): the showcase chaser and image settings, with the cooperative aids removed and the wings stowed.
-- The close shot's offset and up are in the target's body axes instead of LVLH, so the camera rides with the tumble while Earth and the stars sweep past. Its normal side is the one the Sun lights on average over the shot, held for the whole shot so the camera never jumps. The wide shot is unchanged.
-- The port gap comes from `tumble_metrics` (the port frame), and a fifth label shows the target's tumble rate.
+- The close shot's offset and up are in the target's body axes instead of LVLH, so the camera rides with the tumble while Earth and the stars sweep past. Its normal side is held for the whole shot so the camera never jumps. The wide shot is unchanged.
+- The port gap comes from `tumble_metrics` (the port frame), and the panel also shows the target's tumble rate (the stack's, once latched).
 
 Each frame places the target, chaser and Earth from recorded truth, with the Sun along `sunlight_direction_inertial`. Fast tests check:
 - the wide shot keeps both centers of mass inside the image with a 10% margin, at 30 m and 6.5 m separation;
 - the wide shot is on the sunlit normal side for both signs of the Sun's normal component, and Earth's center is below the image;
 - the close shot keeps the chaser and the port inside the image with a 10% margin at 30 m and 1 m gaps, the chaser nearer, with Earth's center below the image;
-- plumes fire against the applied force.
+- plumes fire against the applied force, nozzle by nozzle;
+- a docking run's schedule films from the contact window on tick by tick and ends on the last tick.
 
 **Rendering:**
-- Every third tick is rendered, so each frame covers 0.3 s of simulated time. Rendering uses CUDA.
-- A second thread blooms, overlays and encodes each frame while Blender renders the next.
-- The video is 30 fps (9× real time) MPEG-4 Part 2 (`mp4v`). This OpenCV build cannot open an H.264 encoder.
+- **Schedule** (`frame_ticks`): every third tick (9× real time at 30 fps); for a docking run, every sixth tick before the terminal segment (18×), every third after it (9×), and every tick from 12 s before the latch to the end (3×). The last tick is always filmed.
+- A second thread finishes and encodes each frame while Blender renders the next. Rendering uses CUDA.
+- **Video:** H.264 (libx264, CRF 18, `preset slow`, yuv420p, `+faststart`) piped through ffmpeg when it is on PATH, else MPEG-4 Part 2 (`mp4v`) through OpenCV, whose build cannot open an H.264 encoder.
 - **Cost** at 1080p (GTX 1060 6 GB, i7-8700K): 2.0–2.8 s per frame, against 3.3 s with the earlier 16 samples.
   - The cost grows as the target fills the close shot.
   - Run `29` (933 frames, never nearer than 13 m) took 31 min.
   - Run `00` (694 frames, to 5 m) took 28 min, against 39 min before.
   - M11 fused run `16` (694 frames, to 5 m, the target tumbling at 0.99°/s) took 29 min.
   - M13 docking run `16-dock` (1,208 frames, to contact and through the detumble) took 56 min.
+  - M14 episode `00-stuck_on-closing-at-12m` (1,032 frames on the docking schedule, with the cloud shell, restyled materials and finishing) took 65 min at a median 3.9 s per frame. On the same reference frames the upgraded scene costs about 1 s more per frame than the earlier one (3.6 s against 2.5 s).
   - A run `29` frame splits into:
     - about 0.9 s of GPU sampling, two thirds of it Earth's surface and the atmosphere shell;
     - about 0.8 s for the CPU denoiser on all 12 threads (1.0 s on the base worker's 6);
@@ -684,20 +695,23 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
   - fewer bounces (−1%);
   - two Blender workers rendering alternate frames (−11%, at 4.9 of the GPU's 6 GB).
 
-**Overlay** (drawn by OpenCV on each clean render; sizes scale with the image height from a 720-line base):
-- **Bloom:** a soft glow on highlights: threshold 190, σ 9 px, gain 0.8.
-- **Inset:** the run's most recent docking-camera image captured at or before that tick, or a "no image" box for a missing capture. It is 405 px wide, at the bottom centre in the wide shot and the bottom right in the close shot, clear of the spacecraft. A run without camera images (lidar only) shows its latest lidar scan instead, as a depth image (inferno colormap, nearer brighter, scaled between the scan's 2nd and 98th percentile ranges). In M13 docking runs the phase label reads "captured" for phase 0, the latched stack.
-- **Labels:** run name, elapsed time, port gap and supervisor phase; for M11 runs, also the target's tumble rate.
+**Finishing** (sizes scale with the image height from a 720-line base):
+- **Lens:** bloom on highlights (threshold 190, σ 9 px, gain 0.8); horizontal and vertical streaks, fading exponentially over 60 px, from pixels above 235 (gain 2); a 0.18 vignette; Gaussian grain of 1.5 DN seeded by the frame index.
+- **Telemetry panel** (Pillow, DejaVu fonts from Matplotlib), top left: run name, mission time with the time-lapse factor, port gap, closing speed (from the recorded gap), phase in words, the target's tumble rate (M11 runs), and propellant used (M14 runs, from the recorded on-times) or delta-v (from the applied force). A docking run's phase reads approach to the 5 m hold, holding at 5 m, terminal approach, final coast (inside 1.3 m), captured and detumbling, and docked.
+- **Fault banner:** after a recorded thruster isolation (M14), an amber line under the panel names the thruster and its fault.
+- **Inset,** bottom right: the run's most recent docking-camera image captured at or before that tick, or a "no image" box for a missing capture. A run without camera images (lidar only) shows its latest lidar scan instead, as a depth image (inferno colormap, nearer brighter, scaled between the scan's 2nd and 98th percentile ranges), labelled as inside its minimum range below a 1.3 m gap.
 
 **Outputs:**
-- `frames/NNNNNN.png`: clean renders, without bloom or overlay.
 - `showcase.mp4`.
-- `showcase.json`: source manifest hash, camera rule, asset URLs, hashes and credits, render settings, and timing.
+- The README's `docs/showcase.gif` is cut from M14 episode 00's movie (`runs/m14-showcase`), from 20 s to the end, sped up 1.4×, at 10 fps and 640×360 with a palette pass: `ffmpeg -ss 20 -t 14.4 -i showcase.mp4 -vf "setpts=PTS/1.4,fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 showcase.gif` (103 frames, 9.6 MB).
+- Clean renders are deleted once encoded; with `stills=True`, `frames/` keeps each clean PNG and the finished JPEG.
+- `showcase.json`: source manifest hash, the shots and when each began, camera rules, schedule, codec, lens settings, asset URLs, hashes and credits, render settings, and timing.
 - The marker assets.
 
 **Limitations:**
 - City lights, stars and plumes are brighter than a camera exposed for the sunlit spacecraft would record. Real cold-gas and monopropellant plumes are nearly invisible.
-- The atmosphere uses single scattering in a uniform 60 km shell. There is no airglow or cloud shadow.
+- The atmosphere uses single scattering in a uniform 60 km shell, with no airglow. Clouds are a single textured shell, with no volume.
+- Plumes are uniform cones; real pulses are brief flashes, and a stuck-on thruster's plume shows only for the tick or two before its isolation.
 
 ## Batched engine and Monte Carlo (M9)
 
@@ -1262,7 +1276,7 @@ M14 replaces the chaser's ideal body wrench with 16 thrusters and fails one of t
 - `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`); M10 policy (`policy.py`), safety filter (`safety_filter.py`), learned controllers (`learned_control.py`) and evolution-strategies training (`train_policy.py`); M11 tumbling scenario, guidance and navigation (`tumble.py`) and its fleet variant (`tumble_fleet.py`), unmarked target worker and mesh (`m11_worker.py`, `target_mesh.py`), natural-feature lidar (`natural_lidar.py`), camera keypoints (`keypoints.py`), suite (`m11_suite.py`) and tumbling showcase worker (`m11_showcase_worker.py`); M12 lidar faults, collision-avoidance burn and coast checks (`lidar_faults.py`) and suite (`m12_suite.py`); M13 docking lidar, close-range tracker, docking filter, capture latch, controller and environment (`docking.py`) and suite (`m13_suite.py`); M14 thrusters, allocation, pulse modulation, IMU fault detection and thruster environment (`thrusters.py`) and suite (`m14_suite.py`).
 - `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`; the M10 policy `m10-policy.npy` with `m10-policy.json`; M11's `m11-keypoints.json`, `m11-lidar-calibration.json` and `m11-camera-calibration.json`; M13's `m13-lidar-calibration.json`).
 - `benchmarks`: the result files and figures this reference cites (suite evaluations, campaign and benchmark summaries, the M11 surrogate fit) and `m4-qualified-source/`, the archived M4 execution sources with their hashes.
-- `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`, `m12-lidar-faults.md`, `m13-docking.md`, `m14-thrusters.md`) and the README's `showcase.gif`, cut from the M13 docking movie.
+- `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`, `m12-lidar-faults.md`, `m13-docking.md`, `m14-thrusters.md`) and the README's `showcase.gif`, cut from the M14 docking movie.
 - `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases. `tools/keypoints`: a separate uv project (Python 3.13, PyTorch) that trains the keypoint network and exports it to ONNX.
 - `tests`: Python integration and contract checks; `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
 

@@ -7,7 +7,9 @@ import numpy as np
 from rpod.approach import make_approach_scenario
 from rpod.camera import project_points
 from rpod.frames import relative_state
-from rpod.showcase import VIEW, chase_camera, close_camera, plume_throttles
+from rpod.showcase import (VIEW, chase_camera, close_camera, frame_ticks, nozzle_throttles,
+                           plume_throttles)
+from rpod.thrusters import layout
 
 
 class ChaseCameraFraming(unittest.TestCase):
@@ -56,6 +58,20 @@ class ChaseCameraFraming(unittest.TestCase):
         throttles = plume_throttles([1.0, -2.0, 0.0], 2.0)
         # +x force: exhaust along -x; -y force: exhaust along +y, saturated.
         self.assertEqual(throttles, [0.0, 0.5, 1.0, 0.0, 0.0, 0.0])
+        # Each nozzle takes its exhaust axis' throttle, and fires against the force.
+        nozzles = np.array(nozzle_throttles(throttles))
+        forces = layout()[1]
+        self.assertTrue(np.all(forces[nozzles > 0] @ [1.0, -2.0, 0.0] > 0))
+        self.assertEqual(sorted(set(nozzles)), [0.0, 0.5, 1.0])
+
+    def test_docking_runs_are_filmed_slower_around_contact(self):
+        ticks = frame_ticks(3600, 0.1, terminal_s=200.0, latch_tick=3400)
+        steps = dict(zip(ticks, np.diff(ticks)))
+        self.assertEqual((ticks[0], ticks[-1]), (0, 3599))
+        self.assertEqual(steps[0], 6)
+        self.assertTrue(all(steps[tick] == 3 for tick in ticks if 2010 <= tick < 3270))
+        self.assertTrue(all(steps[tick] == 1 for tick in ticks if 3280 <= tick < 3599))
+        self.assertEqual(frame_ticks(101, 0.1), list(range(0, 101, 3)) + [100])
 
 
 if __name__ == "__main__":
