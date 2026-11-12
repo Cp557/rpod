@@ -34,7 +34,7 @@ The longer-term goal is to explore whether these capabilities solve a specific p
 
 | Environment | Behavior | Status |
 | --- | --- | --- |
-| Rendezvous | Move from an initial relative orbit or separation to a defined proximity-operations region or hold point. | Not built: episodes start tens of meters from the target. |
+| Rendezvous | Move from an initial relative orbit or separation to a defined proximity-operations region or hold point. | Not built: episodes start tens of meters from the target. M15 stage 0 measured what a far-range approach needs ([docs/m15-rendezvous.md](docs/m15-rendezvous.md)). |
 | Station keeping | Maintain a relative position and pointing condition within specified bounds. | Partly: holds at 30 m and 5 m with dwell checks, not long-duration station keeping. |
 | Flyaround | Move between viewpoints or hold points while respecting visibility and separation constraints. | Not built. |
 | Terminal approach | Align with a docking interface and approach a pre-contact target condition. | Built, for the cooperative target (M2–M10) and the unmarked, tumbling one (M11). |

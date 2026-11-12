@@ -1,0 +1,741 @@
+{
+  "implementation_sha256": {
+    "m15_stage0.py": "9caca23b55386d1ac536fefff0e4bfbea202a49060226381787e7b3943872c4b",
+    "rendezvous.py": "ca8fe44bd98cce6b3d2fe6ea1dd903c5e567811d7dfbb2f0023a8563b6ea88bd"
+  },
+  "engine": {
+    "coast_s": 10800,
+    "physics_tick_s": 0.1,
+    "ticks": 108000,
+    "initial_offset_lvlh_m": [
+      -300.0,
+      -3000.0,
+      50.0
+    ],
+    "relative_motion_m": 5471.103509036653,
+    "reference": "DOP853 in relative form, rtol 1e-13, atol 1e-12",
+    "accuracy": [
+      {
+        "tick_s": 0.1,
+        "relative_position_error_m": 2.7326108266027728e-06
+      },
+      {
+        "tick_s": 1.0,
+        "relative_position_error_m": 1.0884298615179653e-06
+      },
+      {
+        "tick_s": 10.0,
+        "relative_position_error_m": 1.5096632318715167e-05
+      }
+    ],
+    "cost": [
+      {
+        "ticks_per_call": 1,
+        "wall_seconds": 0.22003529999710736,
+        "microseconds_per_tick": 2.0373638888621053
+      },
+      {
+        "ticks_per_call": 10,
+        "wall_seconds": 0.0663382000020647,
+        "microseconds_per_tick": 0.6142425926117101
+      },
+      {
+        "ticks_per_call": 100,
+        "wall_seconds": 0.05060759999832953,
+        "microseconds_per_tick": 0.4685888888734216
+      },
+      {
+        "ticks_per_call": 108000,
+        "wall_seconds": 0.04896480000024894,
+        "microseconds_per_tick": 0.4533777777800828
+      }
+    ]
+  },
+  "pointing": {
+    "control_period_s": 1.0,
+    "updates": 10800,
+    "wall_seconds": 2.713311400002567,
+    "microseconds_per_update": 251.23253703727474,
+    "initial_boresight_error_deg": 5.788832299437204,
+    "boresight_error_after_60_s_deg": {
+      "median": 0.02279510201500807,
+      "max": 0.4822549643235478
+    },
+    "worst": {
+      "time_s": 5951.0,
+      "range_m": 302.6317766281883
+    },
+    "closest_approach": {
+      "time_s": 5947.0,
+      "range_m": 302.62384723389545
+    }
+  },
+  "eclipse": {
+    "orbit_period_s": 5553.624271252229,
+    "sample_s": 0.027768121356261145,
+    "betas": [
+      {
+        "beta_deg": 0.0,
+        "shadow_s": 2166.4410600941383,
+        "cylindrical_shadow_s": 2166.466708004406,
+        "umbra_s": 2158.2772324153975,
+        "penumbra_s": 16.383191600194074
+      },
+      {
+        "beta_deg": 30.0,
+        "shadow_s": 2067.0311856387234,
+        "cylindrical_shadow_s": 2067.048509942999,
+        "umbra_s": 2057.3678794067446,
+        "penumbra_s": 19.32661246395776
+      },
+      {
+        "beta_deg": 60.0,
+        "shadow_s": 1462.4081112274932,
+        "cylindrical_shadow_s": 1462.4281621465968,
+        "umbra_s": 1441.4154114821597,
+        "penumbra_s": 41.81879076252928
+      },
+      {
+        "beta_deg": 75.0,
+        "shadow_s": 0.0,
+        "cylindrical_shadow_s": 0.0,
+        "umbra_s": 0.0,
+        "penumbra_s": 0.0
+      }
+    ]
+  },
+  "renders": {
+    "cameras_hfov_deg": [
+      35.0,
+      5.0
+    ],
+    "degradation": {
+      "noise_dn": 2.0,
+      "blur_px": 0.5
+    },
+    "cases": [
+      {
+        "hfov_deg": 35.0,
+        "range_m": 1000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 30.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 92,
+        "peak_contrast_dn": 193.21696885327955,
+        "snr": 96.60848442663978,
+        "background_dn": 0.10869565217391304,
+        "centroid_offset_px": 0.4037966064931973,
+        "bearing_offset_mrad": 0.2486651972280246,
+        "bearing_offset_m": 0.24866519722802463,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 103,
+          "blob_offset_px": 0.4115757989396133
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 1000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 90.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 42,
+        "peak_contrast_dn": 55.3401071746463,
+        "snr": 27.67005358732315,
+        "background_dn": 0.11904761904761904,
+        "centroid_offset_px": 0.9482669988098902,
+        "bearing_offset_mrad": 0.5839598364427088,
+        "bearing_offset_m": 0.5839598364427088,
+        "detector": {
+          "detected": true,
+          "blobs": 3,
+          "blob_px": 38,
+          "blob_offset_px": 1.5885482728599682
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 1000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 150.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 26,
+        "peak_contrast_dn": 37.16225165063351,
+        "snr": 18.581125825316754,
+        "background_dn": 0.15384615384615385,
+        "centroid_offset_px": 0.6970935458263575,
+        "bearing_offset_mrad": 0.42928271627813813,
+        "bearing_offset_m": 0.42928271627813813,
+        "detector": {
+          "detected": true,
+          "blobs": 4,
+          "blob_px": 19,
+          "blob_offset_px": 0.31366073642518927
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 2000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 30.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 27,
+        "peak_contrast_dn": 160.14543867896882,
+        "snr": 80.07271933948441,
+        "background_dn": 0.14814814814814814,
+        "centroid_offset_px": 0.22995148323713938,
+        "bearing_offset_mrad": 0.14160825032342952,
+        "bearing_offset_m": 0.28321650064685905,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 30,
+          "blob_offset_px": 0.10286961845958495
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 2000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 90.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 12,
+        "peak_contrast_dn": 51.26630343231477,
+        "snr": 25.633151716157386,
+        "background_dn": 0.25,
+        "centroid_offset_px": 0.3508688507781032,
+        "bearing_offset_mrad": 0.21607133536268894,
+        "bearing_offset_m": 0.4321426707253779,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 14,
+          "blob_offset_px": 0.37722417939014835
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 2000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 150.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 7,
+        "peak_contrast_dn": 29.30580785455503,
+        "snr": 14.652903927277515,
+        "background_dn": 0.14285714285714285,
+        "centroid_offset_px": 0.32456761162003217,
+        "bearing_offset_mrad": 0.1998745602600399,
+        "bearing_offset_m": 0.3997491205200798,
+        "detector": {
+          "detected": true,
+          "blobs": 2,
+          "blob_px": 6,
+          "blob_offset_px": 0.5042541399674123
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 3000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 30.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 16,
+        "peak_contrast_dn": 127.62480190380296,
+        "snr": 63.81240095190148,
+        "background_dn": 0.125,
+        "centroid_offset_px": 0.16245445652530832,
+        "bearing_offset_mrad": 0.10004236990317031,
+        "bearing_offset_m": 0.3001271097095109,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 20,
+          "blob_offset_px": 0.36983170845188057
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 3000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 90.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 5,
+        "peak_contrast_dn": 37.27792358847423,
+        "snr": 18.638961794237115,
+        "background_dn": 0.4,
+        "centroid_offset_px": 0.2517792301421184,
+        "bearing_offset_mrad": 0.1550501686107281,
+        "bearing_offset_m": 0.4651505058321843,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 7,
+          "blob_offset_px": 0.4074075510956646
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 3000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 150.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 4,
+        "peak_contrast_dn": 21.617609368095785,
+        "snr": 10.808804684047892,
+        "background_dn": 0.25,
+        "centroid_offset_px": 0.4292760177661318,
+        "bearing_offset_mrad": 0.2643558759696374,
+        "bearing_offset_m": 0.7930676279089122,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 4,
+          "blob_offset_px": 0.15312673600841625
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 5000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 30.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 7,
+        "peak_contrast_dn": 66.39217015960777,
+        "snr": 33.196085079803886,
+        "background_dn": 0.2857142857142857,
+        "centroid_offset_px": 0.034486229078813956,
+        "bearing_offset_mrad": 0.02123723879209614,
+        "bearing_offset_m": 0.1061861939604807,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 11,
+          "blob_offset_px": 0.13149129610690158
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 5000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 90.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 4,
+        "peak_contrast_dn": 145.95254040926383,
+        "snr": 72.97627020463192,
+        "background_dn": 0.5,
+        "centroid_offset_px": 0.5588676798838746,
+        "bearing_offset_mrad": 0.34416074728709595,
+        "bearing_offset_m": 1.7208037364354798,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 7,
+          "blob_offset_px": 0.5169502220560809
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 5000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 150.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 2,
+        "peak_contrast_dn": 17.576494317443277,
+        "snr": 8.788247158721639,
+        "background_dn": 0.5,
+        "centroid_offset_px": 0.17147735150057702,
+        "bearing_offset_mrad": 0.10559883056310093,
+        "bearing_offset_m": 0.5279941528155047,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 2,
+          "blob_offset_px": 0.09186930328750419
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 1000.0,
+        "depression_deg": 30.0,
+        "phase_deg": 60.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 64,
+        "peak_contrast_dn": 35.277654621330115,
+        "snr": 17.638827310665057,
+        "background_dn": 54.88020833333333,
+        "centroid_offset_px": 0.7039161673102885,
+        "bearing_offset_mrad": 0.43348420903373025,
+        "bearing_offset_m": 0.43348420903373025,
+        "detector": {
+          "detected": false,
+          "blobs": 0
+        }
+      },
+      {
+        "hfov_deg": 35.0,
+        "range_m": 3000.0,
+        "depression_deg": 30.0,
+        "phase_deg": 60.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 6,
+        "peak_contrast_dn": 14.566817515403708,
+        "snr": 7.283408757701854,
+        "background_dn": 55.05555555555555,
+        "centroid_offset_px": 0.14525592462283138,
+        "bearing_offset_mrad": 0.08945120529506963,
+        "bearing_offset_m": 0.2683536158852089,
+        "detector": {
+          "detected": false,
+          "blobs": 0
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 1000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 30.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 3617,
+        "peak_contrast_dn": 237.24969817454,
+        "snr": 118.62484908727,
+        "background_dn": 0.07962399778822228,
+        "centroid_offset_px": 2.9992390140094187,
+        "bearing_offset_mrad": 0.255760944061811,
+        "bearing_offset_m": 0.255760944061811,
+        "detector": {
+          "detected": true,
+          "blobs": 5,
+          "blob_px": 3697,
+          "blob_offset_px": 4.2144130162010995
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 1000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 90.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 1888,
+        "peak_contrast_dn": 196.7286846389958,
+        "snr": 98.3643423194979,
+        "background_dn": 0.08845338983050847,
+        "centroid_offset_px": 1.911797116705411,
+        "bearing_offset_mrad": 0.16302903274440023,
+        "bearing_offset_m": 0.16302903274440023,
+        "detector": {
+          "detected": true,
+          "blobs": 120,
+          "blob_px": 1158,
+          "blob_offset_px": 4.771107742693279
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 1000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 150.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 1220,
+        "peak_contrast_dn": 78.33726709409392,
+        "snr": 39.16863354704696,
+        "background_dn": 0.09016393442622951,
+        "centroid_offset_px": 2.0565317099843807,
+        "bearing_offset_mrad": 0.17537131558432173,
+        "bearing_offset_m": 0.17537131558432173,
+        "detector": {
+          "detected": true,
+          "blobs": 135,
+          "blob_px": 891,
+          "blob_offset_px": 4.603397464286305
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 2000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 30.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 965,
+        "peak_contrast_dn": 235.5063590638719,
+        "snr": 117.75317953193596,
+        "background_dn": 0.08704663212435233,
+        "centroid_offset_px": 1.4337074567014503,
+        "bearing_offset_mrad": 0.12225980354404307,
+        "bearing_offset_m": 0.24451960708808615,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 994,
+          "blob_offset_px": 1.88007386887506
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 2000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 90.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 522,
+        "peak_contrast_dn": 174.77391040102324,
+        "snr": 87.38695520051162,
+        "background_dn": 0.09578544061302682,
+        "centroid_offset_px": 0.5762986534465567,
+        "bearing_offset_mrad": 0.0491440285280908,
+        "bearing_offset_m": 0.0982880570561816,
+        "detector": {
+          "detected": true,
+          "blobs": 26,
+          "blob_px": 378,
+          "blob_offset_px": 0.9264065106867724
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 2000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 150.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 310,
+        "peak_contrast_dn": 57.16280365236975,
+        "snr": 28.581401826184877,
+        "background_dn": 0.0967741935483871,
+        "centroid_offset_px": 1.2841607944441944,
+        "bearing_offset_mrad": 0.10950717017886223,
+        "bearing_offset_m": 0.21901434035772446,
+        "detector": {
+          "detected": true,
+          "blobs": 36,
+          "blob_px": 240,
+          "blob_offset_px": 2.2540072629554264
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 3000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 30.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 456,
+        "peak_contrast_dn": 226.26790218745964,
+        "snr": 113.13395109372982,
+        "background_dn": 0.08552631578947369,
+        "centroid_offset_px": 0.9847273921834515,
+        "bearing_offset_mrad": 0.08397290322376882,
+        "bearing_offset_m": 0.25191870967130653,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 475,
+          "blob_offset_px": 1.240309032154059
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 3000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 90.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 233,
+        "peak_contrast_dn": 156.30265923772737,
+        "snr": 78.15132961886368,
+        "background_dn": 0.06437768240343347,
+        "centroid_offset_px": 0.2804871484081652,
+        "bearing_offset_mrad": 0.0239186198695708,
+        "bearing_offset_m": 0.0717558596087124,
+        "detector": {
+          "detected": true,
+          "blobs": 17,
+          "blob_px": 173,
+          "blob_offset_px": 1.4381539618522508
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 3000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 150.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 141,
+        "peak_contrast_dn": 47.69554882596667,
+        "snr": 23.847774412983334,
+        "background_dn": 0.04964539007092199,
+        "centroid_offset_px": 0.8202819669711744,
+        "bearing_offset_mrad": 0.06994977368908285,
+        "bearing_offset_m": 0.20984932106724857,
+        "detector": {
+          "detected": true,
+          "blobs": 17,
+          "blob_px": 112,
+          "blob_offset_px": 1.444378863495471
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 5000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 30.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 182,
+        "peak_contrast_dn": 211.70094375844516,
+        "snr": 105.85047187922258,
+        "background_dn": 0.09340659340659341,
+        "centroid_offset_px": 0.632769850627361,
+        "bearing_offset_mrad": 0.0539596256298221,
+        "bearing_offset_m": 0.26979812814911047,
+        "detector": {
+          "detected": true,
+          "blobs": 1,
+          "blob_px": 195,
+          "blob_offset_px": 1.0023601965423807
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 5000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 90.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 89,
+        "peak_contrast_dn": 63.61104728084325,
+        "snr": 31.805523640421626,
+        "background_dn": 0.056179775280898875,
+        "centroid_offset_px": 0.4357419518587898,
+        "bearing_offset_mrad": 0.03715801656826217,
+        "bearing_offset_m": 0.18579008284131085,
+        "detector": {
+          "detected": true,
+          "blobs": 8,
+          "blob_px": 73,
+          "blob_offset_px": 1.6096517192851227
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 5000.0,
+        "depression_deg": 0.0,
+        "phase_deg": 150.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 53,
+        "peak_contrast_dn": 40.31386008754282,
+        "snr": 20.15693004377141,
+        "background_dn": 0.05660377358490566,
+        "centroid_offset_px": 0.37219843638221134,
+        "bearing_offset_mrad": 0.03173932554984607,
+        "bearing_offset_m": 0.15869662774923035,
+        "detector": {
+          "detected": true,
+          "blobs": 9,
+          "blob_px": 39,
+          "blob_offset_px": 0.5291561510305287
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 1000.0,
+        "depression_deg": 30.0,
+        "phase_deg": 60.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 2918,
+        "peak_contrast_dn": 153.26882944138842,
+        "snr": 76.63441472069421,
+        "background_dn": 54.78992460589445,
+        "centroid_offset_px": 5.116816376940242,
+        "bearing_offset_mrad": 0.43633794474009263,
+        "bearing_offset_m": 0.4363379447400926,
+        "detector": {
+          "detected": false,
+          "blobs": 147,
+          "blob_px": 29963,
+          "blob_offset_px": 546.4813210488692
+        }
+      },
+      {
+        "hfov_deg": 5.0,
+        "range_m": 3000.0,
+        "depression_deg": 30.0,
+        "phase_deg": 60.0,
+        "sunlit_fraction": 1.0,
+        "footprint_px": 341,
+        "peak_contrast_dn": 72.37061249280212,
+        "snr": 36.18530624640106,
+        "background_dn": 54.94721407624633,
+        "centroid_offset_px": 1.749508030367188,
+        "bearing_offset_mrad": 0.14918978560907262,
+        "bearing_offset_m": 0.44756935682721777,
+        "detector": {
+          "detected": false,
+          "blobs": 104,
+          "blob_px": 30019,
+          "blob_offset_px": 544.059969792008
+        }
+      }
+    ],
+    "penumbra": {
+      "samples": 256,
+      "pixels": 3723,
+      "steps": [
+        {
+          "sun_radii_outside_limb": 2.0,
+          "sunlit_fraction": 1.0,
+          "rendered_fraction": 1.0
+        },
+        {
+          "sun_radii_outside_limb": 1.0,
+          "sunlit_fraction": 1.0,
+          "rendered_fraction": 0.9982567348773974
+        },
+        {
+          "sun_radii_outside_limb": 0.75,
+          "sunlit_fraction": 0.9279688235096748,
+          "rendered_fraction": 0.9298703829692341
+        },
+        {
+          "sun_radii_outside_limb": 0.5,
+          "sunlit_fraction": 0.8047586107416709,
+          "rendered_fraction": 0.807659206969734
+        },
+        {
+          "sun_radii_outside_limb": 0.25,
+          "sunlit_fraction": 0.6578444046201344,
+          "rendered_fraction": 0.661320635448373
+        },
+        {
+          "sun_radii_outside_limb": 0.0,
+          "sunlit_fraction": 0.500400430691883,
+          "rendered_fraction": 0.5041245217840875
+        },
+        {
+          "sun_radii_outside_limb": -0.25,
+          "sunlit_fraction": 0.34288256108683934,
+          "rendered_fraction": 0.34665529760642527
+        },
+        {
+          "sun_radii_outside_limb": -0.5,
+          "sunlit_fraction": 0.19576156515489784,
+          "rendered_fraction": 0.19954936624375655
+        },
+        {
+          "sun_radii_outside_limb": -0.75,
+          "sunlit_fraction": 0.07226292856912031,
+          "rendered_fraction": 0.07527340947110252
+        },
+        {
+          "sun_radii_outside_limb": -1.0,
+          "sunlit_fraction": 0.0,
+          "rendered_fraction": 0.0005648223393317015
+        }
+      ]
+    },
+    "timing": {
+      "35": {
+        "startup_s": 2.5253986999996414,
+        "median_render_s": 0.338194800000565
+      },
+      "5": {
+        "startup_s": 2.261315800002194,
+        "median_render_s": 0.3292219000013574
+      }
+    }
+  }
+}

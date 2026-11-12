@@ -4,13 +4,13 @@ This document records implemented behavior. [OVERVIEW.md](OVERVIEW.md) describes
 
 ## Current implementation
 
-RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. M10 trains an approach policy in that fleet and flies it behind a runtime safety filter, scored on the same paired campaign and rendered suite as the reference controller; the learned rendered suite fails its fault gate on one abort episode. M11 removes the cooperative aids and lets the target tumble freely: the chaser navigates by lidar shape matching against the target mesh, optionally fused with camera keypoints from a trained network, and holds in the tumbling port's frame; its lidar-only and fused suites pass all gates, but the M9 surrogate does not validate against the fused suite, so M11 makes no Monte Carlo claim. M12 fails the lidar itself on the tumbling target, adds a collision-avoidance burn after a navigation loss and a coast check for passive safety, and fixes a mesh-normal defect that had degraded M11's lidar shape matching; with the fixed core and a more tolerant configuration, the chaser recovers from all twelve suite faults. M13 docks: with a 90-degree lidar on its docking axis, an attitude hold close in and a committed final coast, the chaser closes on the tumbling port, is captured inside a stated envelope by a momentum-conserving latch, and detumbles the joined stack, in all 28 suite episodes. M14 flies that docking on 16 individual thrusters with seeded hardware errors, allocated by a linear program and pulse-modulated, and fails one thruster stuck on or stuck off; an IMU-residual likelihood-ratio test isolates it and allocation carries on without it. Fuel/mass depletion, environmental disturbances, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
+RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. M10 trains an approach policy in that fleet and flies it behind a runtime safety filter, scored on the same paired campaign and rendered suite as the reference controller; the learned rendered suite fails its fault gate on one abort episode. M11 removes the cooperative aids and lets the target tumble freely: the chaser navigates by lidar shape matching against the target mesh, optionally fused with camera keypoints from a trained network, and holds in the tumbling port's frame; its lidar-only and fused suites pass all gates, but the M9 surrogate does not validate against the fused suite, so M11 makes no Monte Carlo claim. M12 fails the lidar itself on the tumbling target, adds a collision-avoidance burn after a navigation loss and a coast check for passive safety, and fixes a mesh-normal defect that had degraded M11's lidar shape matching; with the fixed core and a more tolerant configuration, the chaser recovers from all twelve suite faults. M13 docks: with a 90-degree lidar on its docking axis, an attitude hold close in and a committed final coast, the chaser closes on the tumbling port, is captured inside a stated envelope by a momentum-conserving latch, and detumbles the joined stack, in all 28 suite episodes. M14 flies that docking on 16 individual thrusters with seeded hardware errors, allocated by a linear program and pulse-modulated, and fails one thruster stuck on or stuck off; an IMU-residual likelihood-ratio test isolates it and allocation carries on without it. M15 stage 0 measures what far-range rendezvous needs (physics cost and accuracy over hours, camera pointing, Earth's shadow, records, and the target's visibility at 1–5 km) and adds a Sun and eclipse model; the rendezvous itself is not built. Fuel/mass depletion, environmental disturbances, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
 
 The Rust `rpod-core` crate owns state and time. `rpod-python` exposes it through PyO3. Python defines scenarios, collects snapshots, derives relative state and diagnostics, and exports recordings. Physics has no renderer dependency.
 
 ## Environment and commands
 
-Verified on Windows x86_64 with CPython 3.15.1, uv 0.13.5, Rust/Cargo 1.99.1, Visual Studio Build Tools 2022/MSVC 14.44.35207, and Windows SDK 10.0.26100.0. Dependencies include nalgebra 0.35.0, rayon 1.12.0, parry3d-f64 0.31.1, PyO3 0.30.1 with the `numpy` crate 0.30.0, maturin 1.15.0, NumPy 2.5.4, SciPy 1.18.1 (M14 thruster allocation), Pillow 13.0.0 (showcase overlay), Matplotlib 3.11.2, Rerun 0.40.0, and development dependency psutil 7.2.2.
+Verified on Windows x86_64 with CPython 3.15.1, uv 0.13.5, Rust/Cargo 1.99.1, Visual Studio Build Tools 2022/MSVC 14.44.35207, and Windows SDK 10.0.26100.0. Dependencies include nalgebra 0.35.0, rayon 1.12.0, parry3d-f64 0.31.1, PyO3 0.30.1 with the `numpy` crate 0.30.0, maturin 1.15.0, NumPy 2.5.4, SciPy 1.18.1 (M14 thruster allocation, M15 reference integration), Pillow 13.0.0 (showcase overlay), Matplotlib 3.11.2, Rerun 0.40.0, and development dependency psutil 7.2.2.
 
 From the repository root, with Rust's `cargo` on `PATH`:
 
@@ -285,7 +285,7 @@ The three uninterrupted approaches finish within 1.005× their paired oracle tim
 
 The official nominal feedback run took 362.2 wall-clock seconds for 208.4 simulated seconds, excluding its separately timed paired oracle. Its sampled Blender peak RSS was 266.2 MiB. Qualification cases ran in pairs on the same desktop, so these wall times describe that workload rather than an isolated renderer or real-time guarantee. Each run's summary preserves startup, per-render/request timing, sampled RSS, and total feedback-loop wall time.
 
-The current fast suite passes 98 Python tests and 22 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
+The current fast suite passes 100 Python tests and 22 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
 
 ### Schema 3 visual records
 
@@ -1274,6 +1274,93 @@ uv run --no-sync rpod m14-suite --output runs/m14 --label m14
 - **Timing:** the latch came at 340–357 s; the detumble took 10.9–20.5 s.
 - **Wall time:** 32 min on the CPU (46–56 s per episode), without a renderer.
 
+## Far-range rendezvous (M15), stage 0
+
+M15 is to bring the chaser from kilometres behind the target to the 30 m hold point on camera bearings. Stage 0 measures what that needs before any of it is built; [docs/m15-rendezvous.md](docs/m15-rendezvous.md) states the decisions it settles. No episode, suite or record format changes.
+
+**Sun and Earth's shadow** (`rendezvous.py`).
+- `sunlight_direction(beta_deg, longitude_deg)`: the inertial Sun incident-ray direction (pointing away from the Sun, like `sunlight_direction_inertial`) for the equatorial M15 orbit, whose normal is +Z. The Sun stands `beta_deg` above the orbit plane, at `longitude_deg` from +X within it, and stays fixed for an episode.
+- `sunlit_fraction(positions_m, sunlight_n)`: the fraction of the Sun's disk visible from each position past a spherical Earth of radius 6,378,137 m. It is the conical model of Montenbruck and Gill (2000, §3.4.2) with the Sun at infinity and the renderer's 0.53° disk. Where the disks just touch, its terms cancel to 3e-5 above 1, so the result is clipped to [0, 1].
+- Tests (`test_rendezvous.py`):
+  - at the edge of the cylindrical shadow, half the Sun shows (within 0.01);
+  - the fraction rises monotonically across the penumbra and stays in [0, 1] where the disks touch;
+  - per orbit, the time with under half the Sun matches the cylindrical-shadow duration within 0.5 s at beta 0°, 30° and 60°;
+  - there is no shadow at 75°.
+
+**Measurements** (`m15_stage0.py`; `runs/m15-stage0`, `benchmarks/m15-stage0.json`).
+- **Coast** (`far_state`): the M2 bodies, with the chaser 3 km behind, 300 m below and 50 m out of plane on a circular CW drift. It coasts 3 h, 1.94 orbits, moving 5.5 km relative to the target.
+- **Physics cost:** 108,000 ticks of 0.1 s take 0.22 s at one engine call per tick (2.1 µs per tick), 0.066 s at 10 ticks per call, and 0.049 s in one call.
+- **Accuracy:** relative position after 3 h, against DOP853 integrating the relative motion (rtol 1e-13):
+
+| Tick | Error |
+| --- | --- |
+| 0.1 s | 2.7 µm |
+| 1 s | 1.1 µm |
+| 10 s | 15 µm |
+
+- **Pointing** (`_pointing`, at 1 Hz): a PD law with M2's attitude gains turns chaser body +Y, the camera boresight, onto the true line of sight, with body +Z toward the orbit normal. It feeds forward only the orbit rate.
+  - From 5.8° off, the boresight error after the first minute is 0.023° median and 0.48° worst. The worst came 4 s after the closest approach (303 m), where the line of sight turns fastest.
+  - It takes 250 µs of Python per update.
+- **Eclipse,** per orbit of 5,553.6 s. "Shadow" means under half the Sun visible; the penumbra column counts both crossings.
+
+| Beta | Shadow | Cylindrical shadow | Umbra | Penumbra |
+| --- | --- | --- | --- | --- |
+| 0° | 2,166.44 s | 2,166.47 s | 2,158.3 s | 16.4 s |
+| 30° | 2,067.03 s | 2,067.05 s | 2,057.4 s | 19.3 s |
+| 60° | 1,462.41 s | 1,462.43 s | 1,441.4 s | 41.8 s |
+| 75° | none | none | none | none |
+
+- **Blender's shadow:** the narrow camera, rendering at 256 samples per pixel, views the target 1 km ahead. The Sun's centre steps from 2 Sun radii outside Earth's limb to 1 inside it.
+  - The rendered fraction is the target's summed scene-linear brightness over the fully lit render's, on the 3,723 pixels unsaturated when lit.
+  - It matches `sunlit_fraction` within 0.0038 at every step. In umbra, 0.0006 remains.
+- **Detectability setup:**
+  - **Target:** the unmarked one (`UnmarkedRenderer`, wings stowed), its body axes along LVLH.
+  - **Geometry:** the chaser at 1, 2, 3 and 5 km straight behind (−Y LVLH). The Sun is 30°, 90° and 150° from the camera direction, turned toward the local vertical.
+  - **Against Earth:** two more cases put the chaser above the orbit, looking 30° down past the target onto Earth (1 and 3 km, Sun at 60°).
+  - **Cameras:** the calibrated 35° wide camera and a 5° one (`CameraModel(hfov_deg=5)`), both 1024 px square.
+  - Each case renders with and without the target (`variant="empty"`), and the signal is the difference in grey.
+- **Detectability metrics:**
+  - **Noise:** the suites' `QUALIFIED_DEGRADATION`, 2 DN and a 0.5 px blur.
+  - **Footprint:** the pixels changed by more than 3 noise sigmas.
+  - **SNR:** the blurred signal's peak over 2 DN.
+  - **Bearing offset:** the distance of the signal-weighted centroid from the projected centre of mass.
+- **Detector:** a global-threshold detector on the degraded image keeps the blob with the most excess over the median grey, at 6 robust sigmas. It finds the target in all 24 cases against space and in none of the 4 against Earth.
+- **Results against space,** each cell spanning the three Sun angles:
+
+| | 1 km | 2 km | 3 km | 5 km |
+| --- | --- | --- | --- | --- |
+| Wide footprint (px) | 26–92 | 7–27 | 4–16 | 2–7 |
+| Wide SNR | 19–97 | 15–80 | 11–64 | 9–73 |
+| Narrow footprint (px) | 1,220–3,617 | 310–965 | 141–456 | 53–182 |
+| Narrow SNR | 39–119 | 29–118 | 24–113 | 20–106 |
+
+- **Bearing offset against space:** 0.02–0.58 mrad (0.11–1.72 m) wide, and 0.02–0.26 mrad (0.07–0.27 m) narrow.
+- **Against Earth** (background 55 DN), the target's peak contrast is 15–35 DN wide and 72–153 DN narrow.
+- **Rendering** takes a median 0.33–0.34 s per frame with either camera, after a 2.3–2.5 s startup.
+- The run's `detectability.png`, copied to `docs/m15-detectability.png`, shows 128 px crops: the wide camera at 4× zoom, the narrow one native.
+- **Narrow camera plumbing:** `CameraModel.hfov_deg` reaches Blender's lens through the renderer's init request. A narrow camera therefore needs no worker change; each camera is its own renderer process. The simple scene clips at 1,000 m (`clip_end`) and the realistic one at 1e8 m.
+
+**Records** (from reading the code, not from a run). Schema 3 (`visual_recording.py`) cannot hold a bearings-only run:
+- an accepted observation must be a valid pose, a rotation and a position in front of the camera;
+- every estimate with a target must carry the 12-state target with a 12×12 covariance and cite an accepted pose;
+- health is "lost" beyond a 3 s observation age;
+- every 0.1 s tick is saved: for 3 h that is about 56 MB of states and, at 3.7 kB per estimate row with a target, about 400 MB of estimates.
+
+And `run_episode` overwrites the manifest's Sun with the M4 rule (`sunlight_direction`) and records the 12-state filter's `navigation_configuration`. M15 will have its own runner and record format, with its own loader.
+
+```bash
+uv run --no-sync rpod m15-stage0 --output runs/m15-stage0
+```
+
+`--no-renders` skips the GPU work and takes 11 s. The full run takes about 1.5 min, and it deletes its frames once the sheet and report are written.
+
+**Not measured:**
+- pointing from an estimated line of sight (the law above uses truth);
+- stars, Sun glare and stray light, which the renderer does not draw (at the 150° Sun angle the Sun is 30° off the boresight);
+- other target attitudes, or Sun-tracking wings;
+- look-down angles between 0° and 30°, and fields of view other than 35° and 5°;
+- two Blender processes at once (each camera's renderer ran in turn; startup is 2.3–2.5 s).
+
 ## Source layout and generated output
 
 - `README.md`, `LICENSE` (Apache-2.0, declared in `pyproject.toml` and the Cargo workspace) and `NOTICE` (credits for the NASA and ESA data downloaded at run time, which `docs/showcase.gif` is rendered from).
@@ -1281,10 +1368,10 @@ uv run --no-sync rpod m14-suite --output runs/m14 --label m14
 - `crates/rpod-core`: native dynamics and Rust acceptance tests.
 - `crates/rpod-python`: PyO3 interface and compiler provenance.
 - `crates/rpod-core/src/batch.rs`, `metrics.rs`: the batched engine and pair metrics (M9); `mesh.rs` (with its binding in `crates/rpod-python/src/mesh.rs`): target-mesh ray casts and closest points (M11).
-- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`); M10 policy (`policy.py`), safety filter (`safety_filter.py`), learned controllers (`learned_control.py`) and evolution-strategies training (`train_policy.py`); M11 tumbling scenario, guidance and navigation (`tumble.py`) and its fleet variant (`tumble_fleet.py`), unmarked target worker and mesh (`m11_worker.py`, `target_mesh.py`), natural-feature lidar (`natural_lidar.py`), camera keypoints (`keypoints.py`), suite (`m11_suite.py`) and tumbling showcase worker (`m11_showcase_worker.py`); M12 lidar faults, collision-avoidance burn and coast checks (`lidar_faults.py`) and suite (`m12_suite.py`); M13 docking lidar, close-range tracker, docking filter, capture latch, controller and environment (`docking.py`) and suite (`m13_suite.py`); M14 thrusters, allocation, pulse modulation, IMU fault detection and thruster environment (`thrusters.py`) and suite (`m14_suite.py`).
+- `src/rpod`: scenarios, frames, M1/M2 approach, recording, visualization, benchmark, and CLI; camera, rendering (simple and realistic scenes, `blender_worker.py`), perception, and M3 evaluation; navigation filter and visual controller; visual environment, reference client, M4 runner, schema-3 records/replay, and the M5 suite; flash-lidar model, reflector pose estimate, and lidar filter measurement (`lidar.py`); presentation-only showcase movie (`showcase.py`, `showcase_worker.py`); M9 fleet autonomy (`fleet.py`), navigation surrogate (`surrogate.py`), campaigns (`monte_carlo.py`) and the Basilisk comparison (`crosscheck.py`); M10 policy (`policy.py`), safety filter (`safety_filter.py`), learned controllers (`learned_control.py`) and evolution-strategies training (`train_policy.py`); M11 tumbling scenario, guidance and navigation (`tumble.py`) and its fleet variant (`tumble_fleet.py`), unmarked target worker and mesh (`m11_worker.py`, `target_mesh.py`), natural-feature lidar (`natural_lidar.py`), camera keypoints (`keypoints.py`), suite (`m11_suite.py`) and tumbling showcase worker (`m11_showcase_worker.py`); M12 lidar faults, collision-avoidance burn and coast checks (`lidar_faults.py`) and suite (`m12_suite.py`); M13 docking lidar, close-range tracker, docking filter, capture latch, controller and environment (`docking.py`) and suite (`m13_suite.py`); M14 thrusters, allocation, pulse modulation, IMU fault detection and thruster environment (`thrusters.py`) and suite (`m14_suite.py`); M15 Sun direction and Earth's shadow (`rendezvous.py`) and the stage-0 measurements (`m15_stage0.py`).
 - `models`: small fitted artifacts tracked with their provenance (`m9-surrogate.json`; the M10 policy `m10-policy.npy` with `m10-policy.json`; M11's `m11-keypoints.json`, `m11-lidar-calibration.json` and `m11-camera-calibration.json`; M13's `m13-lidar-calibration.json`).
 - `benchmarks`: the result files and figures this reference cites (suite evaluations, campaign and benchmark summaries, the M11 surrogate fit) and `m4-qualified-source/`, the archived M4 execution sources with their hashes.
-- `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`, `m12-lidar-faults.md`, `m13-docking.md`, `m14-thrusters.md`) and the README's `showcase.gif`, cut from the M14 docking movie.
+- `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`, `m12-lidar-faults.md`, `m13-docking.md`, `m14-thrusters.md`, `m15-rendezvous.md`) and the README's `showcase.gif`, cut from the M14 docking movie.
 - `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases. `tools/keypoints`: a separate uv project (Python 3.13, PyTorch) that trains the keypoint network and exports it to ONNX.
 - `tests`: Python integration and contract checks; `tests/helpers.py` holds the fixtures several test modules share, and `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
 

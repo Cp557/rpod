@@ -76,7 +76,7 @@ Rendered experiments need Blender 5.2.3, at `.tools/blender-5.2.3-windows-x64/bl
 
 - [OVERVIEW.md](OVERVIEW.md): purpose, direction and open decisions.
 - [REFERENCE.md](REFERENCE.md): the canonical specification of implemented behavior, interfaces and results.
-- Milestone write-ups: [M9, batched engine and Monte Carlo](docs/m9-batched-engine.md), [M10, learned control](docs/m10-learned-control.md), [M11, tumbling target](docs/m11-tumbling-target.md), [M12, lidar faults](docs/m12-lidar-faults.md), [M13, docking](docs/m13-docking.md), [M14, thrusters](docs/m14-thrusters.md).
+- Milestone write-ups: [M9, batched engine and Monte Carlo](docs/m9-batched-engine.md), [M10, learned control](docs/m10-learned-control.md), [M11, tumbling target](docs/m11-tumbling-target.md), [M12, lidar faults](docs/m12-lidar-faults.md), [M13, docking](docs/m13-docking.md), [M14, thrusters](docs/m14-thrusters.md), [M15 stage 0, far-range measurements](docs/m15-rendezvous.md).
 
 ## Limitations
 

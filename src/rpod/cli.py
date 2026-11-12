@@ -154,6 +154,12 @@ def main(argv=None) -> int:
     m14.add_argument("--seed", type=int, default=11,
                      help="11 is the suite; any other seed gives development episodes")
     m14.add_argument("--episodes", nargs="+", help="run only these episode ids")
+    stage0 = commands.add_parser(
+        "m15-stage0", help="measure the M15 far-range unknowns: physics cost and accuracy, "
+                           "pointing, eclipses and detectability renders"
+    )
+    stage0.add_argument("--output", required=True, type=Path)
+    stage0.add_argument("--no-renders", action="store_true", help="skip the GPU renders")
     passive = commands.add_parser(
         "passive-safety", help="coast from every 10 s of a tumbling suite's operational episodes"
     )
@@ -374,6 +380,14 @@ def main(argv=None) -> int:
             print(f"M14 passed: {report['passed']}; docked {report['docked']} of "
                   f"{len(report['episodes'])}; report: {(args.output / 'report.json').resolve()}")
             return 0 if report["passed"] else 1
+        elif args.command == "m15-stage0":
+            from .m15_stage0 import run_stage0
+
+            run_stage0(args.output, renders=not args.no_renders)
+            report = args.output / "report.json"
+            if not args.no_renders:
+                report = _publish(report, "m15-stage0.json")
+            print(f"M15 stage 0 report: {report.resolve()}")
         elif args.command == "passive-safety":
             from .lidar_faults import passive_safety_map
             from .recording import write_json
