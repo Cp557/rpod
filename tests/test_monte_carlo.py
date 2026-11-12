@@ -14,8 +14,7 @@ from rpod import fleet, monte_carlo
 from rpod.monte_carlo import clopper_pearson, run_campaign
 from rpod.surrogate import TIME_EDGES_S, SurrogateNavigation, apply_errors, estimate_errors
 
-from test_fleet import random_states
-from test_visual_env import near_handoff
+from helpers import near_handoff, random_states
 
 
 def flat_model(std=0.0, rejection=0.0):
@@ -55,6 +54,16 @@ class Surrogate(unittest.TestCase):
         estimates = [rejected.update(tick, states, active) for tick in range(3)][-1]
         self.assertTrue(np.all(estimates.visual_update == fleet.FAILED_UPDATE))
         self.assertFalse(estimates.available.any())
+
+    def test_replay_refuses_campaigns_it_cannot_rebuild(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            campaign = Path(temporary)
+            for controller, scenario in (("learned", "operational"), ("reference", "tumbling")):
+                (campaign / "campaign.json").write_text(json.dumps(
+                    {"seed": 9, "controller": controller, "scenario": scenario}), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "only reference-controller"):
+                    monte_carlo.replay_episode(campaign, 0, campaign / "calibration.json",
+                                               campaign / "replay")
 
     def test_clopper_pearson_matches_known_values(self):
         np.testing.assert_allclose(clopper_pearson(0, 10), (0.0, 1 - 0.025 ** 0.1), atol=1e-9)

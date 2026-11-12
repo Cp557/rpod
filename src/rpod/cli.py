@@ -3,9 +3,30 @@
 import argparse
 import json
 from pathlib import Path
+import shutil
 import sys
 
 from .scenarios import SCENARIOS
+
+# The qualified realistic-scene camera calibration, which every suite from M8 on uses.
+REALISTIC_CALIBRATION = Path("datasets/m8-vbar/calibration.json")
+
+
+def _suite_parser(commands, name, description, label):
+    """A suite subcommand with the shared --output, --calibration and --label options."""
+    parser = commands.add_parser(name, help=description)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--calibration", type=Path, default=REALISTIC_CALIBRATION)
+    parser.add_argument("--label", default=label, help="evidence name in benchmarks/")
+    return parser
+
+
+def _publish(report, name):
+    """Copy a run's report into benchmarks/ as `name`, the evidence the docs cite."""
+    evidence = Path("benchmarks") / name
+    evidence.parent.mkdir(exist_ok=True)
+    shutil.copyfile(report, evidence)
+    return evidence
 
 
 def main(argv=None) -> int:
@@ -94,8 +115,7 @@ def main(argv=None) -> int:
     )
     replay_episode.add_argument("campaign", type=Path)
     replay_episode.add_argument("--index", type=int, required=True)
-    replay_episode.add_argument("--calibration", type=Path,
-                                default=Path("datasets/m8-vbar/calibration.json"))
+    replay_episode.add_argument("--calibration", type=Path, default=REALISTIC_CALIBRATION)
     replay_episode.add_argument("--output", required=True, type=Path)
     training = commands.add_parser(
         "train-policy", help="train the learned approach policy with evolution strategies"
@@ -113,40 +133,27 @@ def main(argv=None) -> int:
     dataset.add_argument("--train", type=int, default=9000)
     dataset.add_argument("--val", type=int, default=1000)
     dataset.add_argument("--test", type=int, default=1500)
-    dataset.add_argument("--calibration", type=Path,
-                         default=Path("datasets/m8-vbar/calibration.json"))
+    dataset.add_argument("--calibration", type=Path, default=REALISTIC_CALIBRATION)
     keypoint_calibration = commands.add_parser(
         "keypoint-calibrate", help="evaluate the keypoint network and write its calibration")
     keypoint_calibration.add_argument("--dataset", type=Path,
                                       default=Path("datasets/m11/keypoints"))
     keypoint_calibration.add_argument("--model", type=Path, required=True)
-    keypoint_calibration.add_argument("--calibration", type=Path,
-                                      default=Path("datasets/m8-vbar/calibration.json"))
+    keypoint_calibration.add_argument("--calibration", type=Path, default=REALISTIC_CALIBRATION)
     keypoint_calibration.add_argument("--output", type=Path,
                                       default=Path("models/m11-camera-calibration.json"))
-    m11 = commands.add_parser("m11-suite", help="run or resume the M11 tumbling-target suite")
-    m11.add_argument("--output", required=True, type=Path)
-    m11.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
+    m11 = _suite_parser(commands, "m11-suite", "run or resume the M11 tumbling-target suite",
+                        "m11")
     m11.add_argument("--keypoint-model", type=Path, help="fuse camera keypoints from this model")
-    m11.add_argument("--label", default="m11", help="evidence name in benchmarks/")
-    m12 = commands.add_parser("m12-suite", help="run or resume the M12 lidar-fault suite")
-    m12.add_argument("--output", required=True, type=Path)
-    m12.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
+    m12 = _suite_parser(commands, "m12-suite", "run or resume the M12 lidar-fault suite", "m12")
     m12.add_argument("--keypoint-model", type=Path, help="fuse camera keypoints from this model")
     m12.add_argument("--configuration", choices=("m11", "robust"), default="m11")
-    m12.add_argument("--label", default="m12", help="evidence name in benchmarks/")
     commands.add_parser("m13-calibrate", help="calibrate the M13 docking lidar against truth")
-    m13 = commands.add_parser("m13-suite", help="run or resume the M13 docking suite")
-    m13.add_argument("--output", required=True, type=Path)
-    m13.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
-    m13.add_argument("--label", default="m13", help="evidence name in benchmarks/")
-    m14 = commands.add_parser("m14-suite", help="run or resume the M14 thruster suite")
-    m14.add_argument("--output", required=True, type=Path)
-    m14.add_argument("--calibration", type=Path, default=Path("datasets/m8-vbar/calibration.json"))
+    _suite_parser(commands, "m13-suite", "run or resume the M13 docking suite", "m13")
+    m14 = _suite_parser(commands, "m14-suite", "run or resume the M14 thruster suite", "m14")
     m14.add_argument("--seed", type=int, default=11,
                      help="11 is the suite; any other seed gives development episodes")
     m14.add_argument("--episodes", nargs="+", help="run only these episode ids")
-    m14.add_argument("--label", default="m14", help="evidence name in benchmarks/")
     passive = commands.add_parser(
         "passive-safety", help="coast from every 10 s of a tumbling suite's operational episodes"
     )
@@ -202,8 +209,6 @@ def main(argv=None) -> int:
                       f"{report['qualification_passed']}")
                 return 0 if report["qualification_passed"] else 1
         elif args.command == "m5-suite":
-            import shutil
-
             from .m5_suite import run_suite
 
             report = run_suite(args.output, args.calibration, args.lidar, args.scene,
@@ -214,9 +219,7 @@ def main(argv=None) -> int:
                 milestone, name = ("M6", "m6-lidar") if args.lidar else ("M5", "m5")
             if args.label:
                 milestone, name = args.label, args.label
-            evidence = Path("benchmarks") / f"{name}-evaluation.json"
-            evidence.parent.mkdir(exist_ok=True)
-            shutil.copyfile(args.output / "report.json", evidence)
+            evidence = _publish(args.output / "report.json", f"{name}-evaluation.json")
             print(f"{milestone} passed: {report['passed']}; report: {evidence.resolve()}")
             return 0 if report["passed"] else 1
         elif args.command == "fit-surrogate":
@@ -233,8 +236,6 @@ def main(argv=None) -> int:
                   f"{model['validation']['passed']}")
             return 0 if model["validation"]["passed"] else 1
         elif args.command == "monte-carlo":
-            import shutil
-
             from .monte_carlo import OPERATIONAL, run_campaign
             from .vision_records import sha256_file
 
@@ -268,9 +269,7 @@ def main(argv=None) -> int:
                 label=args.controller, scenario=scenario, provenance=provenance)
             name = ("m11-monte-carlo" if args.scenario == "tumbling" else
                     "m9-monte-carlo" if args.controller == "reference" else "m10-monte-carlo")
-            evidence = Path("benchmarks") / f"{name}.json"
-            evidence.parent.mkdir(exist_ok=True)
-            shutil.copyfile(args.output / "report.json", evidence)
+            evidence = _publish(args.output / "report.json", f"{name}.json")
             low, high = report["success_fraction_95_interval"]
             print(f"Success {report['success_fraction']:.5f} (95% interval {low:.5f}-{high:.5f}) "
                   f"over {report['episodes']} episodes; report: {evidence.resolve()}")
@@ -337,26 +336,18 @@ def main(argv=None) -> int:
                   f"{len(valid)}/{len(test)}; report: {evidence.resolve()}")
             return 0 if calibration["qualification_passed"] else 1
         elif args.command == "m11-suite":
-            import shutil
-
             from .m11_suite import run_m11_suite
 
             report = run_m11_suite(args.output, args.calibration, args.keypoint_model)
-            evidence = Path("benchmarks") / f"{args.label}-evaluation.json"
-            evidence.parent.mkdir(exist_ok=True)
-            shutil.copyfile(args.output / "report.json", evidence)
+            evidence = _publish(args.output / "report.json", f"{args.label}-evaluation.json")
             print(f"M11 passed: {report['passed']}; report: {evidence.resolve()}")
             return 0 if report["passed"] else 1
         elif args.command == "m12-suite":
-            import shutil
-
             from .m12_suite import run_m12_suite
 
             report = run_m12_suite(args.output, args.calibration, args.keypoint_model,
                                    args.configuration)
-            evidence = Path("benchmarks") / f"{args.label}-evaluation.json"
-            evidence.parent.mkdir(exist_ok=True)
-            shutil.copyfile(args.output / "report.json", evidence)
+            evidence = _publish(args.output / "report.json", f"{args.label}-evaluation.json")
             print(f"M12 passed: {report['passed']}; recovered {report['recovered']} of "
                   f"{len(report['episodes'])}; report: {evidence.resolve()}")
             return 0 if report["passed"] else 1
@@ -367,27 +358,19 @@ def main(argv=None) -> int:
             print(f"Docking lidar calibration: {LIDAR_CALIBRATION.resolve()}; samples per bin "
                   f"{calibration['samples']}")
         elif args.command == "m13-suite":
-            import shutil
-
             from .m13_suite import run_m13_suite
 
             report = run_m13_suite(args.output, args.calibration)
-            evidence = Path("benchmarks") / f"{args.label}-evaluation.json"
-            evidence.parent.mkdir(exist_ok=True)
-            shutil.copyfile(args.output / "report.json", evidence)
+            evidence = _publish(args.output / "report.json", f"{args.label}-evaluation.json")
             print(f"M13 passed: {report['passed']}; docked {report['docked']} of "
                   f"{len(report['episodes'])}; report: {evidence.resolve()}")
             return 0 if report["passed"] else 1
         elif args.command == "m14-suite":
-            import shutil
-
             from .m14_suite import run_m14_suite
 
             report = run_m14_suite(args.output, args.calibration, args.seed, args.episodes)
             if args.seed == 11 and args.episodes is None:
-                evidence = Path("benchmarks") / f"{args.label}-evaluation.json"
-                evidence.parent.mkdir(exist_ok=True)
-                shutil.copyfile(args.output / "report.json", evidence)
+                _publish(args.output / "report.json", f"{args.label}-evaluation.json")
             print(f"M14 passed: {report['passed']}; docked {report['docked']} of "
                   f"{len(report['episodes'])}; report: {(args.output / 'report.json').resolve()}")
             return 0 if report["passed"] else 1

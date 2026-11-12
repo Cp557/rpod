@@ -23,8 +23,7 @@ from rpod.tumble import TumbleController, tumble_initial_state
 from rpod.visual_control import ControlDecision, MissionSpec
 from rpod.visual_run import sunlight_direction
 
-from test_m11 import asymmetric_mesh
-from test_visual_env import near_handoff
+from helpers import asymmetric_mesh, near_handoff
 
 CALIBRATION = {"range_bins_m": [1e9], "variance": [[1e-4] * 3 + [1e-5] * 3]}
 

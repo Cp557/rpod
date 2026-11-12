@@ -52,14 +52,14 @@ Both configurations pass all three gates of the 40-episode suite: every operatio
 
 ## Reproduce
 
-```powershell
-.\.venv\Scripts\rpod.exe m11-assets
-.\.venv\Scripts\rpod.exe keypoint-dataset --output datasets/m11/keypoints
+```bash
+uv run --no-sync rpod m11-assets
+uv run --no-sync rpod keypoint-dataset --output datasets/m11/keypoints
 uv run --project tools/keypoints python tools/keypoints/train.py datasets/m11/keypoints runs/m11-keypoints
-.\.venv\Scripts\rpod.exe keypoint-calibrate --model runs/m11-keypoints/keypoints.onnx
-.\.venv\Scripts\rpod.exe m11-suite --output runs/m11-lidar --label m11-lidar
-.\.venv\Scripts\rpod.exe m11-suite --output runs/m11-fused --keypoint-model runs/m11-keypoints/keypoints.onnx --calibration models/m11-camera-calibration.json --label m11-fused
-.\.venv\Scripts\rpod.exe fit-surrogate --suite runs/m11-fused --scenario tumbling --output benchmarks/m11-surrogate.json
+uv run --no-sync rpod keypoint-calibrate --model runs/m11-keypoints/keypoints.onnx
+uv run --no-sync rpod m11-suite --output runs/m11-lidar --label m11-lidar
+uv run --no-sync rpod m11-suite --output runs/m11-fused --keypoint-model runs/m11-keypoints/keypoints.onnx --calibration models/m11-camera-calibration.json --label m11-fused
+uv run --no-sync rpod fit-surrogate --suite runs/m11-fused --scenario tumbling --output benchmarks/m11-surrogate.json
 ```
 
 `m11-assets` needs Blender and the NASA model; the lidar-only suite needs no renderer. The surrogate fit exits 1 because its validation fails.

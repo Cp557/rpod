@@ -380,9 +380,7 @@ def load_visual_run(directory):
     return manifest, trajectory
 
 
-def load_visual_events(directory, manifest=None):
-    if manifest is None:
-        manifest = _read_json(Path(directory) / "manifest.json")
+def load_visual_events(directory, manifest):
     events = _read_json(Path(directory) / "events.json")
     _validate_events(events, manifest)
     return events

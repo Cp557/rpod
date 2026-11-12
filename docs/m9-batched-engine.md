@@ -61,14 +61,14 @@ Every failure is the supervisor's designed safe response to two consecutive reje
 
 ## Reproduce
 
-```powershell
-.\.venv\Scripts\rpod.exe fit-surrogate --suite runs/m8-realistic --output models/m9-surrogate.json
-.\.venv\Scripts\rpod.exe monte-carlo --episodes 100000 --seed 9 --output runs/m9-monte-carlo
-.\.venv\Scripts\rpod.exe monte-carlo-replay runs/m9-monte-carlo --index 6 --output runs/m9-replay-6
-.\.venv\Scripts\rpod.exe benchmark --batch --output benchmarks/m9-batch.json
-.\.venv\Scripts\rpod.exe basilisk-cases --output runs/m9-crosscheck/cases.json
+```bash
+uv run --no-sync rpod fit-surrogate --suite runs/m8-realistic --output models/m9-surrogate.json
+uv run --no-sync rpod monte-carlo --episodes 100000 --seed 9 --output runs/m9-monte-carlo
+uv run --no-sync rpod monte-carlo-replay runs/m9-monte-carlo --index 6 --output runs/m9-replay-6
+uv run --no-sync rpod benchmark --batch --output benchmarks/m9-batch.json
+uv run --no-sync rpod basilisk-cases --output runs/m9-crosscheck/cases.json
 uv run --project tools/basilisk python tools/basilisk/propagate.py runs/m9-crosscheck/cases.json runs/m9-crosscheck/basilisk.json
-.\.venv\Scripts\rpod.exe basilisk-compare --cases runs/m9-crosscheck/cases.json --basilisk runs/m9-crosscheck/basilisk.json --output runs/m9-crosscheck/report.json
+uv run --no-sync rpod basilisk-compare --cases runs/m9-crosscheck/cases.json --basilisk runs/m9-crosscheck/basilisk.json --output runs/m9-crosscheck/report.json
 ```
 
 `fit-surrogate` needs the rendered M8 suite (`runs/m8-realistic`); the campaign needs only the fitted model, which is tracked in `models/`.

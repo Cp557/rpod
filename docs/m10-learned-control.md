@@ -69,11 +69,11 @@ As planned, the gate failure is reported rather than tuned away. It points at th
 
 ## Reproduce
 
-```powershell
-.\.venv\Scripts\rpod.exe train-policy --output models/m10-policy.npy --generations 300
-.\.venv\Scripts\rpod.exe monte-carlo --controller learned --episodes 100000 --seed 9 --output runs/m10-monte-carlo
-.\.venv\Scripts\rpod.exe m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --output runs/m10-reference --label m10-reference
-.\.venv\Scripts\rpod.exe m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --controller learned --output runs/m10-learned --label m10-learned
+```bash
+uv run --no-sync rpod train-policy --output models/m10-policy.npy --generations 300
+uv run --no-sync rpod monte-carlo --controller learned --episodes 100000 --seed 9 --output runs/m10-monte-carlo
+uv run --no-sync rpod m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --output runs/m10-reference --label m10-reference
+uv run --no-sync rpod m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --controller learned --output runs/m10-learned --label m10-learned
 ```
 
 Training and the campaign need only the tracked surrogate (`models/m9-surrogate.json`); the rendered suites need Blender and the M8 calibration.

@@ -186,8 +186,15 @@ def run_campaign(output, count, seed, model_path, batch_size=16384, threads=0,
 
 
 def replay_episode(campaign, index, calibration_path, output):
-    """Run one campaign episode as a full rendered visual episode."""
+    """Run one campaign episode as a full rendered visual episode. Only campaigns of the
+    reference controller in the operational scenario (M9) can be replayed; the others would
+    need their own controller and environment."""
     config = json.loads((Path(campaign) / "campaign.json").read_text(encoding="utf-8"))
+    # M9 campaigns predate the scenario key; every campaign records its controller.
+    kind = (config["controller"], config.get("scenario", OPERATIONAL.name))
+    if kind != ("reference", OPERATIONAL.name):
+        raise ValueError("only reference-controller operational campaigns can be replayed; "
+                         f"this one is {kind[0]} in {kind[1]}")
     calibration = load_qualified_calibration(calibration_path)
     spec = campaign_spec(config["seed"], index)
     return run_episode(episode_initial_state(spec), MissionSpec(), calibration,

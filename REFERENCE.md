@@ -12,23 +12,22 @@ The Rust `rpod-core` crate owns state and time. `rpod-python` exposes it through
 
 Verified on Windows x86_64 with CPython 3.15.1, uv 0.13.5, Rust/Cargo 1.99.1, Visual Studio Build Tools 2022/MSVC 14.44.35207, and Windows SDK 10.0.26100.0. Dependencies include nalgebra 0.35.0, rayon 1.12.0, parry3d-f64 0.31.1, PyO3 0.30.1 with the `numpy` crate 0.30.0, maturin 1.15.0, NumPy 2.5.4, SciPy 1.18.1 (M14 thruster allocation), Pillow 13.0.0 (showcase overlay), Matplotlib 3.11.2, Rerun 0.40.0, and development dependency psutil 7.2.2.
 
-From the repository root in PowerShell:
+From the repository root, with Rust's `cargo` on `PATH`:
 
-```powershell
-$env:Path = "$env:USERPROFILE\.cargo\bin;$env:Path"
+```bash
 uv sync --locked
 uv run --locked maturin develop --release --locked
 
-.\.venv\Scripts\rpod.exe run --scenario circular --output runs/circular
-.\.venv\Scripts\rpod.exe run --scenario drift --output runs/drift
-.\.venv\Scripts\rpod.exe replay runs/drift
-.\.venv\Scripts\rpod.exe replay runs/drift --save-only
-.\.venv\Scripts\rpod.exe benchmark --output benchmarks/m1.json
+uv run --no-sync rpod run --scenario circular --output runs/circular
+uv run --no-sync rpod run --scenario drift --output runs/drift
+uv run --no-sync rpod replay runs/drift
+uv run --no-sync rpod replay runs/drift --save-only
+uv run --no-sync rpod benchmark --output benchmarks/m1.json
 ```
 
 `python -m rpod` provides the same commands. `run` defaults to `circular` and never launches a viewer. Output must be a new or empty directory. `replay` regenerates `replay.rrd` from numerical records and opens the native viewer unless `--save-only` is supplied. It never constructs an engine or propagates physics. Benchmark JSON files must not already exist.
 
-Use the environment's executables after the release build. A later `uv sync` can rebuild the editable extension in debug mode; rebuild release before benchmarking. The benchmark rejects extensions with debug assertions enabled. For an already synchronized environment, this offline build avoids another dependency installation:
+Run commands with `uv run --no-sync` after the release build. A later `uv sync`, or `uv run` without `--no-sync`, can rebuild the editable extension in debug mode; rebuild release before benchmarking. The benchmark rejects extensions with debug assertions enabled. On Windows, for an already synchronized environment, this offline build avoids another dependency installation:
 
 ```powershell
 $env:VIRTUAL_ENV = (Resolve-Path '.venv').Path
@@ -120,11 +119,11 @@ The coupled RK4 solver rotates body force using each intermediate attitude, not 
 
 ## M2 guidance, control, and supervision
 
-```powershell
-.\.venv\Scripts\rpod.exe run --scenario approach --output runs/m2-approach
-.\.venv\Scripts\rpod.exe run --scenario approach-disturbed --output runs/m2-disturbed
-.\.venv\Scripts\rpod.exe run --scenario approach-retreat --output runs/m2-retreat
-.\.venv\Scripts\rpod.exe replay runs/m2-disturbed
+```bash
+uv run --no-sync rpod run --scenario approach --output runs/m2-approach
+uv run --no-sync rpod run --scenario approach-disturbed --output runs/m2-disturbed
+uv run --no-sync rpod run --scenario approach-retreat --output runs/m2-retreat
+uv run --no-sync rpod replay runs/m2-disturbed
 ```
 
 All three use a 0.1 s physics tick and 1 s control period, with at most 1,200 simulated seconds. Observations are exact current truth with zero latency; there is no camera, sensor scheduling pipeline, or estimator. Guidance, controller, and supervisor live in Python, with physical bounds enforced again in Rust.
@@ -178,13 +177,13 @@ M2 encounter geometry uses each recorded body rotation in target LVLH and offset
 
 ## Verification
 
-```powershell
+```bash
 cargo test -p rpod-core --locked
 cargo fmt --all -- --check
-$env:PYO3_PYTHON = (Resolve-Path '.venv\Scripts\python.exe').Path
+export PYO3_PYTHON="$(uv run --no-sync python -c 'import sys; print(sys.executable)')"
 cargo clippy --workspace --all-targets --locked -- -D warnings
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-.\.venv\Scripts\python.exe -m rerun_cli rrd verify runs/circular/replay.rrd runs/drift/replay.rrd
+uv run --no-sync python -W error -m unittest discover -s tests -v
+uv run --no-sync python -m rerun_cli rrd verify runs/circular/replay.rrd runs/drift/replay.rrd
 ```
 
 Seven Rust tests cover analytical maximum error at every tick through 6,000 seconds for both spacecraft in equatorial and 30-degree inclined planes; fourth-order convergence; state/time contracts; identical-body determinism; invalid inputs; overflow; and atomic failed ticks. Seven Python tests cover binding contracts, long-run local-frame/conservation behavior, drift initialization, both save/replay pipelines without physics during replay, record corruption, and clean CLI errors.
@@ -239,13 +238,13 @@ The shared target definition has four 0.55 m ArUco `DICT_4X4_50` markers with ID
 
 `estimate_pose(ImageObservation, CameraModel)` reads RGB pixels only. It enlarges detector input 2× with cubic interpolation and uses AprilTag subpixel corner refinement with the ArUco 4×4 dictionary, maps corners back using `(pixel+0.5)/2-0.5`, then solves EPNP/RANSAC and refines inliers. Physical resolution, camera intrinsics, and field of view remain unchanged. Validity requires at least eight inlier corners spanning both marker-depth groups, minimum original-image marker edge 20 pixels, finite positive-depth geometry, front-face visibility, and reprojection RMS <=1 pixel. Missing/unusable images return explicit invalid reasons. No projected truth landmarks are estimator inputs.
 
-```powershell
-.\.venv\Scripts\rpod.exe camera-check --output datasets/camera-check
-.\.venv\Scripts\rpod.exe perception-eval --suite m3 --output datasets/m3
-.\.venv\Scripts\rpod.exe perception-eval --source runs/m2-disturbed --output datasets/m2-images
-.\.venv\Scripts\rpod.exe visual-run --case nominal --seed 0 --calibration datasets/m3/calibration.json --output runs/my-visual-approach
-.\.venv\Scripts\rpod.exe replay runs/m4-nominal
-.\.venv\Scripts\rpod.exe replay datasets/m3 --save-only
+```bash
+uv run --no-sync rpod camera-check --output datasets/camera-check
+uv run --no-sync rpod perception-eval --suite m3 --output datasets/m3
+uv run --no-sync rpod perception-eval --source runs/m2-disturbed --output datasets/m2-images
+uv run --no-sync rpod visual-run --case nominal --seed 0 --calibration datasets/m3/calibration.json --output runs/my-visual-approach
+uv run --no-sync rpod replay runs/m4-nominal
+uv run --no-sync rpod replay datasets/m3 --save-only
 ```
 
 The M3 fixture suite fixes six port gaps (4.5,5,10,20,30,32 m), six body poses, and three lit-face Sun directions. It has 108 positive renders, with 36 calibration and 72 held-out poses, degraded copies (Gaussian noise 2/255 and blur 0.5 pixels), and 24 negative renders. Partition membership is fixed before estimator evaluation. PNGs, hashes, feature detections, and estimates are in `observations.jsonl`; truth poses and scoring labels are kept separately under `truth/`. `dataset.json` records camera, source hashes, assets, and implementation hashes. `report.json`, `calibration.json`, and `performance.json` preserve measurements and qualification state.
@@ -286,7 +285,7 @@ The three uninterrupted approaches finish within 1.005× their paired oracle tim
 
 The official nominal feedback run took 362.2 wall-clock seconds for 208.4 simulated seconds, excluding its separately timed paired oracle. Its sampled Blender peak RSS was 266.2 MiB. Qualification cases ran in pairs on the same desktop, so these wall times describe that workload rather than an isolated renderer or real-time guarantee. Each run's summary preserves startup, per-render/request timing, sampled RSS, and total feedback-loop wall time.
 
-The current fast suite passes 85 Python tests and 22 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
+The current fast suite passes 98 Python tests and 22 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
 
 ### Schema 3 visual records
 
@@ -328,12 +327,12 @@ Ordering matches M4: each tick records state, checks the hard boundaries (3 m CO
 
 `run_episode` (`visual_run.py`) drives one client through one environment episode and writes the schema-3 record; `run_visual` is the M4 wrapper that adds the fixed-case qualification gates. `initial_state(scenario, seed, ...)` resolves an episode: M4 hidden target errors scaled by `error_scale`, optional chaser disturbance, Sun angle about chaser body Z from the M4 lit face (M3's ±30° light convention), image degradation (blur then seeded noise per capture, `degrade_image`), and loss schedule. The six M4 cases are fixed condition sets.
 
-M4 preservation: `tests/fixtures/m4_trace.json` holds digests of every record from a short stub-rendered M4 run (acquisition, missing and black frames, braking, reacquisition, navigation loss) captured before the refactor; the refactored path reproduces them exactly. Actual-Blender reruns of `nominal`/0 and `long-loss`/2 reproduce `runs/m4-nominal` and `runs/m4-long-loss` exactly in trajectory, events, estimates, pose detections, summaries, and decoded pixels (209/209 and 63/63 images). Blender PNG file bytes differ between renders of identical pixels, so image checksums are per-record integrity checks, not cross-run identity.
+M4 preservation: `tests/fixtures/m4_trace.json` holds digests of every record from a short stub-rendered M4 run (acquisition, missing and black frames, braking, reacquisition, navigation loss) captured before the refactor; the refactored path reproduces them exactly. The digests are bit-exact, and the run's last float bits depend on the C maths library and on OpenCV's and NumPy's CPU dispatch, so the check holds only on the machine that recorded the fixture; it is skipped when the `CI` environment variable is set. Actual-Blender reruns of `nominal`/0 and `long-loss`/2 reproduce `runs/m4-nominal` and `runs/m4-long-loss` exactly in trajectory, events, estimates, pose detections, summaries, and decoded pixels (209/209 and 63/63 images). Blender PNG file bytes differ between renders of identical pixels, so image checksums are per-record integrity checks, not cross-run identity.
 
 ## M5 evaluation suite
 
-```powershell
-.\.venv\Scripts\rpod.exe m5-suite --output runs/m5 --calibration datasets/m3/calibration.json
+```bash
+uv run --no-sync rpod m5-suite --output runs/m5 --calibration datasets/m3/calibration.json
 ```
 
 `m5_suite.py` resolves all 40 episodes from `M5_SUITE_SEED = 5` and writes them to `suite.json` with the calibration hash, calibration range bins, and hashes of the frozen execution files before any rendering. Initialization seeds are 1000+index (M4 used 0–2). Each episode's conditions, faults, and per-capture image noise use separate recorded streams `[suite seed, index, 1|2|3]`.
@@ -372,8 +371,8 @@ The suite took 14,390 s (4.0 h) on an unisolated desktop. Another CPU-heavy work
 
 ## Lidar sensor and fusion (M6)
 
-```powershell
-.\.venv\Scripts\rpod.exe m5-suite --lidar --output runs/m6-lidar --calibration datasets/m3/calibration.json
+```bash
+uv run --no-sync rpod m5-suite --lidar --output runs/m6-lidar --calibration datasets/m3/calibration.json
 ```
 
 **Sensor model** (`lidar.py`). `LidarModel` is a pinhole flash lidar: 256×256 pixels, 30° field of view (0.117° per pixel), the camera's optical axes and `R_BC`, mounted at `[-0.2, 0.55, 0.2] m` on the chaser body. Scans run at 1 Hz on ticks 5 mod 10, half a period after camera captures, and are delivered 0.2 s later. `scan_target` ray-casts the rendered geometry: the 2 m target cube and the four 0.71 m marker pads, two of which float 0.3 m in front of the docking face. It also includes four retroreflectors that exist only in the lidar model, not in camera images: 0.06 m radius discs 2 mm proud of the −Y face at `(0,−1,0.85)`, `(0.8,−1,0)`, `(0,−1,−0.45)` and `(−0.6,−1,0)` in target body coordinates, with distinct pairwise spacings. Every return gets Gaussian range noise of σ 0.02 m, seeded by `[episode lidar seed, scan ID]`, and the maximum range is 100 m. A reflector reads as retroreflective only within 45° of its normal; outside that cone it returns like the face. The model has no intensity falloff, beam divergence, multipath, motion distortion, solar background or random dropouts.
@@ -466,10 +465,10 @@ Runtime, on an unisolated desktop:
 
 ## Realistic scene (M7, upgraded in M8)
 
-```powershell
-.\.venv\Scripts\rpod.exe perception-eval --suite m3 --scene realistic --earth vbar --output datasets/m8-vbar
-.\.venv\Scripts\rpod.exe perception-eval --suite m3 --scene realistic --earth rbar --output datasets/m8-rbar
-.\.venv\Scripts\rpod.exe m5-suite --scene realistic --output runs/m8-realistic --calibration datasets/m8-vbar/calibration.json
+```bash
+uv run --no-sync rpod perception-eval --suite m3 --scene realistic --earth vbar --output datasets/m8-vbar
+uv run --no-sync rpod perception-eval --suite m3 --scene realistic --earth rbar --output datasets/m8-rbar
+uv run --no-sync rpod m5-suite --scene realistic --output runs/m8-realistic --calibration datasets/m8-vbar/calibration.json
 ```
 
 M8 replaced the M7 realistic scene in place, raised its Sun, and reran the suite. The M7 code is preserved in git commit `a03d4f0`. `runs/m7-realistic`, `datasets/m7-*` and `benchmarks/m7-realistic-evaluation.json` were produced by that commit; the current code cannot resume them, because the frozen hashes differ.
@@ -744,18 +743,18 @@ M9 steps many independent episodes together and turns the fixed 40-episode suite
 - **Rejections:** a Bernoulli draw per delivery with the fitted probability for the time since the first estimate. Rejected deliveries hold the estimate and send `visual_update` False, so the controller brakes exactly as the reference client does. M8's operational episodes rejected 4 of about 5,900 deliveries, all 14–34 s after the first estimate.
 - `rpod fit-surrogate` validates the procedure, then fits `models/m9-surrogate.json` on all 28 operational episodes of `runs/m8-realistic`. Validation fits on half the episodes (pairs of indices alternate, so both halves hold degraded and clean images) and passes two checks: for each of completion time, minimum port gap, final port speed and braking count, at least 25 of the 28 rendered values lie inside the central 95% band of 200 surrogate runs of the same episode; and held-out estimate-error medians and P95 lie within 25% of the surrogate's.
 
-**Campaigns** (`monte_carlo.py`). `campaign_spec(seed, index)` draws the M5 operational distribution (`m5_suite.operational_conditions`, shared with the suites, and `initial_state` seed `seed × 10⁷ + index`, clear of the suites' 1000 + index). `run_campaign` runs batches of 16,384 and writes `campaign.json`, `episodes.npz` (per-episode outcome, end tick, completion time, minimum port gap and range, final speed and gap, Δv, brakes, abort reason), `failures.jsonl` and `report.json` with a Clopper–Pearson 95% interval. The same seed and batch size reproduce every episode. `rpod monte-carlo-replay CAMPAIGN --index N` reruns any episode as a full rendered visual episode.
+**Campaigns** (`monte_carlo.py`). `campaign_spec(seed, index)` draws the M5 operational distribution (`m5_suite.operational_conditions`, shared with the suites, and `initial_state` seed `seed × 10⁷ + index`, clear of the suites' 1000 + index). `run_campaign` runs batches of 16,384 and writes `campaign.json`, `episodes.npz` (per-episode outcome, end tick, completion time, minimum port gap and range, final speed and gap, Δv, brakes, abort reason), `failures.jsonl` and `report.json` with a Clopper–Pearson 95% interval. The same seed and batch size reproduce every episode. `rpod monte-carlo-replay CAMPAIGN --index N` reruns any episode of a reference-controller operational campaign (M9) as a full rendered visual episode. It refuses learned-controller and tumbling campaigns, whose controller and environment it does not rebuild.
 
 **Basilisk cross-check** (`crosscheck.py`, `tools/basilisk`). `rpod basilisk-cases` writes three cases: one 5,500 s orbit of point-mass gravity, a 1,000 s torque-free tumble with the target's inertia, and 300 s of constant body-frame force and torque on the chaser. `tools/basilisk/propagate.py` runs them in Basilisk (its own uv project on Python 3.13, `bsk` 2.12.2) with RK4 at the same 0.1 s step, and `rpod basilisk-compare` reports the largest differences against tolerances of 1 mm, 1 µm/s, 1e-6 rad and 1e-9 rad/s.
 
-```powershell
-.\.venv\Scripts\rpod.exe fit-surrogate --suite runs/m8-realistic --output models/m9-surrogate.json
-.\.venv\Scripts\rpod.exe monte-carlo --episodes 100000 --seed 9 --output runs/m9-monte-carlo
-.\.venv\Scripts\rpod.exe monte-carlo-replay runs/m9-monte-carlo --index 6 --output runs/m9-replay-6
-.\.venv\Scripts\rpod.exe benchmark --batch --output benchmarks/m9-batch.json
-.\.venv\Scripts\rpod.exe basilisk-cases --output runs/m9-crosscheck/cases.json
+```bash
+uv run --no-sync rpod fit-surrogate --suite runs/m8-realistic --output models/m9-surrogate.json
+uv run --no-sync rpod monte-carlo --episodes 100000 --seed 9 --output runs/m9-monte-carlo
+uv run --no-sync rpod monte-carlo-replay runs/m9-monte-carlo --index 6 --output runs/m9-replay-6
+uv run --no-sync rpod benchmark --batch --output benchmarks/m9-batch.json
+uv run --no-sync rpod basilisk-cases --output runs/m9-crosscheck/cases.json
 uv run --project tools/basilisk python tools/basilisk/propagate.py runs/m9-crosscheck/cases.json runs/m9-crosscheck/basilisk.json
-.\.venv\Scripts\rpod.exe basilisk-compare --cases runs/m9-crosscheck/cases.json --basilisk runs/m9-crosscheck/basilisk.json --output runs/m9-crosscheck/report.json
+uv run --no-sync rpod basilisk-compare --cases runs/m9-crosscheck/cases.json --basilisk runs/m9-crosscheck/basilisk.json --output runs/m9-crosscheck/report.json
 ```
 
 ### M9 results
@@ -842,11 +841,11 @@ M10 replaces the reference translational law in approach with a learned policy b
 - every 10 generations the mean policy flies 1,024 validation episodes (seed 11); the best is saved to `models/m10-policy.npy`, with its configuration, hashes and learning curve in `models/m10-policy.json`.
 - Training and validation seeds are disjoint from the M9 campaign (seed 9) and the suites (1000 + index).
 
-```powershell
-.\.venv\Scripts\rpod.exe train-policy --output models/m10-policy.npy --generations 300
-.\.venv\Scripts\rpod.exe monte-carlo --controller learned --episodes 100000 --seed 9 --output runs/m10-monte-carlo
-.\.venv\Scripts\rpod.exe m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --output runs/m10-reference --label m10-reference
-.\.venv\Scripts\rpod.exe m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --controller learned --output runs/m10-learned --label m10-learned
+```bash
+uv run --no-sync rpod train-policy --output models/m10-policy.npy --generations 300
+uv run --no-sync rpod monte-carlo --controller learned --episodes 100000 --seed 9 --output runs/m10-monte-carlo
+uv run --no-sync rpod m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --output runs/m10-reference --label m10-reference
+uv run --no-sync rpod m5-suite --scene realistic --calibration datasets/m8-vbar/calibration.json --controller learned --output runs/m10-learned --label m10-learned
 ```
 
 A learned campaign uses the M9 campaign's episodes (seed 9), so the two are paired; its `campaign.json` adds the policy's hash and the hashes of `IMPLEMENTATION_FILES` (policy, filter, controllers and fleet). Campaigns now also record each episode's safety-filter interventions and the ticks in approach whose true port state lies outside the safe set, for either controller. A learned suite records the policy's and implementation hashes in `suite.json` and in every episode manifest (`learned_controller`, which the uniform-records gate checks against the suite), and the filter's interventions per episode.
@@ -953,14 +952,14 @@ M11 removes the cooperative aids and lets the target tumble: the chaser must fin
 - `rpod fit-surrogate --scenario tumbling` fits and validates the M9 surrogate on a tumbling suite. As failures it counts the ticks 0.2 s after each whole second whose `visual_update` was False, what a multi-sensor agent brakes on.
 - `rpod monte-carlo --scenario tumbling` runs a campaign of `tumbling_spec` episodes (the operational draw plus a tumble, drawn as the suite draws it) and copies its report to `benchmarks/m11-monte-carlo.json`.
 
-```powershell
-.\.venv\Scripts\rpod.exe m11-assets
-.\.venv\Scripts\rpod.exe keypoint-dataset --output datasets/m11/keypoints
+```bash
+uv run --no-sync rpod m11-assets
+uv run --no-sync rpod keypoint-dataset --output datasets/m11/keypoints
 uv run --project tools/keypoints python tools/keypoints/train.py datasets/m11/keypoints runs/m11-keypoints
-.\.venv\Scripts\rpod.exe keypoint-calibrate --model runs/m11-keypoints/keypoints.onnx
-.\.venv\Scripts\rpod.exe m11-suite --output runs/m11-lidar --label m11-lidar
-.\.venv\Scripts\rpod.exe m11-suite --output runs/m11-fused --keypoint-model runs/m11-keypoints/keypoints.onnx --calibration models/m11-camera-calibration.json --label m11-fused
-.\.venv\Scripts\rpod.exe fit-surrogate --suite runs/m11-fused --scenario tumbling --output benchmarks/m11-surrogate.json
+uv run --no-sync rpod keypoint-calibrate --model runs/m11-keypoints/keypoints.onnx
+uv run --no-sync rpod m11-suite --output runs/m11-lidar --label m11-lidar
+uv run --no-sync rpod m11-suite --output runs/m11-fused --keypoint-model runs/m11-keypoints/keypoints.onnx --calibration models/m11-camera-calibration.json --label m11-fused
+uv run --no-sync rpod fit-surrogate --suite runs/m11-fused --scenario tumbling --output benchmarks/m11-surrogate.json
 ```
 
 The surrogate fit exits 1 because its validation fails (see M11 results).
@@ -1059,11 +1058,11 @@ Both were chosen from off-suite episodes (M11 operational episodes 12–18). The
   - every loss is followed by a passively safe coast after the burn.
 - Recovery is reported, not gated.
 
-```powershell
-.\.venv\Scripts\rpod.exe m11-suite --output runs/m11-lidar-normals --label m11-lidar-normals
-.\.venv\Scripts\rpod.exe m12-suite --output runs/m12-lidar --label m12-lidar
-.\.venv\Scripts\rpod.exe m12-suite --output runs/m12-lidar-robust --configuration robust --label m12-lidar-robust
-.\.venv\Scripts\rpod.exe passive-safety runs/m11-lidar-normals --output benchmarks/m12-passive-safety.json
+```bash
+uv run --no-sync rpod m11-suite --output runs/m11-lidar-normals --label m11-lidar-normals
+uv run --no-sync rpod m12-suite --output runs/m12-lidar --label m12-lidar
+uv run --no-sync rpod m12-suite --output runs/m12-lidar-robust --configuration robust --label m12-lidar-robust
+uv run --no-sync rpod passive-safety runs/m11-lidar-normals --output benchmarks/m12-passive-safety.json
 ```
 
 ### M12 results
@@ -1174,9 +1173,9 @@ M13 carries the M11 approach through to contact: from the 5 m hold the chaser cl
 - **Gates:** records are valid and uniform; every episode docks (success, a latch inside the envelope, both dwells satisfied, actuator bounds); no false completion or physical violation.
 - The fleet cannot carry a merged stack (masses and inertias are batch-wide in Rust), so M13 has no Monte Carlo campaign.
 
-```powershell
-.\.venv\Scripts\rpod.exe m13-calibrate
-.\.venv\Scripts\rpod.exe m13-suite --output runs/m13 --label m13
+```bash
+uv run --no-sync rpod m13-calibrate
+uv run --no-sync rpod m13-suite --output runs/m13 --label m13
 ```
 
 The design above was settled on off-suite episodes (M11's fault and stress specs 28–39). With the final design, all 12 docked, at 0.3–1.0 cm lateral offset and under 0.11 degrees misalignment.
@@ -1250,8 +1249,8 @@ M14 replaces the chaser's ideal body wrench with 16 thrusters and fails one of t
 - M5's 2 N/0.5 N·m actuator flag, which M13's docking gate used, does not apply: the hardware errors alone put actual thrust up to 3% over the request.
 - `--seed` other than 11 gives development episodes (different conditions and tumbles) and `--episodes` a subset. The expected response (dock) and the detection threshold were set on seed-14 episodes: two nominal and the 12-fault grid (`runs/m14-dev2`) all docked, every fault was exercised and isolated 0.1 s after its onset or first command, and contact came within 1.2 cm and 0.1°.
 
-```powershell
-.\.venv\Scripts\rpod.exe m14-suite --output runs/m14 --label m14
+```bash
+uv run --no-sync rpod m14-suite --output runs/m14 --label m14
 ```
 
 ### M14 results
@@ -1278,7 +1277,7 @@ M14 replaces the chaser's ideal body wrench with 16 thrusters and fails one of t
 ## Source layout and generated output
 
 - `README.md`, `LICENSE` (Apache-2.0, declared in `pyproject.toml` and the Cargo workspace) and `NOTICE` (credits for the NASA and ESA data downloaded at run time, which `docs/showcase.gif` is rendered from).
-- `.github/workflows/ci.yml`: on pushes to `main` and on pull requests, Windows and Ubuntu runners sync the locked environment, run the Rust tests, formatting and lints, build the release extension and run the Python tests. It runs on the private GitHub repository; its results are not recorded here.
+- `.github/workflows/ci.yml`: on pushes to `main` and on pull requests, Windows and Ubuntu runners sync the locked environment, run the Rust tests, formatting and lints, build the release extension and run the Python tests. GitHub Actions publishes each run on the public repository; the bit-exact M4 trace check is skipped there (see Visual environment interface).
 - `crates/rpod-core`: native dynamics and Rust acceptance tests.
 - `crates/rpod-python`: PyO3 interface and compiler provenance.
 - `crates/rpod-core/src/batch.rs`, `metrics.rs`: the batched engine and pair metrics (M9); `mesh.rs` (with its binding in `crates/rpod-python/src/mesh.rs`): target-mesh ray casts and closest points (M11).
@@ -1287,6 +1286,6 @@ M14 replaces the chaser's ideal body wrench with 16 thrusters and fails one of t
 - `benchmarks`: the result files and figures this reference cites (suite evaluations, campaign and benchmark summaries, the M11 surrogate fit) and `m4-qualified-source/`, the archived M4 execution sources with their hashes.
 - `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`, `m12-lidar-faults.md`, `m13-docking.md`, `m14-thrusters.md`) and the README's `showcase.gif`, cut from the M14 docking movie.
 - `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases. `tools/keypoints`: a separate uv project (Python 3.13, PyTorch) that trains the keypoint network and exports it to ONNX.
-- `tests`: Python integration and contract checks; `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
+- `tests`: Python integration and contract checks; `tests/helpers.py` holds the fixtures several test modules share, and `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
 
 Frozen-file hashes are taken over raw bytes, so `.gitattributes` checks text out with LF, except `blender_worker.py`. That file is stored byte-exact with CRLF line endings, as the M8 suite hashed it. `.gitignore` excludes the environment, tool environments under `tools/`, workspace-local uv cache, target directory, compiled extensions, Python caches, portable tools, and generated `runs/` and `datasets/` outputs. Blender is installed locally for M3/M4 and remains separate from the physics runtime. Contact engines are not installed, and PyTorch exists only in the `tools/keypoints` environment; the simulator runs the exported network through OpenCV.

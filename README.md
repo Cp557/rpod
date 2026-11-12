@@ -58,16 +58,16 @@ flowchart LR
 
 ## Quickstart
 
-Verified on Windows x86_64 with [uv](https://docs.astral.sh/uv/) and stable Rust (MSVC build tools). From the repository root:
+Needs [uv](https://docs.astral.sh/uv/) and stable Rust. Developed on Windows x86_64; CI also runs the tests on Ubuntu. From the repository root:
 
-```powershell
+```bash
 uv sync --locked
 uv run --locked maturin develop --release --locked
-.\.venv\Scripts\python.exe -m unittest discover -s tests
+uv run --no-sync python -m unittest discover -s tests
 
-.\.venv\Scripts\rpod.exe run --scenario drift --output runs/drift
-.\.venv\Scripts\rpod.exe replay runs/drift
-.\.venv\Scripts\rpod.exe monte-carlo --episodes 10000 --output runs/campaign
+uv run --no-sync rpod run --scenario drift --output runs/drift
+uv run --no-sync rpod replay runs/drift
+uv run --no-sync rpod monte-carlo --episodes 10000 --output runs/campaign
 ```
 
 Rendered experiments need Blender 5.2.3, at `.tools/blender-5.2.3-windows-x64/blender.exe` or on `PATH`. The realistic scene downloads NASA imagery and models (about 205 MB, hash-checked) on first use and is practical only on a CUDA GPU. [REFERENCE.md](REFERENCE.md#environment-and-commands) lists every command.

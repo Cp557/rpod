@@ -80,11 +80,11 @@ The approach closes straight along the rotating docking axis, so inside about 12
 
 ## Reproduce
 
-```powershell
-.\.venv\Scripts\rpod.exe m11-suite --output runs/m11-lidar-normals --label m11-lidar-normals
-.\.venv\Scripts\rpod.exe m12-suite --output runs/m12-lidar --label m12-lidar
-.\.venv\Scripts\rpod.exe m12-suite --output runs/m12-lidar-robust --configuration robust --label m12-lidar-robust
-.\.venv\Scripts\rpod.exe passive-safety runs/m11-lidar-normals --output benchmarks/m12-passive-safety.json
+```bash
+uv run --no-sync rpod m11-suite --output runs/m11-lidar-normals --label m11-lidar-normals
+uv run --no-sync rpod m12-suite --output runs/m12-lidar --label m12-lidar
+uv run --no-sync rpod m12-suite --output runs/m12-lidar-robust --configuration robust --label m12-lidar-robust
+uv run --no-sync rpod passive-safety runs/m11-lidar-normals --output benchmarks/m12-passive-safety.json
 ```
 
 The lidar-only runs need no renderer and take minutes on a CPU.

@@ -1,41 +1,18 @@
 """The vectorized fleet must reproduce the scalar reference law, supervisor and oracle."""
 
-from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 import numpy as np
 
 from rpod import fleet
-from rpod.approach import commanded_wrench, gap_profile, make_approach_scenario, state_metrics
+from rpod.approach import commanded_wrench, gap_profile, state_metrics
 from rpod.frames import quaternion_matrices
 from rpod.observations import ChaserInputs, NavigationEstimate, OwnNavigation
 from rpod.visual_control import MissionSpec, VisualController
 from rpod.visual_run import initial_state, paired_truth_baseline
 
-from test_visual_env import near_handoff
-
-
-def random_states(count, seed, max_angle_deg=20.0):
-    """Pairs near the 30 m handoff with random offsets, attitudes and rates."""
-    rng = np.random.default_rng(seed)
-    scenario = make_approach_scenario("approach")
-    base = fleet.manifest_state(scenario)
-    states = np.repeat(base[None], count, axis=0)
-    states[:, 1, :3] = states[:, 0, :3] + [0, -31.5, 0] + rng.normal(0, [0.5, 3, 0.5], (count, 3))
-    states[:, :, 3:6] += rng.normal(0, 0.02, (count, 2, 3))
-    axes = rng.normal(size=(count, 2, 3))
-    angles = rng.uniform(0, np.deg2rad(max_angle_deg), (count, 2, 1))
-    axes *= np.sin(angles / 2) / np.linalg.norm(axes, axis=-1, keepdims=True)
-    states[:, :, 6:10] = np.concatenate([axes, np.cos(angles / 2)], axis=-1)
-    states[:, :, 10:] += rng.normal(0, 0.003, (count, 2, 3))
-    return states
-
-
-def snapshot(state):
-    return SimpleNamespace(positions_m=state[:, :3], velocities_mps=state[:, 3:6],
-                           quaternions_xyzw=state[:, 6:10],
-                           angular_velocities_body_radps=state[:, 10:])
+from helpers import near_handoff, random_states, snapshot
 
 
 class FleetMatchesScalar(unittest.TestCase):

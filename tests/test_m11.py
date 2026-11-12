@@ -7,7 +7,6 @@ from unittest.mock import patch
 import numpy as np
 
 from rpod import fleet
-from rpod._core import TargetMesh
 from rpod.approach import make_engine, state_metrics
 from rpod.frames import matrix_quaternion, quaternion_matrices
 from rpod.keypoints import _peaks, _sample, calibrate_keypoints, keypoint_labels
@@ -21,28 +20,7 @@ from rpod.tumble import (tumble_initial_state, tumble_metrics, tumble_truth_base
 from rpod.tumble_fleet import TumbleFleetController, TumbleScoring
 from rpod.visual_control import MissionSpec
 
-from test_fleet import random_states, snapshot
-from test_visual_env import near_handoff
-
-
-def box(center, half):
-    """Triangles of an axis-aligned box."""
-    corners = np.array([[x, y, z] for z in (-1, 1) for y in (-1, 1) for x in (-1, 1)], float)
-    faces = [[0, 2, 1], [1, 2, 3], [4, 5, 6], [5, 7, 6], [0, 1, 4], [1, 5, 4],
-             [2, 6, 3], [3, 6, 7], [0, 4, 2], [2, 4, 6], [1, 3, 5], [3, 7, 5]]
-    return np.asarray(center) + corners * half, np.array(faces)
-
-
-def asymmetric_mesh():
-    """A bus with a wing and a boom, so no rotation maps it onto itself."""
-    parts = [box((0, 0, 0), (1.0, 1.0, 1.0)), box((3.0, 0.2, 0), (2.0, 0.05, 0.8)),
-             box((-0.4, 0.5, -1.8), (0.15, 0.15, 0.8))]
-    vertices, triangles, offset = [], [], 0
-    for part_vertices, part_triangles in parts:
-        vertices.append(part_vertices)
-        triangles.append(part_triangles + offset)
-        offset += len(part_vertices)
-    return TargetMesh(np.vstack(vertices), np.vstack(triangles).astype(np.uint32))
+from helpers import asymmetric_mesh, near_handoff, random_states, snapshot
 
 
 class M11(unittest.TestCase):

@@ -136,10 +136,7 @@ def run_scenario(scenario: str, output: Path) -> dict:
         write_json(output / "events.json", events)
     from .visualization import export_replay
 
-    if events is None:
-        export_replay(manifest, trajectory, output / "replay.rrd")
-    else:
-        export_replay(manifest, trajectory, output / "replay.rrd", events=events)
+    export_replay(manifest, trajectory, output / "replay.rrd", events=events)
     return summary
 
 
@@ -333,15 +330,8 @@ def replay_run(directory: Path, save_only: bool = False) -> Path:
     manifest, trajectory = load_run(directory)
     from .visualization import export_replay, open_replay
 
-    if manifest["schema_version"] == 2:
-        path = export_replay(
-            manifest,
-            trajectory,
-            Path(directory) / "replay.rrd",
-            events=load_events(directory, manifest),
-        )
-    else:
-        path = export_replay(manifest, trajectory, Path(directory) / "replay.rrd")
+    events = load_events(directory, manifest) if manifest["schema_version"] == 2 else None
+    path = export_replay(manifest, trajectory, Path(directory) / "replay.rrd", events=events)
     if not save_only:
         open_replay(path)
     return path

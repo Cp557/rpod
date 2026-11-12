@@ -21,8 +21,7 @@ from rpod.observations import ChaserInputs, NavigationEstimate, OwnNavigation
 from rpod.tumble import TumbleController, tumble_initial_state
 from rpod.visual_control import ControlDecision, MissionSpec
 
-from test_m11 import asymmetric_mesh
-from test_visual_env import near_handoff
+from helpers import asymmetric_mesh, near_handoff
 
 
 def tumbling_pair():

@@ -51,9 +51,9 @@ All 28 suite episodes docked: the same conditions, tumbles and seeds as M11's op
 
 ## Reproduce
 
-```powershell
-.\.venv\Scripts\rpod.exe m13-calibrate
-.\.venv\Scripts\rpod.exe m13-suite --output runs/m13 --label m13
+```bash
+uv run --no-sync rpod m13-calibrate
+uv run --no-sync rpod m13-suite --output runs/m13 --label m13
 ```
 
 Both run on the CPU; the suite takes about half an hour.

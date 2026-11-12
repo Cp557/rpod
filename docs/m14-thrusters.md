@@ -53,6 +53,6 @@ The suite flies M13's 28 docking episodes on thrusters, then 12 of them again wi
 
 ## Reproduce
 
-```powershell
-.\.venv\Scripts\rpod.exe m14-suite --output runs/m14 --label m14
+```bash
+uv run --no-sync rpod m14-suite --output runs/m14 --label m14
 ```
