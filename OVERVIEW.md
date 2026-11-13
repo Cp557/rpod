@@ -125,7 +125,6 @@ Game engines, Isaac Sim, a contact engine, GPU physics, and a large-scale learni
 ## Project documents
 
 - [README.md](README.md): a summary of results, architecture, and quickstart.
-- [CLAUDE.md](CLAUDE.md): instructions for AI coding agents working in this repository.
 - [OVERVIEW.md](OVERVIEW.md): purpose, direction, status by environment family, and open decisions.
 - [REFERENCE.md](REFERENCE.md): the canonical record of implemented architecture, interfaces, invariants, and operational behavior.
 - [docs](docs): milestone write-ups with method, results, limitations, and reproduction commands.
