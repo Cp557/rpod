@@ -8,6 +8,10 @@ Simulation, perception and autonomy for spacecraft rendezvous, proximity operati
 
 *A run from the M14 thruster suite (fault episode 00), its last 2 m sped up 4–13×. A thruster pushing toward the target stuck on 12 m out and was isolated in 0.1 s (the amber banner). On its other 15 thrusters the chaser closes on QuikSCAT's docking port as the target tumbles at 0.9°/s, docks, and stops the tumble. Plumes show each nozzle's recorded firings; the inset is the docking lidar's depth image. `rpod showcase` rendered it from the run's saved record.*
 
+The full movie follows the whole episode, from 30 m out to the detumble (34 s, 1080p):
+
+https://github.com/user-attachments/assets/32d1ce66-c285-4b55-965f-bab690bc53ea
+
 A chaser spacecraft flies itself to a satellite and docks with it, using only what its sensors deliver: camera images that Blender renders from the simulated state, and a simulated flash lidar, arriving late and sometimes dropped or degraded. The hardest case is a dead, unmarked satellite tumbling freely. The chaser recognizes it by its shape, follows its rotating docking axis in, is captured, and stops the tumble. Physics runs in Rust. Guidance, navigation and perception run in Python and, from M4 on, never see the target's true state: they get sensor data, or in the Monte Carlo campaigns a statistical model of navigation errors. The chaser knows its own state exactly. Every result below comes from a frozen, hash-checked evaluation suite, a seeded Monte Carlo campaign or a recorded benchmark, and every run saves records that replay without rerunning the physics.
 
 ## Results

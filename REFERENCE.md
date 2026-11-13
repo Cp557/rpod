@@ -726,6 +726,7 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 **Outputs:**
 - `showcase.mp4`.
 - The README's `docs/showcase.gif` is cut from M14 episode 00's movie (`runs/m14-showcase`), from 20 s to the end, sped up 1.4×, at 10 fps and 640×360 with a palette pass: `ffmpeg -ss 20 -t 14.4 -i showcase.mp4 -vf "setpts=PTS/1.4,fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 showcase.gif` (103 frames, 9.9 MB).
+- The README also embeds the whole movie, attached to a GitHub issue. GitHub caps video uploads at 10 MB on free accounts, so it is re-encoded in two passes at 2 Mb/s, still 1080p: `ffmpeg -i showcase.mp4 -c:v libx264 -preset slow -b:v 2000k -pass 1 -an -f null -`, then `ffmpeg -i showcase.mp4 -c:v libx264 -preset slow -b:v 2000k -pass 2 -pix_fmt yuv420p -movflags +faststart -an showcase-readme.mp4` (8.7 MB).
 - Clean renders are deleted once encoded; with `stills=True`, `frames/` keeps each clean PNG and the finished JPEG.
 - `showcase.json`: source manifest hash, the shots and when each began, camera rules, schedule, codec, lens settings, asset URLs, hashes and credits, render settings, and timing.
 - The marker assets.
