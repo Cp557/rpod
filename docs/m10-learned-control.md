@@ -1,6 +1,6 @@
 # M10: learned approach control behind a safety filter
 
-The reference controller flies a hand-designed gap profile with a PD law. M10 asks whether a policy learned entirely in simulation, from noisy onboard estimates, can fly the same approach better, with a simple runtime check that keeps it inside a verified safe envelope. The policy is trained in the M9 fleet against the M9 navigation surrogate, then judged in two places it never trained on: the paired 100,000-episode campaign and the frozen 40-episode rendered suite, where perception comes from rendered images.
+The reference controller flies a hand-designed gap profile with a PD law. M10 asks whether a policy learned entirely in simulation, from noisy onboard estimates, can fly the same approach better, with a simple runtime check that keeps it inside a predefined safe envelope. The policy is trained in the M9 fleet against the M9 navigation surrogate, then judged in two places it never trained on: the paired 100,000-episode campaign and the frozen 40-episode rendered suite, where perception comes from rendered images.
 
 [REFERENCE.md](../REFERENCE.md#learned-approach-control-m10) is the full specification.
 
@@ -58,7 +58,7 @@ The false completion is in abort episode 29, and it is not the policy's doing.
 - The reference stayed just inside, at 0.17–0.19 m.
 - The learned run's faster approach triggered the abort 29 s earlier, and it straddled the limit at 0.19–0.21 m. Its onboard dwell completed while the physical one did not.
 
-As planned, the gate failure is reported rather than tuned away. It points at the retreat's completion margin rather than at the policy.
+The gate failure is reported rather than tuned away. It points at the retreat's completion margin rather than at the policy.
 
 ## Limitations
 

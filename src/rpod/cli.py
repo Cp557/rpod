@@ -10,6 +10,8 @@ from .scenarios import SCENARIOS
 
 # The qualified realistic-scene camera calibration, which every suite from M8 on uses.
 REALISTIC_CALIBRATION = Path("datasets/m8-vbar/calibration.json")
+# The navigation surrogate every published Monte Carlo campaign used.
+PUBLISHED_SURROGATE = Path("models/m9-surrogate.json")
 
 
 def _suite_parser(commands, name, description, label):
@@ -104,7 +106,7 @@ def main(argv=None) -> int:
     )
     campaign.add_argument("--episodes", type=int, default=100_000)
     campaign.add_argument("--seed", type=int, default=9)
-    campaign.add_argument("--model", type=Path, default=Path("models/m9-surrogate.json"))
+    campaign.add_argument("--model", type=Path, default=PUBLISHED_SURROGATE)
     campaign.add_argument("--controller", choices=("reference", "learned"), default="reference")
     campaign.add_argument("--scenario", choices=("operational", "tumbling"),
                           default="operational")
@@ -275,7 +277,10 @@ def main(argv=None) -> int:
                 label=args.controller, scenario=scenario, provenance=provenance)
             name = ("m11-monte-carlo" if args.scenario == "tumbling" else
                     "m9-monte-carlo" if args.controller == "reference" else "m10-monte-carlo")
-            evidence = _publish(args.output / "report.json", f"{name}.json")
+            evidence = args.output / "report.json"
+            # Only the published settings replace the evidence in benchmarks/.
+            if (args.episodes, args.seed, args.model) == (100_000, 9, PUBLISHED_SURROGATE):
+                evidence = _publish(evidence, f"{name}.json")
             low, high = report["success_fraction_95_interval"]
             print(f"Success {report['success_fraction']:.5f} (95% interval {low:.5f}-{high:.5f}) "
                   f"over {report['episodes']} episodes; report: {evidence.resolve()}")

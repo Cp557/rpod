@@ -1,6 +1,6 @@
 # M15: far-range rendezvous, stage 0
 
-Every episode so far starts with the chaser already 30 m from the target. M15 will start it kilometres behind, on the same orbit, and bring it to that 30 m hold point. On the way it navigates by camera bearings alone: the direction to the target, without its distance or attitude. Stage 0 measured the unknowns that decide how to build that, before building any of it. [REFERENCE.md](../REFERENCE.md#far-range-rendezvous-m15-stage-0) has the specification, and [benchmarks/m15-stage0.json](../benchmarks/m15-stage0.json) the numbers.
+Every approach so far starts within 100 m of the target, most at a 30 m hold point. M15 will start it kilometres behind, on the same orbit, and bring it to that 30 m hold point. On the way it navigates by camera bearings alone: the direction to the target, without its distance or attitude. Stage 0 measured the unknowns that decide how to build that, before building any of it. [REFERENCE.md](../REFERENCE.md#far-range-rendezvous-m15-stage-0) has the specification, and [benchmarks/m15-stage0.json](../benchmarks/m15-stage0.json) the numbers.
 
 ## Physics: keep the 0.1 s tick, call the engine in blocks
 
@@ -39,7 +39,7 @@ The schema-3 record that every episode so far writes, and the loader that checks
 
 ## Cameras: a narrow one needs no new Blender code
 
-The plan expected a new Blender worker for a narrow camera. None is needed: the camera's field of view already reaches Blender's lens. Each camera does need its own Blender process, since a renderer holds one camera.
+A narrow camera needs no new Blender code: the camera's field of view already reaches Blender's lens. Each camera does need its own Blender process, since a renderer holds one camera.
 
 The detectability renders show the unmarked QuikSCAT, wings stowed, holding its attitude, from 1, 2, 3 and 5 km behind. The Sun is 30°, 90° or 150° from the camera direction (150° lights it from behind). The images get the suites' sensor noise (2 grey levels) and blur.
 
@@ -69,7 +69,7 @@ Each cell spans the three Sun angles. A pixel counts when the target changes it 
 - The renderer draws no stars, Sun glare or stray light, so a sunlit target on black space is nearly always found by a threshold. At the 150° Sun angle the Sun sits 30° off the camera's axis with no penalty here.
 - One target attitude was rendered, holding steady relative to its orbit with the wings stowed.
 - The records finding comes from reading the loader and the runner, not from a run.
-- The two cameras' Blender processes ran one after the other; two at once on the 6 GB card is unmeasured. Starting one takes 2.3–2.5 s, so switching cameras at the handover is cheap.
+- The two cameras' Blender processes ran one after the other; two at once on the 6 GB GPU used here is unmeasured. Starting one takes 2.3–2.5 s, so switching cameras at the handover is cheap.
 - One far-range coast and one narrow field of view were measured.
 
 ## Reproduce

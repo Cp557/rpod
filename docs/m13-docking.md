@@ -40,7 +40,7 @@ All 28 suite episodes docked: the same conditions, tumbles and seeds as M11's op
 
 - **After a 31 s blind coast,** the chaser's estimate of the port was still within 1.2 cm laterally and 1.5 cm along the axis.
 - **Capture** came about 342 s after starting 30 m out. The detumble then took 11–20 s, longer for faster tumbles.
-- **Fuel grows with the square of the tumble rate:** 0.4 m/s of delta-v at 0.2°/s, up to 2 m/s at 1°/s. Following a rotating docking axis means thrusting continually just to stay on it.
+- **Fuel rises steeply with the tumble rate:** 0.4 m/s of delta-v at 0.2°/s, up to 2 m/s at 1°/s. Following a rotating docking axis means thrusting continually just to stay on it.
 
 ## Limitations
 

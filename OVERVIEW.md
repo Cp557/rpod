@@ -2,15 +2,13 @@
 
 RPOD is a project to build efficient, reproducible simulation environments for autonomous spacecraft rendezvous, proximity operations, and docking.
 
-It began as a portfolio project, with the longer-term intention of exploring whether the work could become the foundation of a startup.
-
 The stack is a custom Rust simulation core, Python for experiments and autonomy, Rerun for engineering visualization, and Blender for spacecraft assets and camera imagery.
 
 This document describes the project's purpose and direction; it is not an implementation specification. [REFERENCE.md](REFERENCE.md) records implemented behavior and qualification results, and [README.md](README.md) summarizes them by milestone. Work proceeds in small, inspectable milestones rather than implementing a whole model catalog at once.
 
 ## Where it stands
 
-A chaser flies itself to a target satellite on delayed sensor observations. The target was first cooperative, carrying markers and retroreflectors; later it is NASA's QuikSCAT, stripped of them and tumbling freely. Blender renders camera images from the states the feedback loop reaches, and a simulated flash lidar feeds the same navigation filter. On the unmarked satellite, matching lidar scans to its shape carries most of the navigation, and a trained network finds keypoints in the images. A batched engine runs Monte Carlo campaigns of 100,000 episodes, in which a learned approach controller was trained and evaluated behind a safety filter. The chaser docks with the tumbling satellite: a momentum-conserving latch captures it at contact inside a stated envelope, and the chaser then detumbles the joined pair.
+A chaser flies itself to a target satellite on delayed sensor observations. The target was first cooperative, carrying markers and retroreflectors; later it is NASA's QuikSCAT, stripped of them and tumbling freely. Blender renders camera images from the states the feedback loop reaches, and a simulated flash lidar feeds the same navigation filter. On the unmarked satellite, matching lidar scans to its shape carries most of the navigation, and a trained network finds keypoints in the images. A batched engine runs Monte Carlo campaigns of 100,000 episodes, in which a learned approach controller was trained and evaluated behind a safety filter. The chaser docks with the tumbling satellite: a momentum-conserving latch captures it at contact inside a stated envelope, and the chaser then detumbles the joined pair. The same docking also flies on 16 thrusters, one of which fails mid-approach and is isolated. Far-range rendezvous is next; its first stage measured what that needs.
 
 ## End goal
 
@@ -24,12 +22,6 @@ Perception is a central part of the project. The long-term goal includes autonom
 
 Engine efficiency is a core objective alongside autonomy and perception. We want control over the execution, memory use, and batching of simulation environments, with compute energy measured where practical. Improvements must preserve the declared model fidelity and numerical accuracy.
 
-## Portfolio and startup potential
-
-The near-term goal is a substantial portfolio project that demonstrates spacecraft simulation, Rust systems engineering, perception, autonomous control, and quantitative performance evaluation. It should produce understandable demonstrations, reproducible experiments, measured benchmarks, and clear documentation that make the work easy to assess.
-
-The longer-term goal is to explore whether these capabilities solve a specific problem well enough to support a startup. That possibility should be informed by technical results and evidence of useful applications. Target users, product scope, business model, and commercial viability have not been established. The portfolio project should remain valuable as a technical achievement while those possibilities are explored.
-
 ## Environment families
 
 | Environment | Behavior | Status |
@@ -41,7 +33,7 @@ The longer-term goal is to explore whether these capabilities solve a specific p
 | Abort and retreat | Respond to an unsafe condition or fault and execute a defined retreat maneuver. | Built: aborts retreat to 30 m, lost tracking brakes, and a navigation loss triggers a collision-avoidance burn (M12). |
 | Docking contact | Physical contact, capture, and latching with a specified docking mechanism. | Partly: capture inside a stated envelope by a momentum-conserving latch, then a detumble (M13); no contact dynamics. |
 
-Seeded variation, disturbances, sensor degradation and faults, actuator faults (a thruster stuck on or off, M14), and batch evaluation exist.
+Seeded variation, initial-state disturbances, sensor degradation and faults, actuator faults (a thruster stuck on or off, M14), and batch evaluation exist.
 
 ## Why a custom Rust core
 
@@ -119,7 +111,6 @@ Verification should include analytical motion cases, frame and port-kinematics c
 
 ## Decisions still open
 
-- Target users, useful applications, and product scope for potential commercialization.
 - Physical parameters and task thresholds beyond the current fixed suites.
 - Targets of unknown shape or inertia, and the inspection and synchronization that precede a tumbling-target approach.
 - Whether other suites should move from ideal force/torque actuation to M14's thrusters, and propellant mass depletion.
@@ -134,7 +125,7 @@ Game engines, Isaac Sim, a contact engine, GPU physics, and a large-scale learni
 ## Project documents
 
 - [README.md](README.md): a summary of results, architecture, and quickstart.
-- [CLAUDE.md](CLAUDE.md): instructions for working in this repository.
+- [CLAUDE.md](CLAUDE.md): instructions for AI coding agents working in this repository.
 - [OVERVIEW.md](OVERVIEW.md): purpose, direction, status by environment family, and open decisions.
 - [REFERENCE.md](REFERENCE.md): the canonical record of implemented architecture, interfaces, invariants, and operational behavior.
 - [docs](docs): milestone write-ups with method, results, limitations, and reproduction commands.

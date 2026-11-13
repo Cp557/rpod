@@ -6,7 +6,7 @@ Through M13 the chaser pushed itself with an ideal force and torque: any directi
 
 ## The thruster set
 
-Sixteen 1 N thrusters sit in four corner pods, the layout the showcase movie already drew. Each pod fires outward sideways, outward up or down, and both ways along the docking axis.
+Sixteen 1 N thrusters sit in four corner pods, the same layout the showcase movie shows. Each pod fires outward sideways, outward up or down, and both ways along the docking axis.
 - **Specific impulse** is 220 s, and the **minimum on-time** is 10 ms.
 - **The hardware is imperfect:** each thruster's thrust is off by up to 3% and its direction by up to 0.5°, drawn per episode. The flight software knows only the nominal design.
 - **Authority:** with everything healthy, the set delivers ±2 N sideways, ±4 N along the docking axis, and ±1.44 N·m about every axis.
@@ -39,7 +39,7 @@ The suite flies M13's 28 docking episodes on thrusters, then 12 of them again wi
 - **Every failure was caught and isolated 0.1 s after it began,** or after the stuck-off thruster was first commanded, and it was always the right thruster and the right kind of failure. Each fault episode still docked.
 - **No false alarms:** across the 28 healthy episodes nothing was isolated, and no failure hypothesis ever looked more likely than "no failure".
 - **The thrusters could always do what was asked,** even after losing one.
-- **A docking used 27–146 g of propellant** (median 62 g), more the faster the target tumbles: keeping station on a rotating docking axis takes constant thrust.
+- **A nominal docking used 26–146 g of propellant** (median 62 g; the fault episodes 27–150 g), more the faster the target tumbles: keeping station on a rotating docking axis takes constant thrust.
 - **A small wobble remains:** on thrusters the relative rotation at contact rose from essentially zero with M13's ideal actuators to about 0.01°/s, still a twentieth of the limit.
 
 ## Limitations

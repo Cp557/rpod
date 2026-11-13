@@ -11,7 +11,7 @@ used under its providers' terms:
   Maps 2020; Gaia DR2: ESA/Gaia/DPAC.
 - Spacecraft models: NASA 3D Resources (QuikSCAT, IBEX).
 
-docs/showcase.gif is rendered from these assets.
+docs/showcase.gif and docs/m15-detectability.png are rendered from these assets.
 
 Optional tools install their own dependencies: Basilisk (tools/basilisk) and PyTorch
 with torchvision ImageNet weights (tools/keypoints).

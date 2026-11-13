@@ -4,7 +4,23 @@ This document records implemented behavior. [OVERVIEW.md](OVERVIEW.md) describes
 
 ## Current implementation
 
-RPOD 0.1.0 implements M1 orbital experiments, M2 truth-state controlled pre-contact approach, M3 calibrated cooperative-marker perception, M4 image-based closed-loop approach, the M5 reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite, M6 optional simulated flash lidar fused with the camera in the same navigation filter, and an M7 optional realistic render scene (space lighting, Earth, GPU rendering), upgraded in M8 to NASA's QuikSCAT model as the target bus, a NASA-imaged rotating Earth with an atmosphere, and a raised Sun. The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. M9 adds a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk. M10 trains an approach policy in that fleet and flies it behind a runtime safety filter, scored on the same paired campaign and rendered suite as the reference controller; the learned rendered suite fails its fault gate on one abort episode. M11 removes the cooperative aids and lets the target tumble freely: the chaser navigates by lidar shape matching against the target mesh, optionally fused with camera keypoints from a trained network, and holds in the tumbling port's frame; its lidar-only and fused suites pass all gates, but the M9 surrogate does not validate against the fused suite, so M11 makes no Monte Carlo claim. M12 fails the lidar itself on the tumbling target, adds a collision-avoidance burn after a navigation loss and a coast check for passive safety, and fixes a mesh-normal defect that had degraded M11's lidar shape matching; with the fixed core and a more tolerant configuration, the chaser recovers from all twelve suite faults. M13 docks: with a 90-degree lidar on its docking axis, an attitude hold close in and a committed final coast, the chaser closes on the tumbling port, is captured inside a stated envelope by a momentum-conserving latch, and detumbles the joined stack, in all 28 suite episodes. M14 flies that docking on 16 individual thrusters with seeded hardware errors, allocated by a linear program and pulse-modulated, and fails one thruster stuck on or stuck off; an IMU-residual likelihood-ratio test isolates it and allocation carries on without it. M15 stage 0 measures what far-range rendezvous needs (physics cost and accuracy over hours, camera pointing, Earth's shadow, records, and the target's visibility at 1–5 km) and adds a Sun and eclipse model; the rendezvous itself is not built. Fuel/mass depletion, environmental disturbances, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
+RPOD 0.1.0 implements:
+- **M1:** orbital experiments.
+- **M2:** a truth-state controlled pre-contact approach.
+- **M3:** calibrated cooperative-marker perception.
+- **M4:** an image-based closed-loop approach.
+- **M5:** the reusable visual environment (`reset`/`step`) with a frozen 40-episode evaluation suite.
+- **M6:** optional simulated flash lidar, fused with the camera in the same navigation filter.
+- **M7, upgraded in M8:** an optional realistic render scene (space lighting, Earth, GPU rendering). M8 makes NASA's QuikSCAT model the target bus, adds a NASA-imaged rotating Earth with an atmosphere, and raises the Sun. The M7 realistic suite had failed its fault gate when one abort episode's target entered Earth's shadow; in M8 no episode reaches sunset.
+- **M9:** a batched Rust engine, vectorized reference autonomy and a validated navigation surrogate for 100,000-episode Monte Carlo campaigns, with dynamics cross-checked against Basilisk.
+- **M10:** an approach policy trained in that fleet and flown behind a runtime safety filter, scored on the same paired campaign and rendered suite as the reference controller. The learned rendered suite fails its fault gate on one abort episode.
+- **M11:** the cooperative aids removed and the target tumbling freely. The chaser navigates by lidar shape matching against the target mesh, optionally fused with camera keypoints from a trained network, and holds in the tumbling port's frame. Its lidar-only and fused suites pass all gates, but the M9 surrogate does not validate against the fused suite, so M11 makes no Monte Carlo claim.
+- **M12:** lidar faults on the tumbling target, a collision-avoidance burn after a navigation loss, and a coast check for passive safety. It also fixes a mesh-normal defect that had degraded M11's lidar shape matching. With the fixed core and a more tolerant configuration, the chaser recovers from all twelve suite faults.
+- **M13:** docking. With a 90-degree lidar on its docking axis, an attitude hold close in and a committed final coast, the chaser closes on the tumbling port, is captured inside a stated envelope by a momentum-conserving latch, and detumbles the joined stack, in all 28 suite episodes.
+- **M14:** that docking on 16 individual thrusters with seeded hardware errors, allocated by a linear program and pulse-modulated, with one thruster failing stuck on or stuck off. An IMU-residual likelihood-ratio test isolates it, and allocation carries on without it.
+- **M15 stage 0:** measurements of what far-range rendezvous needs (physics cost and accuracy over hours, camera pointing, Earth's shadow, records, and the target's visibility at 1–5 km), and a Sun and eclipse model. The rendezvous itself is not built.
+
+The rendered-pixel M3 gates (in the simple and realistic scenes), all six fixed M4 qualification cases, and the M5, M6 lidar and M8 realistic suite gates pass. A presentation-only `showcase` command renders a saved run as a realistic outside-view movie. Fuel/mass depletion, environmental disturbances, and collision/contact dynamics are not implemented. Simple rendered geometry does not define a contact model.
 
 The Rust `rpod-core` crate owns state and time. `rpod-python` exposes it through PyO3. Python defines scenarios, collects snapshots, derives relative state and diagnostics, and exports recordings. Physics has no renderer dependency.
 
@@ -22,7 +38,7 @@ uv run --no-sync rpod run --scenario circular --output runs/circular
 uv run --no-sync rpod run --scenario drift --output runs/drift
 uv run --no-sync rpod replay runs/drift
 uv run --no-sync rpod replay runs/drift --save-only
-uv run --no-sync rpod benchmark --output benchmarks/m1.json
+uv run --no-sync rpod benchmark --output runs/m1-benchmark.json
 ```
 
 `python -m rpod` provides the same commands. `run` defaults to `circular` and never launches a viewer. Output must be a new or empty directory. `replay` regenerates `replay.rrd` from numerical records and opens the native viewer unless `--save-only` is supplied. It never constructs an engine or propagates physics. Benchmark JSON files must not already exist.
@@ -192,7 +208,7 @@ Acceptance tolerances: maximum position error <1 mm and velocity error <1 μm/s 
 
 Measured on this build: circular maximum position error approximately 2.01 μm and velocity error 2.12 nm/s over 6,000 seconds; local-position change 0.336 μm and local speed 0.158 nm/s. The 600 s drift scenario ends at approximately `[19.594, -79.006, 11.099] m` local position and 82.153 m range.
 
-Both M1 recordings passed Rerun file verification and native rendering on this hardware. Screenshots are saved as `runs/circular/preview.png` and `runs/drift/preview.png`. The native viewer was opened with both recordings. Automated interaction could not proceed because computer-use app approval timed out; manual playback-control acceptance remains outstanding. Sandbox launches did not expose a window; native rendering and opening were verified outside the agent sandbox.
+Both M1 recordings pass Rerun file verification and open in the native viewer; screenshots are saved as `runs/circular/preview.png` and `runs/drift/preview.png`. Interactive playback controls are untested.
 
 M2 adds six Rust checks for unequal-inertia torque-free motion, analytic spin/constant torque, rotating body thrust, norm limits/reset, invalid body parameters, and overflow/failed-tick atomicity. Over 100 s at 0.01 s steps, torque-free energy and inertial angular-momentum vector changes stay below 1e-9 fractionally and quaternion norm error below 1e-14. Python adds four focused checks covering independent offset-port finite differences, full nominal/disturbed dwell and bounded commands, v2 replay/corruption, retreat timing/safety, and dwell reset boundaries.
 
@@ -206,7 +222,7 @@ Verified M2 demonstrations:
 | approach-disturbed | success | 703.5 s | 4.99653 m | 0.001425 m/s |
 | approach-retreat | retreated | 885.2 s | 60.0058 m | 0.002402 m/s |
 
-The retreat request occurs at tick 5784 (578.4 s), immediately updates control, and preserves `scheduled_abort_at_20m` through its terminal outcome. All three RRD files pass file verification. Native screenshots of disturbed approach and retreat are saved under their run directories; actual attitude, ports, guidance, wrench, and phase telemetry were visually inspected. Interactive playback controls have not been re-certified.
+The retreat request occurs at tick 5784 (578.4 s), immediately updates control, and preserves `scheduled_abort_at_20m` through its terminal outcome. All three RRD files pass file verification. Native screenshots of disturbed approach and retreat are saved under their run directories; actual attitude, ports, guidance, wrench, and phase telemetry were visually inspected. Interactive playback controls are untested.
 
 ## Benchmark baseline
 
@@ -226,7 +242,7 @@ An additional M2 release measurement, `benchmarks/m2-native.json`, records appro
 
 ## Visual perception and navigation implementation
 
-The Python environment includes `opencv-python-headless==4.14.0.94` (runtime OpenCV 4.14.0), verified on standard CPython 3.15.1 with ArUco, PnP, and PNG encoding. Portable Blender 5.2.3 LTS is installed at `.tools/blender-5.2.3-windows-x64/blender.exe`; its archive was checked against the official SHA256 manifest. It runs a separate bundled-Python worker and does not import RPOD's native extension. Cycles CPU rendering works in background mode on this machine.
+The Python environment includes `opencv-python-headless==4.14.0.94` (runtime OpenCV 4.14.0), verified on standard CPython 3.15.1 with ArUco, PnP, and PNG encoding. Portable Blender 5.2.3 LTS is installed at `.tools/blender-5.2.3-windows-x64/blender.exe`; its archive was checked against the official SHA256 manifest. It runs a separate bundled-Python worker and does not import RPOD's native extension. Cycles CPU rendering works in background mode on the development machine.
 
 The immutable observation records are `OwnNavigation`, `ImageObservation`, `PoseEstimate`, `NavigationEstimate`, and `ChaserInputs`. Image observations carry actual pixels and capture/delivery times. Pose estimates map target-body coordinates into optical camera coordinates. Own navigation supplies only the chaser's position, velocity, body-to-inertial quaternion, and body angular rate. `ChaserInputs` has optional target estimate and an accepted/invalid/no-delivery flag; it contains no physical two-body snapshot or target initialization.
 
@@ -743,7 +759,7 @@ M9 steps many independent episodes together and turns the fixed 40-episode suite
 - **Rejections:** a Bernoulli draw per delivery with the fitted probability for the time since the first estimate. Rejected deliveries hold the estimate and send `visual_update` False, so the controller brakes exactly as the reference client does. M8's operational episodes rejected 4 of about 5,900 deliveries, all 14–34 s after the first estimate.
 - `rpod fit-surrogate` validates the procedure, then fits `models/m9-surrogate.json` on all 28 operational episodes of `runs/m8-realistic`. Validation fits on half the episodes (pairs of indices alternate, so both halves hold degraded and clean images) and passes two checks: for each of completion time, minimum port gap, final port speed and braking count, at least 25 of the 28 rendered values lie inside the central 95% band of 200 surrogate runs of the same episode; and held-out estimate-error medians and P95 lie within 25% of the surrogate's.
 
-**Campaigns** (`monte_carlo.py`). `campaign_spec(seed, index)` draws the M5 operational distribution (`m5_suite.operational_conditions`, shared with the suites, and `initial_state` seed `seed × 10⁷ + index`, clear of the suites' 1000 + index). `run_campaign` runs batches of 16,384 and writes `campaign.json`, `episodes.npz` (per-episode outcome, end tick, completion time, minimum port gap and range, final speed and gap, Δv, brakes, abort reason), `failures.jsonl` and `report.json` with a Clopper–Pearson 95% interval. The same seed and batch size reproduce every episode. `rpod monte-carlo-replay CAMPAIGN --index N` reruns any episode of a reference-controller operational campaign (M9) as a full rendered visual episode. It refuses learned-controller and tumbling campaigns, whose controller and environment it does not rebuild.
+**Campaigns** (`monte_carlo.py`). `campaign_spec(seed, index)` draws the M5 operational distribution (`m5_suite.operational_conditions`, shared with the suites, and `initial_state` seed `seed × 10⁷ + index`, clear of the suites' 1000 + index). `run_campaign` runs batches of 16,384 and writes `campaign.json`, `episodes.npz` (per-episode outcome, end tick, completion time, minimum port gap and range, final speed and gap, Δv, brakes, abort reason), `failures.jsonl` and `report.json` with a Clopper–Pearson 95% interval. The same seed and batch size reproduce every episode. `rpod monte-carlo` copies `report.json` into `benchmarks/` (`m9-`, `m10-` or `m11-monte-carlo.json`, by controller and scenario) only at the published settings: 100,000 episodes, seed 9 and the M9 surrogate. Other runs keep it in their output directory. `rpod monte-carlo-replay CAMPAIGN --index N` reruns any episode of a reference-controller operational campaign (M9) as a full rendered visual episode. It refuses learned-controller and tumbling campaigns, whose controller and environment it does not rebuild.
 
 **Basilisk cross-check** (`crosscheck.py`, `tools/basilisk`). `rpod basilisk-cases` writes three cases: one 5,500 s orbit of point-mass gravity, a 1,000 s torque-free tumble with the target's inertia, and 300 s of constant body-frame force and torque on the chaser. `tools/basilisk/propagate.py` runs them in Basilisk (its own uv project on Python 3.13, `bsk` 2.12.2) with RK4 at the same 0.1 s step, and `rpod basilisk-compare` reports the largest differences against tolerances of 1 mm, 1 µm/s, 1e-6 rad and 1e-9 rad/s.
 
@@ -751,7 +767,7 @@ M9 steps many independent episodes together and turns the fixed 40-episode suite
 uv run --no-sync rpod fit-surrogate --suite runs/m8-realistic --output models/m9-surrogate.json
 uv run --no-sync rpod monte-carlo --episodes 100000 --seed 9 --output runs/m9-monte-carlo
 uv run --no-sync rpod monte-carlo-replay runs/m9-monte-carlo --index 6 --output runs/m9-replay-6
-uv run --no-sync rpod benchmark --batch --output benchmarks/m9-batch.json
+uv run --no-sync rpod benchmark --batch --output runs/m9-batch.json
 uv run --no-sync rpod basilisk-cases --output runs/m9-crosscheck/cases.json
 uv run --project tools/basilisk python tools/basilisk/propagate.py runs/m9-crosscheck/cases.json runs/m9-crosscheck/basilisk.json
 uv run --no-sync rpod basilisk-compare --cases runs/m9-crosscheck/cases.json --basilisk runs/m9-crosscheck/basilisk.json --output runs/m9-crosscheck/report.json
@@ -759,7 +775,7 @@ uv run --no-sync rpod basilisk-compare --cases runs/m9-crosscheck/cases.json --b
 
 ### M9 results
 
-All M9 checks pass. Measured on the same desktop as earlier benchmarks (i7-8700K, 6 cores and 12 threads), not isolated: another session's Blender render ran during the campaign and the benchmark.
+All M9 checks pass. Measured on the same desktop as earlier benchmarks (i7-8700K, 6 cores and 12 threads), not isolated: a separate Blender render ran during the campaign and the benchmark.
 
 **Equivalence:** the fleet reproduces the scalar law, supervisor and oracle (3 Python tests), and the batch reproduces independent engines bitwise for any thread count (5 Rust tests).
 
@@ -821,7 +837,7 @@ M10 replaces the reference translational law in approach with a learned policy b
 - `VisualEnv`: `_renderer`, `_target_command`, `_scoring_metrics`, `_boundary`, `_physically_valid`, `_capture_due`, `_image_pose`, `_scan_ranges` and `_lidar_pose`.
 - `VisualAgent(..., controller=None, navigator=None)` and `run_episode(..., controller=None, env_class=VisualEnv, navigator=None)`.
 - `VisualNavigation` class attributes for its initialization priors and rotation process noise: `initial_velocity_sigma_mps` 0.1, `initial_rate_sigma_radps` 0.005, `rotation_spectral_density` 4e-8 and `acquisition_rotation_spectral_density` 2.5e-5, the former inline constants.
-- The 58 M9 Python tests, including the pre-refactor M4 trace digest, pass unchanged. Because the hashes changed, the realistic suite is re-run on this tree as `runs/m10-reference` (`--label m10-reference`), which is also the same-tree baseline for the learned controller.
+- The 58 M9 Python tests, including the M4 trace digest recorded before these hooks, pass unchanged. Because the hashes changed, the realistic suite is re-run on this tree as `runs/m10-reference` (`--label m10-reference`), which is also the same-tree baseline for the learned controller.
 
 **Policy** (`policy.py`). A NumPy MLP, 13 → 64 → 64 → 3 with tanh hidden and output layers, 5,251 parameters.
 - Inputs, from onboard estimates: the port offset from the hold point at a 10 m scale and clipped at ±1 m, the port velocity at a 0.1 m/s scale and clipped at ±0.02 m/s, and the estimate age over 3 s.
@@ -950,7 +966,7 @@ M11 removes the cooperative aids and lets the target tumble: the chaser must fin
 
 **Fleet variant** (`tumble_fleet.py`). `TumbleFleetController` and `TumbleScoring` vectorize `TumbleController` and `TumbleEnv`'s physics and scoring for the M9 fleet; a test holds the fleet's outcomes and end ticks equal to `tumble_truth_baseline` for two tumbles. The fleet keeps the center-of-mass and port-gap boundaries but does not check hull clearance against the mesh.
 - `rpod fit-surrogate --scenario tumbling` fits and validates the M9 surrogate on a tumbling suite. As failures it counts the ticks 0.2 s after each whole second whose `visual_update` was False, what a multi-sensor agent brakes on.
-- `rpod monte-carlo --scenario tumbling` runs a campaign of `tumbling_spec` episodes (the operational draw plus a tumble, drawn as the suite draws it) and copies its report to `benchmarks/m11-monte-carlo.json`.
+- `rpod monte-carlo --scenario tumbling` runs a campaign of `tumbling_spec` episodes (the operational draw plus a tumble, drawn as the suite draws it) and, at the published settings, copies its report to `benchmarks/m11-monte-carlo.json`.
 
 ```bash
 uv run --no-sync rpod m11-assets
@@ -1194,7 +1210,7 @@ The design above was settled on off-suite episodes (M11's fault and stress specs
 
 - **Estimate at contact:** the filter's port estimate on the last tick before the latch was off by a median 0.64 cm laterally (max 1.2 cm) and 0.91 cm axially (max 1.5 cm), after the 31 s committed coast.
 - **Timing:** the latch came at 340–358 s (median 342 s). The detumble took 10.9–20.2 s (median 14.4 s), growing with the tumble rate (correlation 0.95). Episodes end at 353–369 s.
-- **Delta-v:** 0.42–1.98 m/s per episode (median 0.87), growing with the square of the tumble rate (correlation 0.94). Holding a rotating docking axis takes continual centripetal thrust: at 1°/s the 30 m approach costs about four times as much as at 0.2°/s.
+- **Delta-v:** 0.42–1.98 m/s per episode (median 0.87), rising with the tumble rate (correlation 0.92 with the rate and 0.94 with its square). Holding a rotating docking axis takes continual centripetal thrust: the fastest tumble (1°/s) cost almost five times the slowest (0.2°/s).
 - **Clearance:** before the latch, hull points away from the interface stayed at least 6.3 cm from the mesh. That is the outer face over the plate at contact.
 - **Wall time:** 34 min on the CPU (68–80 s per episode), without a renderer.
 
@@ -1207,7 +1223,7 @@ M14 replaces the chaser's ideal body wrench with 16 thrusters and fails one of t
 - 16 thrusters at 1 N, specific impulse 220 s, minimum on-time 10 ms.
 - Authority with all healthy, along each axis with the other five wrench components zero: ±2 N in x and z, ±4 N in y, ±1.44 N·m about each axis.
 - **Hardware errors**, drawn per episode from stream `[seed, index, 6]`: thrust scale uniform within ±3%, and a tilt of up to 0.5° about a random axis across the nominal direction. The driver knows only the nominal geometry.
-- **Mass** stays constant: a docking burns 27–150 g of 100 kg. Propellant is accounted as Σ thrust·on-time / (Isp·g₀).
+- **Mass** stays constant: a docking burns 26–150 g of 100 kg. Propellant is accounted as Σ thrust·on-time / (Isp·g₀).
 
 **Allocation.** Each tick the driver bounds the requested force to 2 N and torque to 0.5 N·m, as M13's engine did, then solves one linear program over the healthy thrusters (SciPy `linprog`, HiGHS):
 - Duty cycles u in [0, 1] with B·u = s·w, where B is the nominal 6×n wrench matrix, w the bounded request and s ≤ 1 its scale.
@@ -1269,7 +1285,7 @@ uv run --no-sync rpod m14-suite --output runs/m14 --label m14
 - **Faults:** all 12 triggered and all were exercised. Each was isolated, the right thruster and kind and nothing else, 0.1 s after its onset (stuck on) or first command (stuck off), and every episode docked. The failed thrusters were 10, 2, 6 (closing, stuck on), 1, 0, 5 (lateral, stuck on), 10, 2, 14 (closing, stuck off) and 8, 8, 5 (lateral, stuck off).
 - **No false alarm:** no isolation in the 28 nominal episodes, and before any fault no hypothesis ever gained evidence over no fault (largest statistic 0, threshold 50).
 - **Allocation never saturated:** every request was met at full scale, nominal and after every isolation.
-- **Propellant:** 27–146 g per nominal docking (median 62 g, P95 132 g), growing with the square of the tumble rate (correlation 0.95), as M13's delta-v did. The fault episodes used 27–150 g.
+- **Propellant:** 26–146 g per nominal docking (median 62 g, P95 132 g), rising with the tumble rate (correlation 0.93 with the rate and 0.95 with its square), as M13's delta-v did. The fault episodes used 27–150 g.
 - **Delta-v** from the applied force: median 0.94 m/s (M13 0.87), per episode 0.89–1.19× M13's. Total thruster impulse over mass is a median 1.34 m/s: couples and opposing pairs fire against each other for torque.
 - **Timing:** the latch came at 340–357 s; the detumble took 10.9–20.5 s.
 - **Wall time:** 32 min on the CPU (46–56 s per episode), without a renderer.
@@ -1346,7 +1362,7 @@ M15 is to bring the chaser from kilometres behind the target to the 30 m hold po
 - health is "lost" beyond a 3 s observation age;
 - every 0.1 s tick is saved: for 3 h that is about 56 MB of states and, at 3.7 kB per estimate row with a target, about 400 MB of estimates.
 
-And `run_episode` overwrites the manifest's Sun with the M4 rule (`sunlight_direction`) and records the 12-state filter's `navigation_configuration`. M15 will have its own runner and record format, with its own loader.
+And `run_episode` overwrites the manifest's Sun with the M4 rule (`sunlight_direction`) and records the 12-state filter's `navigation_configuration`. A bearings-only run therefore needs its own runner and record format, with its own loader.
 
 ```bash
 uv run --no-sync rpod m15-stage0 --output runs/m15-stage0
@@ -1363,7 +1379,7 @@ uv run --no-sync rpod m15-stage0 --output runs/m15-stage0
 
 ## Source layout and generated output
 
-- `README.md`, `LICENSE` (Apache-2.0, declared in `pyproject.toml` and the Cargo workspace) and `NOTICE` (credits for the NASA and ESA data downloaded at run time, which `docs/showcase.gif` is rendered from).
+- `README.md`, `LICENSE` (Apache-2.0, declared in `pyproject.toml` and the Cargo workspace) and `NOTICE` (credits for the NASA and ESA data downloaded at run time, which `docs/showcase.gif` and `docs/m15-detectability.png` are rendered from).
 - `.github/workflows/ci.yml`: on pushes to `main` and on pull requests, Windows and Ubuntu runners sync the locked environment, run the Rust tests, formatting and lints, build the release extension and run the Python tests. GitHub Actions publishes each run on the public repository; the bit-exact M4 trace check is skipped there (see Visual environment interface).
 - `crates/rpod-core`: native dynamics and Rust acceptance tests.
 - `crates/rpod-python`: PyO3 interface and compiler provenance.
@@ -1373,6 +1389,6 @@ uv run --no-sync rpod m15-stage0 --output runs/m15-stage0
 - `benchmarks`: the result files and figures this reference cites (suite evaluations, campaign and benchmark summaries, the M11 surrogate fit) and `m4-qualified-source/`, the archived M4 execution sources with their hashes.
 - `docs`: milestone write-ups (`m9-batched-engine.md`, `m10-learned-control.md` and its learning-curve figure, `m11-tumbling-target.md`, `m12-lidar-faults.md`, `m13-docking.md`, `m14-thrusters.md`, `m15-rendezvous.md`) and the README's `showcase.gif`, cut from the M14 docking movie.
 - `tools/basilisk`: a separate uv project (Python 3.13, Basilisk) that propagates the cross-check cases. `tools/keypoints`: a separate uv project (Python 3.13, PyTorch) that trains the keypoint network and exports it to ONNX.
-- `tests`: Python integration and contract checks; `tests/helpers.py` holds the fixtures several test modules share, and `tests/fixtures` holds two actual Blender images and the pre-refactor M4 trace digest.
+- `tests`: Python integration and contract checks; `tests/helpers.py` holds the fixtures several test modules share, and `tests/fixtures` holds two actual Blender images and the M4 trace digest recorded before M10's hooks.
 
 Frozen-file hashes are taken over raw bytes, so `.gitattributes` checks text out with LF, except `blender_worker.py`. That file is stored byte-exact with CRLF line endings, as the M8 suite hashed it. `.gitignore` excludes the environment, tool environments under `tools/`, workspace-local uv cache, target directory, compiled extensions, Python caches, portable tools, and generated `runs/` and `datasets/` outputs. Blender is installed locally for M3/M4 and remains separate from the physics runtime. Contact engines are not installed, and PyTorch exists only in the `tools/keypoints` environment; the simulator runs the exported network through OpenCV.
