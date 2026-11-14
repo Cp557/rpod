@@ -301,7 +301,7 @@ The three uninterrupted approaches finish within 1.005× their paired oracle tim
 
 The official nominal feedback run took 362.2 wall-clock seconds for 208.4 simulated seconds, excluding its separately timed paired oracle. Its sampled Blender peak RSS was 266.2 MiB. Qualification cases ran in pairs on the same desktop, so these wall times describe that workload rather than an isolated renderer or real-time guarantee. Each run's summary preserves startup, per-render/request timing, sampled RSS, and total feedback-loop wall time.
 
-The current fast suite passes 100 Python tests and 22 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
+The current fast suite passes 98 Python tests and 22 Rust tests, with Python resource warnings treated as errors, Rust formatting, and Clippy warnings denied. Actual saved Blender images exercise the image-to-command boundary: hidden scoring labels cannot affect commands, changed valid image evidence changes estimates and commands, and black images never acquire. Runtime-pipeline-disabled replay tests and real saved-run exports pass. Native screenshots of the M3 and M4 replays were inspected; interactive playback controls were not re-certified. `benchmarks/visual-approach.png` shows three actual nominal observations and the recorded port-gap history.
 
 ### Schema 3 visual records
 
@@ -667,46 +667,45 @@ Runtime, on an unisolated desktop:
 
 `showcase.json` records the asset URLs, hashes and credits.
 
-**Camera rules.** Every shot uses a 50° horizontal field of view at 1920×1080. The wide shot moves into the close shot without a cut; the later shots cut. Within a shot the camera moves with its frame.
-- **Wide shot** (`chase_camera`), establishing both spacecraft over Earth for the first 36 s of the run, LVLH +radial up, from the normal side the Sun shines from:
-  - **Aim:** the midpoint of the two centers of mass.
-  - **Direction from that midpoint**, in target LVLH: `normalize(0.25, −0.2, ±0.95)` (radial, along-track, normal). That is slightly above and behind the chaser, looking across the approach.
-  - **Distance:** `max(1.5 × separation, 12 m)`.
-- **Opening move** (`opening_camera`), over the next 90 s, in two phases that each take 60% of it, each eased by smootherstep:
-  - **Swing:** the camera circles the wide shot's aim at the wide shot's distance, from its direction to the close shot's, with LVLH +radial up.
-  - **Push-in:** the aim slides to the point on the close shot's line of sight nearest the wide shot's aim, the distance to it shrinks geometrically to the close shot's, and up turns from LVLH +radial to the close shot's.
-  - Circling far out keeps both spacecraft across the image, and the roll waits until both are near the line of sight. On M14 episode 00 both centers of mass stay at least 240 px inside the frame, and the camera moves at most 0.7 m and 1.8° per frame relative to the target, most of it the horizon rolling 95° during the push-in to meet the close shot's tumbling up.
-  - It replaced a cut after 1.7 s of the wide shot that jumped 42 m and turned 80° in one frame (M14 episode 00).
-- **Close shot** (`close_camera`), from the end of the opening move until the contact window or the end of the run, retreats included. In the wide shot the 1.1 m chaser is only 50–110 px across beside the 7 m target; here, 5.7 m from the camera, it stays about 400 px across at every gap:
-  - **Position:** over the chaser's shoulder, at `(1.2, −5.0, ±2.4)` m from its center of mass in target LVLH (target body axes for M11 runs), on the normal side the Sun lights on average over the shot.
-  - **Aim:** midway between the directions to the chaser and to the target's docking port. Between 30 m and 5 m of port gap, the chaser's center stays near the lower-left third of the frame and the port near the upper-right third.
-- **Contact shot** (`contact_camera`, docking runs), from 12 s before the latch to 6 s after: a three-quarter view from the chaser's side at `(2.4, −3.6, ±2.0)` m from the midpoint of the two ports in the target's body axes, looking at that midpoint, body +x up, so the chaser is seen closing on the docking ring against the face. A side view along the face showed the target's unlit flank whenever the Sun lit the face.
-- **Detumble shot** (`orbit_camera`, docking runs), from 6 s after the latch: the contact view's direction pulled back to 9 m from the pair's midpoint, in the target's body axes frozen at the latch and carried with LVLH, turning at 2°/s of mission time about their +x, so the stack's tumble is seen to slow and stop.
+**Camera.** One continuous shot (`chase_camera`) films the whole run, with no cuts, at a 50° horizontal field of view and 1920×1080:
+- **Aim:** the midpoint of the two centers of mass, with LVLH +radial up, so the horizon stays level.
+- **Direction from that midpoint**, in target LVLH: `normalize(0.25, −1, ±0.5)` (radial, along-track, normal). That is above and behind the chaser, 29° off the along-track axis. For an approach from behind, as in M11–M14, it looks past the chaser at the target's docking face, with Earth's limb across the lower quarter of the frame. The normal sign puts the camera on the side the Sun lights over the whole run, chosen over the full frame schedule, so the camera never jumps and a partial render (stills, a preview) films the same side as the full movie.
+- **Distance:** `hypot(1.7 × separation, 16 m)`: about 1.7 × the separation while the two are apart, easing in to 16 m as they dock. At 16 m, QuikSCAT's arrays, whose tips sweep 4.1 m from its tumble axis, stay inside the frame and clear of the overlay.
+- **M14 episode 00, checked on every frame** by projecting the target mesh and the chaser:
+  - neither spacecraft passes under the telemetry panel or the inset; the chaser stays inside a 5% margin, and the target never hides it;
+  - the chaser (1.1 m across its pods) grows from about 54 px across at 30 m to about 145 px at the latch;
+  - the docking face is seen 41° off its axis at the latch, and over the last 12 s the port gap shows about 88 px per metre;
+  - array tips cross the frame's edge for about 3.6 s of the terminal approach (frames 383–491); otherwise the target is whole in frame.
+- **What it replaced** (2026-11-13):
+  - The same continuous camera from beside the approach (`normalize(0.25, −0.2, ±0.95)`, easing in to 10 m). It saw the docking face nearly edge-on (85° off its axis), so the latch read as a small dark shape at the target's edge.
+  - Before that, a sequence of shots:
+    - A wide shot at `max(1.5 × separation, 12 m)`, which left the chaser under the old bottom-right inset.
+    - A close shot over the chaser's shoulder, riding the tumbling target's body axes, which swung Earth and the horizon through the frame. A 5 s camera move that rolled the horizon 95° led into it.
+    - A contact shot beside the docking interface, and a detumble shot circling the stack.
 
-**M11 runs** (scenario `visual-m11-*`) are filmed as the docking camera saw them, around a tumbling target:
+**M11 runs** (scenario `visual-m11-*`) are filmed around the unmarked, tumbling target:
 - `m11_showcase_worker.py` combines the two workers (`UnmarkedShowcaseRenderer(ShowcaseRenderer, UnmarkedRenderer)`): the showcase chaser and image settings, with the cooperative aids removed and the wings stowed.
-- The close shot's offset and up are in the target's body axes instead of LVLH, so the camera rides with the tumble while Earth and the stars sweep past. Its normal side is held for the whole shot so the camera never jumps, and is chosen over the full frame schedule, so a partial render (stills, a preview) films the same side as the full movie. The wide shot is unchanged.
 - The port gap comes from `tumble_metrics` (the port frame), and the panel also shows the target's tumble rate (the stack's, once latched).
 
 Each frame places the target, chaser and Earth from recorded truth, with the Sun along `sunlight_direction_inertial`. Fast tests check:
-- the wide shot keeps both centers of mass inside the image with a 10% margin, at 30 m and 6.5 m separation;
-- the wide shot is on the sunlit normal side for both signs of the Sun's normal component, and Earth's center is below the image;
-- the close shot keeps the chaser and the port inside the image with a 10% margin at 30 m and 1 m gaps, the chaser nearer, with Earth's center below the image;
-- the opening move starts exactly on the wide shot and ends exactly on the close shot, keeps both centers of mass inside the image with a 5% margin for a target frame turned 80° from LVLH about along-track, and moves the camera less than 3 m and 5° per 1/120 of the move, while the two shots are over 30 m apart;
+- the camera keeps both centers of mass inside the image with a 10% margin and off the overlay's pixels (telemetry panel, inset), at 30 m, 6.5 m and 1.5 m separation, and with the chaser swung 35° off the approach axis at 25 m;
+- it sits behind the chaser, within 45° of the approach axis (the side view sat 64–75° off it in these cases), on the sunlit normal side for both signs of the Sun's normal component, and Earth's center is below the image;
 - plumes fire against the applied force, nozzle by nozzle;
-- a docking run's schedule films from the contact window on tick by tick and ends on the last tick.
+- a docking run's schedule films from 12 s before the latch on tick by tick, eases each slow-down in one tick per frame at a time, and ends on the last tick.
 
 **Rendering:**
-- **Schedule** (`frame_ticks`): every third tick (9× real time at 30 fps); for a docking run, every sixth tick before the terminal segment (18×), every third after it (9×), and every tick from 12 s before the latch to the end (3×). The last tick is always filmed.
+- **Schedule** (`frame_ticks`): every third tick (9× real time at 30 fps); for a docking run, every sixth tick before the terminal segment (18×), every third after it (9×), and every tick from 12 s before the latch to the end (3×). Each slow-down eases in one tick per frame at a time over the 20 s of the run before it (about 1 s and 1.7 s of video). The last tick is always filmed.
 - A second thread finishes and encodes each frame while Blender renders the next. Rendering uses CUDA.
 - **Video:** H.264 (libx264, CRF 18, `preset slow`, yuv420p, `+faststart`) piped through ffmpeg when it is on PATH, else MPEG-4 Part 2 (`mp4v`) through OpenCV, whose build cannot open an H.264 encoder.
 - **Cost** at 1080p (GTX 1060 6 GB, i7-8700K): 2.0–2.8 s per frame, against 3.3 s with the earlier 16 samples.
-  - The cost grows as the target fills the close shot.
+  - The cost grows as the target fills the frame.
   - Run `29` (933 frames, never nearer than 13 m) took 31 min.
   - Run `00` (694 frames, to 5 m) took 28 min, against 39 min before.
   - M11 fused run `16` (694 frames, to 5 m, the target tumbling at 0.99°/s) took 29 min.
   - M13 docking run `16-dock` (1,208 frames, to contact and through the detumble) took 56 min.
-  - M14 episode `00-stuck_on-closing-at-12m` (1,032 frames on the docking schedule, with the cloud shell, restyled materials, finishing, pod mounts and the opening move) took 62 min at a median 3.8 s per frame. On the same reference frames the upgraded scene costs about 1 s more per frame than the earlier one (3.6 s against 2.5 s).
+  - M14 episode `00-stuck_on-closing-at-12m` (with the cloud shell, restyled materials, finishing and pod mounts):
+    - 1,096 frames on the eased docking schedule took 49 min with the camera behind the chaser, at a median 2.6 s per frame;
+    - 1,032 frames took 55 min (median 3.2 s) with the camera beside the approach, and 62 min (median 3.8 s) with the earlier shots. On the same reference frames the upgraded scene costs about 1 s more per frame than the earlier one (3.6 s against 2.5 s).
   - A run `29` frame splits into:
     - about 0.9 s of GPU sampling, two thirds of it Earth's surface and the atmosphere shell;
     - about 0.8 s for the CPU denoiser on all 12 threads (1.0 s on the base worker's 6);
@@ -720,15 +719,14 @@ Each frame places the target, chaser and Earth from recorded truth, with the Sun
 **Finishing** (sizes scale with the image height from a 720-line base):
 - **Lens:** bloom on highlights (threshold 190, σ 9 px, gain 0.8); horizontal and vertical streaks, fading exponentially over 60 px, from pixels above 235 (gain 2); a 0.18 vignette; Gaussian grain of 1.5 DN seeded by the frame index.
 - **Telemetry panel** (Pillow, DejaVu fonts from Matplotlib), top left: run name, mission time with the time-lapse factor, port gap, closing speed (from the recorded gap), phase in words, the target's tumble rate (M11 runs), and propellant used (M14 runs, from the recorded on-times) or delta-v (from the applied force). A docking run's phase reads approach to the 5 m hold, holding at 5 m, terminal approach, final coast (inside 1.3 m), captured and detumbling, and docked.
-- **Fault banner:** after a recorded thruster isolation (M14), an amber line under the panel names the thruster and its fault.
-- **Inset,** bottom right: the run's most recent docking-camera image captured at or before that tick, or a "no image" box for a missing capture. A run without camera images (lidar only) shows its latest lidar scan instead, as a depth image (inferno colormap, nearer brighter, scaled between the scan's 2nd and 98th percentile ranges), labelled as inside its minimum range below a 1.3 m gap.
+- **Inset,** top right, captioned underneath: the run's most recent docking-camera image captured at or before that tick, or a "no image" box for a missing capture. A run without camera images (lidar only) shows its latest lidar scan instead, as a depth image (inferno colormap, nearer brighter, scaled between the scan's 2nd and 98th percentile ranges), labelled as inside its minimum range below a 1.3 m gap. Once latched, the lidar sits at the target's face and returns only noise, so the inset shows the "no image" box.
 
 **Outputs:**
 - `showcase.mp4`.
-- The README's `docs/showcase.gif` is cut from M14 episode 00's movie (`runs/m14-showcase`), from 20 s to the end, sped up 1.4×, at 10 fps and 640×360 with a palette pass: `ffmpeg -ss 20 -t 14.4 -i showcase.mp4 -vf "setpts=PTS/1.4,fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 showcase.gif` (103 frames, 9.9 MB).
-- The README also embeds the whole movie, attached to a GitHub issue. GitHub caps video uploads at 10 MB on free accounts, so it is re-encoded in two passes at 2 Mb/s, still 1080p: `ffmpeg -i showcase.mp4 -c:v libx264 -preset slow -b:v 2000k -pass 1 -an -f null -`, then `ffmpeg -i showcase.mp4 -c:v libx264 -preset slow -b:v 2000k -pass 2 -pix_fmt yuv420p -movflags +faststart -an showcase-readme.mp4` (8.7 MB).
+- The README's `docs/showcase.gif` is cut from M14 episode 00's movie (`runs/m14-showcase`), from 20 s to the end, sped up 1.4×, at 10 fps and 640×360 with a palette pass: `ffmpeg -ss 20 -t 16.5 -i showcase.mp4 -vf "setpts=PTS/1.4,fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 showcase.gif` (118 frames, 7.0 MB): the terminal approach, the latch and the detumble.
+- The README also embeds the whole movie, attached to a GitHub issue. GitHub caps video uploads at 10 MB on free accounts, so it is re-encoded in two passes at 2 Mb/s, still 1080p: `ffmpeg -i showcase.mp4 -c:v libx264 -preset slow -b:v 2000k -pass 1 -an -f null -`, then `ffmpeg -i showcase.mp4 -c:v libx264 -preset slow -b:v 2000k -pass 2 -pix_fmt yuv420p -movflags +faststart -an showcase-readme.mp4` (9.2 MB).
 - Clean renders are deleted once encoded; with `stills=True`, `frames/` keeps each clean PNG and the finished JPEG.
-- `showcase.json`: source manifest hash, the shots and when each began, camera rules, schedule, codec, lens settings, asset URLs, hashes and credits, render settings, and timing.
+- `showcase.json`: source manifest hash, the camera rule and its normal side, schedule, codec, lens settings, asset URLs, hashes and credits, render settings, and timing.
 - The marker assets.
 
 **Limitations:**

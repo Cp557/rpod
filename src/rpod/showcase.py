@@ -1,10 +1,11 @@
-"""Presentation-only movie of a saved visual run, filmed by outside cameras.
+"""Presentation-only movie of a saved visual run, filmed by an outside camera.
 
 Reads a validated schema-3 record and renders it in the realistic scene, with a chaser,
-city lights, stars and thruster plumes added, under the run's own Sun. An M11 run is filmed
-around the unmarked target, with the close shot riding in its tumbling body axes. A docking
-run (M13, M14) gets a contact shot beside the docking interface and a detumble shot circling
-the joined pair, and is filmed faster through the approach than around contact. A run with
+city lights, stars and thruster plumes added, under the run's own Sun. One continuous shot
+from above and behind the chaser, level with the orbit, keeps both spacecraft whole in frame
+from the first tick to the last and closes in as they do. An M11 run is filmed around the
+unmarked target. A docking run (M13, M14) is filmed faster through the approach than around
+contact, easing between speeds. A run with
 `thrusters.npz` (M14) fires each nozzle's plume from its recorded on-time. Nothing here
 feeds physics, autonomy, or evaluation.
 """
@@ -28,38 +29,28 @@ from .rendering import ASSET_CREDITS, ASSETS, BlenderRenderer, realistic_scene
 from .thrusters import SPECIFIC_IMPULSE_S, STANDARD_GRAVITY_MPS2, layout
 from .tumble import tumble_metrics
 from .vision_records import json_value, new_output, read_jsonl, read_rgb, sha256_file
-from .visual_recording import load_visual_events, load_visual_run
+from .visual_recording import load_visual_run
 from .visualization import PHASE_NAMES
 
 
 VIEW = CameraModel(width=1920, height=1080, hfov_deg=50.0, camera_id="showcase")
-# Wide shot: camera direction from the spacecraft midpoint in target LVLH (radial,
-# along-track, normal), slightly above and behind the chaser, looking across the approach.
-# The normal component's sign follows the Sun, so the camera sees the lit sides.
-OFFSET_LVLH = np.array([0.25, -0.2, -0.95]) / np.linalg.norm([0.25, -0.2, -0.95])
-DISTANCE_PER_SEPARATION = 1.5
-MIN_DISTANCE_M = 12.0
-# Close shot, once the opening move ends: over the chaser's shoulder at this offset from its
-# center of mass, aimed midway between the chaser and the target's docking port. The offset
-# is in target LVLH, or in the target's body axes when it tumbles (the two coincide for a
-# target holding LVLH), with the normal sign toward the Sun.
-CLOSE_OFFSET_M = np.array([1.2, -5.0, -2.4])
-# The wide shot holds for the run's first ESTABLISHING_S, then over MOVE_S the camera moves
-# into the close shot in two eased phases that each take PHASE_FRACTION of it, so the movie
-# opens without a cut (see `opening_camera`).
-ESTABLISHING_S, MOVE_S, PHASE_FRACTION = 36.0, 90.0, 0.6
-# Docking runs: from CONTACT_WINDOW_S[0] around the latch, a camera beside the docking
-# interface at this offset (target body axes) from the midpoint of the two ports; from
-# CONTACT_WINDOW_S[1], the same view pulled back to ORBIT_RADIUS_M from the pair's midpoint,
-# in the target's body axes frozen at the latch and carried with LVLH, circling slowly about
-# their +x, so the stack's tumble is seen to stop.
-CONTACT_OFFSET_M = np.array([2.4, -3.6, 2.0])
-CONTACT_WINDOW_S = (-12.0, 6.0)
-ORBIT_RADIUS_M, ORBIT_RATE_RADPS = 9.0, np.radians(2.0)
+# The camera's direction from the spacecraft midpoint in target LVLH (radial, along-track,
+# normal): above and behind the chaser, 29 degrees off the along-track axis, so for an
+# approach from behind (M11-M14) it looks past the chaser at the target's docking face and
+# Earth's limb. The normal component's sign follows the Sun, so the camera sees the lit sides.
+OFFSET_LVLH = np.array([0.25, -1.0, -0.5]) / np.linalg.norm([0.25, -1.0, -0.5])
+# Its distance, hypot(DISTANCE_PER_SEPARATION x separation, MIN_DISTANCE_M), frames both
+# spacecraft whole while they are apart and, as they dock, keeps QuikSCAT's arrays, whose tips
+# sweep 4.1 m from its tumble axis, inside the frame and clear of the telemetry panel and inset.
+DISTANCE_PER_SEPARATION = 1.7
+MIN_DISTANCE_M = 16.0
 TICKS_PER_FRAME = 3
 # Docking runs are filmed at these physics ticks per frame: 18x real time through the
-# approach, 9x from the terminal segment, 3x from the contact window to the end.
+# approach, 9x from the terminal segment, 3x from CONTACT_LEAD_S before the latch to the end,
+# easing down one tick per frame at a time over the RAMP_S of the run before each change.
 APPROACH_TICKS, TERMINAL_TICKS, CONTACT_TICKS = 6, 3, 1
+CONTACT_LEAD_S = 12.0
+RAMP_S = 20.0
 FPS = 30
 # Denoised, 8 samples look the same as 16 at half the GPU time.
 SAMPLES = 8
@@ -92,83 +83,16 @@ def _sun_side(frames_nl, sunlight_n):
     return 1.0 if np.sum(np.asarray(frames_nl)[..., :, 2] @ sunlight_n) >= 0 else -1.0
 
 
-def chase_camera(target_n, chaser_n, basis_nl, sunlight_n):
-    """Wide shot: camera origin and optical-camera-to-inertial rotation framing both spacecraft.
-
-    The camera looks at the midpoint of the two centers of mass, with LVLH radial up, from
-    the normal side the Sun shines from.
-    """
+def chase_camera(target_n, chaser_n, basis_nl, side):
+    """The movie's one camera: origin and optical-camera-to-inertial rotation framing both
+    spacecraft, looking at the midpoint of their centers of mass with LVLH radial up. `side`
+    is `_sun_side`'s sign for the run, which puts the camera on the normal side the Sun
+    lights."""
     middle = (np.asarray(target_n) + np.asarray(chaser_n)) / 2
-    distance = max(DISTANCE_PER_SEPARATION * np.linalg.norm(np.subtract(chaser_n, target_n)),
-                   MIN_DISTANCE_M)
-    position = middle + distance * (basis_nl @ (OFFSET_LVLH * [1, 1, _sun_side(basis_nl, sunlight_n)]))
+    distance = np.hypot(DISTANCE_PER_SEPARATION * np.linalg.norm(np.subtract(chaser_n, target_n)),
+                        MIN_DISTANCE_M)
+    position = middle + distance * (basis_nl @ (OFFSET_LVLH * [1, 1, side]))
     return position, _look(position, middle, basis_nl[:, 0])
-
-
-def close_camera(chaser_n, port_n, frame_nl, side):
-    """Close shot: over the chaser's shoulder toward the target's docking port, frame +x up,
-    aimed midway between their directions so both stay in frame at any range. `side` (+1 or
-    -1) is the frame's normal side the camera takes."""
-    position = np.asarray(chaser_n) + frame_nl @ (CLOSE_OFFSET_M * [1, 1, side])
-    rays = [point - position for point in (np.asarray(chaser_n), np.asarray(port_n))]
-    aim = position + sum(ray / np.linalg.norm(ray) for ray in rays)
-    return position, _look(position, aim, frame_nl[:, 0])
-
-
-def _ease(fraction):
-    """Smootherstep: 0 to 1 as `fraction` goes from 0 to 1, starting and ending at rest."""
-    fraction = float(np.clip(fraction, 0.0, 1.0))
-    return fraction ** 3 * (fraction * (6 * fraction - 15) + 10)
-
-
-def _slerp(start, end, fraction):
-    """The unit vector `fraction` of the way along the great circle from `start` to `end`."""
-    start, end = start / np.linalg.norm(start), end / np.linalg.norm(end)
-    angle = np.arccos(np.clip(start @ end, -1.0, 1.0))
-    if angle < 1e-9:
-        return start
-    return (np.sin((1 - fraction) * angle) * start + np.sin(fraction * angle) * end) / np.sin(angle)
-
-
-def opening_camera(target_n, chaser_n, port_n, basis_nl, frame_nl, sunlight_n, side, fraction):
-    """The wide shot (`fraction` 0 or less) moving into the close shot (`fraction` 1 or more).
-
-    First the camera circles the wide shot's look-at point at the wide shot's distance, from
-    its direction to the close shot's. Then it pushes in: its aim slides to the nearest point
-    on the close shot's line of sight, its distance shrinks geometrically, and its up turns
-    from LVLH radial to the close shot's. Circling far out keeps both spacecraft in frame,
-    and the roll waits until both are near the line of sight.
-    """
-    wide_n, _ = chase_camera(target_n, chaser_n, basis_nl, sunlight_n)
-    close_n, close_nc = close_camera(chaser_n, port_n, frame_nl, side)
-    middle = (np.asarray(target_n) + np.asarray(chaser_n)) / 2
-    forward = close_nc[:, 2]
-    close_aim = close_n + forward * ((middle - close_n) @ forward)
-    swing = _ease(fraction / PHASE_FRACTION)
-    push = _ease((fraction - 1 + PHASE_FRACTION) / PHASE_FRACTION)
-    aim = middle + push * (close_aim - middle)
-    start, end = wide_n - middle, close_n - close_aim
-    distance = np.linalg.norm(start) ** (1 - push) * np.linalg.norm(end) ** push
-    position = aim + distance * _slerp(start, end, swing)
-    return position, _look(position, aim, _slerp(basis_nl[:, 0], frame_nl[:, 0], push))
-
-
-def contact_camera(port_n, chaser_port_n, frame_nb, side):
-    """Contact shot: beside the docking interface, riding in the target's body axes, looking
-    across the gap at the midpoint of the two ports, body +x up."""
-    middle = (np.asarray(port_n) + np.asarray(chaser_port_n)) / 2
-    position = middle + frame_nb @ (CONTACT_OFFSET_M * [1, 1, side])
-    return position, _look(position, middle, frame_nb[:, 0])
-
-
-def orbit_camera(center_n, frame_nb, angle, side):
-    """Detumble shot: the contact shot's direction pulled back to `ORBIT_RADIUS_M` from
-    `center_n`, turned by `angle` about the frame's +x, which is up."""
-    cosine, sine = np.cos(angle), np.sin(angle)
-    turn = np.array([[1.0, 0.0, 0.0], [0.0, cosine, -sine], [0.0, sine, cosine]])
-    offset = turn @ (CONTACT_OFFSET_M * [1, 1, side])
-    position = np.asarray(center_n) + ORBIT_RADIUS_M * frame_nb @ (offset / np.linalg.norm(offset))
-    return position, _look(position, np.asarray(center_n), frame_nb[:, 0])
 
 
 def plume_throttles(force_body_n, limit_n):
@@ -191,17 +115,21 @@ def nozzle_throttles(axis_throttles):
 def frame_ticks(count, dt_s, terminal_s=None, latch_tick=None):
     """Indices of the recorded ticks to film: every `TICKS_PER_FRAME`, or for a docking run
     `APPROACH_TICKS` before the terminal segment, `TERMINAL_TICKS` after it and
-    `CONTACT_TICKS` from the contact window on; always ending on the last tick."""
+    `CONTACT_TICKS` from `CONTACT_LEAD_S` before the latch on, each change eased in over the
+    `RAMP_S` before it; always ending on the last tick."""
     if latch_tick is None:
         ticks = list(range(0, count, TICKS_PER_FRAME))
     else:
-        contact_s = latch_tick * dt_s + CONTACT_WINDOW_S[0]
+        changes = [(latch_tick * dt_s - CONTACT_LEAD_S, CONTACT_TICKS)]
+        if terminal_s is not None:
+            changes.insert(0, (terminal_s, TERMINAL_TICKS))
         ticks, index = [], 0
         while index < count:
             ticks.append(index)
-            seconds = index * dt_s
-            index += (CONTACT_TICKS if seconds >= contact_s else TERMINAL_TICKS
-                      if terminal_s is not None and seconds >= terminal_s else APPROACH_TICKS)
+            step = APPROACH_TICKS
+            for start_s, level in changes:
+                step = round(np.interp(index * dt_s, [start_s - RAMP_S, start_s], [step, level]))
+            index += step
     return ticks if ticks[-1] == count - 1 else ticks + [count - 1]
 
 
@@ -278,9 +206,9 @@ def _lidar_inset(path):
     return cv2.cvtColor(colored, cv2.COLOR_BGR2RGB)
 
 
-def _overlay(frame, inset, title, rows, sensor, note=None):
-    """A telemetry panel at the top left (label, value rows), an optional alert line under
-    it, and the docking-sensor inset at the bottom right."""
+def _overlay(frame, inset, title, rows, sensor):
+    """A telemetry panel at the top left (label, value rows) and the docking-sensor inset at
+    the top right, captioned under it."""
     height, width = frame.shape[:2]
     margin, inner = round(16 * SCALE), round(12 * SCALE)
     image = Image.fromarray(frame)
@@ -297,19 +225,14 @@ def _overlay(frame, inset, title, rows, sensor, note=None):
         draw.text((panel[0] + inner, y + round(2 * SCALE)), name.upper(), font=label,
                   fill=(150, 160, 175))
         draw.text((panel[0] + round(118 * SCALE), y), text, font=value, fill=(240, 244, 250))
-    if note:
-        box = draw.textbbox((0, 0), note, font=label)
-        y = panel[3] + round(8 * SCALE)
-        draw.rounded_rectangle((margin, y, margin + box[2] + 2 * inner, y + box[3] + inner),
-                               radius=round(6 * SCALE), fill=(150, 70, 0, 190))
-        draw.text((margin + inner, y + inner // 2), note, font=label, fill=(255, 255, 255))
-    x, y = width - INSET_PX - margin, height - INSET_PX - margin
+    x, y = width - INSET_PX - margin, margin
     tile = (np.full((INSET_PX, INSET_PX, 3), 20, np.uint8) if inset is None else
             cv2.resize(inset, (INSET_PX, INSET_PX), interpolation=cv2.INTER_AREA))
     image.paste(Image.fromarray(tile), (x, y))
     draw.rectangle((x - 1, y - 1, x + INSET_PX, y + INSET_PX), outline=(200, 200, 200))
-    draw.text((x, y - round(20 * SCALE)), sensor + ("" if inset is not None else ": no image"),
-              font=label, fill=(230, 230, 230))
+    draw.text((x + INSET_PX, y + INSET_PX + round(6 * SCALE)),
+              sensor + ("" if inset is not None else ": no image"), font=label,
+              fill=(230, 230, 230), anchor="ra")
     return np.asarray(image)
 
 
@@ -348,10 +271,10 @@ class _Video:
             self.writer.release()
 
 
-def _encode(video, path, index, inset, title, rows, sensor, note, stills):
+def _encode(video, path, index, inset, title, rows, sensor, stills):
     """Lens effects and overlay on the clean render at `path`, then append it to the video;
     the clean render is deleted unless `stills` keeps the finished frame beside it."""
-    frame = _overlay(_lens(read_rgb(path), index), inset, title, rows, sensor, note)
+    frame = _overlay(_lens(read_rgb(path), index), inset, title, rows, sensor)
     video.write(frame)
     if stills:
         cv2.imwrite(str(path.with_suffix(".jpg")), cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
@@ -377,7 +300,6 @@ def render_showcase(run_dir, output, ticks=None, stills=False):
     run_dir = Path(run_dir)
     manifest, trajectory = load_visual_run(run_dir)
     summary_in = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
-    events = load_visual_events(run_dir, manifest)
     output = new_output(output)
     dt_s = manifest["dt_ns"] / 1e9
     positions, quaternions = trajectory["positions_m"], trajectory["quaternions_xyzw"]
@@ -391,7 +313,6 @@ def render_showcase(run_dir, output, ticks=None, stills=False):
     closing = -np.gradient(gaps, dt_s)
     target_rate_deg_s = np.degrees(np.linalg.norm(
         trajectory["angular_velocities_body_radps"][:, 0], axis=-1))
-    ports = np.asarray(manifest["docking_ports_body_m"], dtype=np.float64)
     forces = trajectory["applied_forces_body_n"][:, 1]
     force_limit = float(manifest["force_limits_n"][1])
     sunlight_n = np.asarray(manifest["sunlight_direction_inertial"], dtype=np.float64)
@@ -410,7 +331,6 @@ def render_showcase(run_dir, output, ticks=None, stills=False):
     else:
         used = np.r_[0.0, np.cumsum(np.linalg.norm(forces, axis=-1))] * dt_s / manifest[
             "masses_kg"][1]
-    isolations = [event for event in events if event["kind"] == "safety_detection"]
     # Without camera images (lidar-only runs) the inset shows the latest lidar scan.
     captures = read_jsonl(run_dir / "observations.jsonl")
     sensor = "Docking camera"
@@ -420,61 +340,33 @@ def render_showcase(run_dir, output, ticks=None, stills=False):
     count = len(trajectory["tick"])
     schedule = frame_ticks(count, dt_s, terminal_s, latch_tick)
     ticks = schedule if ticks is None else list(ticks)
-    close_ticks = [index for index in schedule if index * dt_s >= ESTABLISHING_S]
-    # The close shot rides in the tumbling target's body axes, on the side the Sun lights for
-    # most of the shot, so the camera never jumps. The side comes from the full schedule, so a
-    # partial render (stills, a preview) films the same side as the full movie.
-    shot_frames = rotations[:, 0] if tumbling else basis
-    side = _sun_side(shot_frames[close_ticks], sunlight_n) if close_ticks else 1.0
+    # The camera holds the normal side the Sun lights over the whole run, so it never jumps.
+    # The side comes from the full schedule, so a partial render (stills, a preview) films the
+    # same side as the full movie.
+    side = _sun_side(basis[schedule], sunlight_n)
 
     frames = output / "frames"
     movie = output / "showcase.mp4"
     video = _Video(movie, FPS, (VIEW.width, VIEW.height))
     started, render_seconds, shown, inset, encoded = time.perf_counter(), [], None, None, None
-    shots = []
     try:
         # One thread finishes and encodes each frame while Blender renders the next.
         worker = "m11_showcase_worker.py" if tumbling else "showcase_worker.py"
         with _ShowcaseRenderer(output, worker) as renderer, ThreadPoolExecutor(1) as encoder:
             for count_index, index in enumerate(ticks):
                 seconds = int(trajectory["tick"][index]) * dt_s
-                port_n = positions[index, 0] + rotations[index, 0] @ ports[0]
-                if latch_s is not None and seconds >= latch_s + CONTACT_WINDOW_S[1]:
-                    shot = "detumble"
-                    frozen_nb = basis[index] @ basis[latch_tick].T @ rotations[latch_tick, 0]
-                    position_nc, rotation_nc = orbit_camera(
-                        positions[index].mean(axis=0), frozen_nb,
-                        ORBIT_RATE_RADPS * (seconds - latch_s - CONTACT_WINDOW_S[1]), side)
-                elif latch_s is not None and seconds >= latch_s + CONTACT_WINDOW_S[0]:
-                    shot = "contact"
-                    chaser_port_n = positions[index, 1] + rotations[index, 1] @ ports[1]
-                    position_nc, rotation_nc = contact_camera(port_n, chaser_port_n,
-                                                              rotations[index, 0], side)
-                elif seconds >= ESTABLISHING_S + MOVE_S:
-                    shot = "close"
-                    position_nc, rotation_nc = close_camera(positions[index, 1], port_n,
-                                                            shot_frames[index], side)
-                else:
-                    shot = "wide" if seconds < ESTABLISHING_S else "move"
-                    position_nc, rotation_nc = opening_camera(
-                        positions[index, 0], positions[index, 1], port_n, basis[index],
-                        shot_frames[index], sunlight_n, side, (seconds - ESTABLISHING_S) / MOVE_S)
-                if not shots or shots[-1][0] != shot:
-                    shots.append((shot, seconds))
-
-                def pose(body):
-                    return (rotation_nc.T @ rotations[index, body],
-                            rotation_nc.T @ (positions[index, body] - position_nc))
-
+                camera_n, camera_nc = chase_camera(positions[index, 0], positions[index, 1],
+                                                   basis[index], side)
                 path = frames / f"{count_index:06d}.png"
-                earth = (rotation_nc.T @ earth_rotation_ne(seconds),
-                         rotation_nc.T @ -position_nc)
                 step = min(index, len(forces) - 1)
                 throttles = (list(thrusters["actual_on_s"][step] / dt_s) if thrusters is not None
                              else nozzle_throttles(plume_throttles(forces[step], force_limit)))
-                result = renderer.render_view(path, pose(0), pose(1), earth,
-                                              rotation_nc.T @ sunlight_n, rotation_nc, throttles)
-                render_seconds.append(result["render_seconds"])
+                poses = [(camera_nc.T @ rotations[index, body],
+                          camera_nc.T @ (positions[index, body] - camera_n)) for body in (0, 1)]
+                earth = (camera_nc.T @ earth_rotation_ne(seconds), camera_nc.T @ -camera_n)
+                render_seconds.append(renderer.render_view(
+                    path, *poses, earth, camera_nc.T @ sunlight_n, camera_nc,
+                    throttles)["render_seconds"])
                 latest = int(np.searchsorted(capture_times, seconds * 1e9, side="right")) - 1
                 if latest != shown:
                     row = captures[latest] if latest >= 0 else {}
@@ -498,17 +390,16 @@ def render_showcase(run_dir, output, ticks=None, stills=False):
                 rows.append(("Propellant", f"{1000 * used[min(index, len(used) - 1)]:5.1f} g")
                             if thrusters is not None else
                             ("Delta-v", f"{used[min(index, len(used) - 1)]:5.2f} m/s"))
-                isolated = [event for event in isolations if event["tick"] <= index]
-                note = None
-                if isolated:
-                    name = isolated[-1]["reason"].removesuffix("_isolated").split("_", 2)
-                    note = f"Thruster {int(name[1])} {name[2].replace('_', ' ')}: isolated"
                 if encoded is not None:
                     encoded.result()
+                lidar = sensor.startswith("Docking lidar")
                 label = (sensor + ", inside its minimum range" if latch_tick is not None
-                         and gaps[index] < 1.3 and sensor.startswith("Docking lidar") else sensor)
-                encoded = encoder.submit(_encode, video, path, count_index, inset,
-                                         run_dir.name, rows, label, note, stills)
+                         and gaps[index] < 1.3 and lidar else sensor)
+                # Latched, the lidar sits at the target's face and returns only noise.
+                latched = latch_tick is not None and index >= latch_tick
+                encoded = encoder.submit(_encode, video, path, count_index,
+                                         None if latched and lidar else inset,
+                                         run_dir.name, rows, label, stills)
                 if count_index % 30 == 0:
                     print(f"frame {count_index + 1}/{len(ticks)}", flush=True)
             if encoded is not None:
@@ -523,36 +414,13 @@ def render_showcase(run_dir, output, ticks=None, stills=False):
         "source_manifest_sha256": sha256_file(run_dir / "manifest.json"),
         "purpose": "presentation only; not used by physics, autonomy, or evaluation",
         "camera": {key: VIEW.to_dict()[key] for key in ("width", "height", "hfov_deg", "K")},
-        "shots": [{"shot": shot, "from_s": seconds} for shot, seconds in shots],
-        "wide_shot": {
-            "until_s": ESTABLISHING_S,
+        "shot": {
             "look_at": "midpoint of target and chaser centers of mass",
             "offset_direction_lvlh": OFFSET_LVLH,
-            "normal_side": "sign of the toward-Sun LVLH normal component",
+            "normal_side": side,
             "up": "target LVLH +radial",
-            "distance_m": f"max({DISTANCE_PER_SEPARATION} * separation, {MIN_DISTANCE_M})",
+            "distance_m": f"hypot({DISTANCE_PER_SEPARATION} * separation, {MIN_DISTANCE_M})",
         },
-        "opening_move": {
-            "from_s": ESTABLISHING_S, "duration_s": MOVE_S, "easing": "smootherstep",
-            "phases": [
-                {"fraction": [0.0, PHASE_FRACTION],
-                 "path": "circle the wide shot's look-at point at its distance, to the close "
-                         "shot's direction"},
-                {"fraction": [1 - PHASE_FRACTION, 1.0],
-                 "path": "push in to the close shot, distance geometric, up turning from LVLH "
-                         "radial to the close shot's"},
-            ],
-        },
-        "close_shot": {
-            "from_s": ESTABLISHING_S + MOVE_S, "offset_from_chaser_m": CLOSE_OFFSET_M,
-            "frame": "target body axes" if tumbling else "target LVLH", "normal_side": side,
-            "look_at": "midway between the directions to the chaser and the target docking port",
-        },
-        "contact_shot": {"window_s_about_latch": CONTACT_WINDOW_S,
-                         "offset_from_port_midpoint_m": CONTACT_OFFSET_M,
-                         "frame": "target body axes"},
-        "detumble_shot": {"radius_m": ORBIT_RADIUS_M, "rate_deg_s": np.degrees(ORBIT_RATE_RADPS),
-                          "frame": "target body axes at the latch, carried with LVLH"},
         "target": "unmarked, tumbling (M11 worker)" if tumbling else "M8 realistic target",
         "assets": {name: {"url": url, "sha256": digest} for name, (url, digest) in ASSETS.items()},
         "credits": ASSET_CREDITS, "exposure": EXPOSURE, "star_strength": STAR_STRENGTH,
